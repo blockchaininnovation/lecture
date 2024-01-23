@@ -1,3 +1,9 @@
+<center>
+
+  ![](../chart.drawio.svg)
+</center>
+
+
 # Ethereumとは何か？
 
 端的に言えば**ビットコインの一般化**である。
