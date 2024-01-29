@@ -1,3 +1,20 @@
+- [詳細な仕様について](#詳細な仕様について)
+  - [EOA (Externally Owned Account)](#eoa-externally-owned-account)
+    - [補足: Ethereumの通貨単位](#補足-ethereumの通貨単位)
+  - [CA (Contract Account)](#ca-contract-account)
+    - [補足: マークル・パトリシアツリー](#補足-マークルパトリシアツリー)
+  - [Message Call トランザクションのデータ構造](#message-call-トランザクションのデータ構造)
+  - [Ethereumの手数料 (gas)](#ethereumの手数料-gas)
+    - [各用語の意味](#各用語の意味)
+    - [手数料の徴収ルール](#手数料の徴収ルール)
+  - [Message Call トランザクションのレシート](#message-call-トランザクションのレシート)
+  - [Contract Creation トランザクションのデータ構造](#contract-creation-トランザクションのデータ構造)
+  - [Contract Creation トランザクションのレシート](#contract-creation-トランザクションのレシート)
+    - [補足: Internal トランザクションのデータ構造](#補足-internal-トランザクションのデータ構造)
+    - [補足: Internal トランザクションのレシート](#補足-internal-トランザクションのレシート)
+- [まとめ](#まとめ)
+
+
 # 詳細な仕様について
 
 Ethereumの構成要素について、もう少し詳細をみてみよう。
