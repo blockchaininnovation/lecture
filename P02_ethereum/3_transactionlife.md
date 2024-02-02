@@ -194,6 +194,8 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 - 復習: Message CallトランザクションとContract Creationのレシート
 - 状態ツリーとレシートツリーの全歴史は、archive nodeが保持している
 
+<!-- 芝野さん授業スライドの図を挿入 -->
+
 改めて整理すると、状態(state)に関して各ノードが保持するデータは以下の通り:
 
 - Light node
