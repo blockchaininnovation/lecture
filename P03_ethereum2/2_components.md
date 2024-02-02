@@ -98,23 +98,23 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 |value| 送金するetherの量 (wei)
 |data| データ領域 (16進数の数列にエンコード化されている)
 |gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
+|maxPriorityFeePerGas| EOAがバリデーターノードに支払えるGasの最大金額
 |maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
 
 
 ## Ethereumの手数料 (gas)
 - Bitcoinと同様、Ethereumのトランザクション実行には手数料が必要
-  - `なぜ?: スパム攻撃 (意味のないトランザクションを大量に送ってネットワークを混雑させる) 対策のため&実行を担うマイナーノードへのインセンティブのため`
+  - `なぜ?: スパム攻撃 (意味のないトランザクションを大量に送ってネットワークを混雑させる) 対策のため&実行を担うバリデーターノードへのインセンティブのため`
 - 他方でEthereumは、ether (wei) 単位での手数料入力にgasという単位を噛ませている
   - e.g., あるEOAが自身が作成したトランザクションの手数料を決める場合
   - 「手数料は0.1etherとする」 ではなく
   - 「feePerGas = 0.000002ether, gasLimit = 50000」 といった入力を行う
     - (0.000002*50000 = 0.1ether)
-  - `なぜ?: トランザクションの実行に必要な計算量を、マイナーノードに対して定量的にわかりやすく示したいから`
-- Bitcoinは (inputの数などで決まる) トランザクションの大きさだけが手数料に影響するが、スマートコントラクトを含むEthereumはマイナーノードが負担する計算量も手数料に影響する
+  - `なぜ?: トランザクションの実行に必要な計算量を、バリデーターノードに対して定量的にわかりやすく示したいから`
+- Bitcoinは (inputの数などで決まる) トランザクションの大きさだけが手数料に影響するが、スマートコントラクトを含むEthereumはバリデーターノードが負担する計算量も手数料に影響する
   - Bitcoinのマイニングノード
     - 「ブロックに多く格納出来ない分、大きなトランザクションには高い手数料が欲しいな...」
-  - Ethereumのマイナーノード
+  - Ethereumのバリデーターノード
     - 「ブロックに多く格納出来ない分、大きなトランザクションには高い手数料が欲しいな...」
     - 「複雑なコントラクトを動かすトランザクションには高い手数料が欲しいな...」 
 - タクシーの料金表示で、走行距離と運賃だけでなく消費燃料の量と価格も出るイメージ
@@ -136,11 +136,11 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 - tx実行に必要な1gas あたりの費用 (wei/gas)
 - Ethereumの混雑具合によって変動するルールが設けられている (後半で詳述)
 - これが高いほどEthereumは混雑している
-- baseFeeとして支払われたetherはマイナーノードには渡らずburnされる
+- baseFeeとして支払われたetherはバリデーターノードには渡らずburnされる
 
 **priorityFeePerGas**
 - EOAが決める値
-- マイナーノードに支払う1gas あたりの費用 (wei/gas)
+- バリデーターノードに支払う1gas あたりの費用 (wei/gas)
 - Bitcoinの手数料の相当する存在
 - これを高く設定すればするほどtxはブロックに速く取り込まれやすくなる
 
@@ -159,7 +159,7 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 - `なぜ?: スケーラビリティ問題に対処したいから(後半で詳述)`
 - `なぜ?: etherの総供給量を減らす仕組みが必要だから`
 
-マイナーノードの目線でトランザクションを見ると、
+バリデーターノードの目線でトランザクションを見ると、
 - maxPriorityFeePerGas: EOAは計算単位あたり(最大でも)これだけのetherを私に支払って良いと考えているんだな
 - gasLimit: EOAはこのトランザクションに(最大でも)これだけの計算が必要だと考えているんだな
 
@@ -167,18 +167,18 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 
 ### 手数料の徴収ルール
 
-- いざマイナーノードがtxの実行を試みると、EOAが指定した手数料が不十分だったなんてこともありうる
+- いざバリデーターノードがtxの実行を試みると、EOAが指定した手数料が不十分だったなんてこともありうる
 
 実際の手数料 = feePerGas * gasUsed　>　EOAが支払い可能な手数料 = feePerGas * gasLimit
 
-- この場合txは実行されないが、 feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはマイナーノードが獲得) される
+- この場合txは実行されないが、 feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはバリデーターノードが獲得) される
   - そうしなければスパム攻撃対策にならない
 
 - 反対にtxを実行した結果、EOAが指定した手数料が余る場合もある
 
 実際の手数料 = feePerGas * gasUsed　<　EOAが支払い可能な手数料 = feePerGas * gasLimit　
 
-- この場合txは実行され、feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはマイナーノードが獲得) される
+- この場合txは実行され、feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはバリデーターノードが獲得) される
 - 余ったetherはEOAに返却される
 
 
@@ -215,7 +215,7 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 |value| 送金するetherの量 (wei)
 |data| データ領域 (16進数の数列にエンコード化されている)
 |gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
+|maxPriorityFeePerGas| EOAがバリデーターノードに支払えるGasの最大金額
 |maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
 
 ## Contract Creation トランザクションのレシート
@@ -252,7 +252,7 @@ CAから発せられる、ブロックチェーンに記録されない処理 (�
 |value| 送金するetherの量 (wei)
 |data| データ領域 (16進数の数列にエンコード化されている)
 |gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
+|maxPriorityFeePerGas| EOAがバリデーターノードに支払えるGasの最大金額
 |maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
 
 ### 補足: Internal トランザクションのレシート
