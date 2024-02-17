@@ -1,4 +1,4 @@
-- [詳細な仕様について](#詳細な仕様について)
+- [The Merge](#the-merge)
 - [トランザクションのライフサイクル](#トランザクションのライフサイクル)
   - [トランザクションの伝搬](#トランザクションの伝搬)
     - [Ethereumネットワークのノードについて](#ethereumネットワークのノードについて)
@@ -32,7 +32,18 @@
 - [まとめ](#まとめ)
 
 
-# 詳細な仕様について
+# The Merge
+
+- スケーラビリティ問題への対処を主目的に、Ethereumは2022年の8月に互換性の無い形での大規模な仕様変更がおこなわれた （The Merge）
+  - PoWからPoSへ (i.e., マイニングの廃止)
+  - マイナーノード → バリデータノード
+- これによりコンセンサスと報酬の仕組みが根本的に変わった
+  - 伴わせてブロックのデータ構造も変化
+
+![The-Merge](./img/the-merge.png)
+
+[https://ethreum.org/roadmap/merge](https://ethreum.org/roadmap/merge) から引用
+
 
 # トランザクションのライフサイクル
  
@@ -78,7 +89,9 @@ EOAは、トランザクション(Message Call or Contract Creation)を各ノー
 ## トランザクションの伝搬
 
 ### Ethereumネットワークのノードについて
+
 Ethereumネットワークのノードは、full node, light node, archive nodeの3種類に大別される
+
 - Bitcoinは、full node, SPV (軽量) nodeの2種類に大別される
 - ただしarchive nodeをfull nodeの派生版とみなす分類もある
 - Ethereumにはブロックデータ以外に状態 (state) データというものが存在する (詳細は後述)
