@@ -75,8 +75,8 @@
 
 - 「The Merge」と呼ばれるアップグレードにより、PoW を採用する元のメインネットと、PoS を採用したビーコンチェーンと呼ばれる新しいチェーンが、1つのチェーンに統合された
 - 1つのチェーンに統合されたものを、現在は単に「 Ethereum 」と呼ぶ
-  - Ethereum 1.0 (Eth1) と呼ばれていた PoW を採用した元のメインネットは、実行レイヤーと呼ばれる
-  - Ethereum 2.0 (Eth2) と呼ばれていた PoS を採用したビーコンチェーンは、コンセンサスレイヤーと呼ばれる
+  - Ethereum 1.0 (Eth1) と呼ばれていた PoW を採用した元のメインネットは、実行レイヤー ( Execution Layer )と呼ばれる
+  - Ethereum 2.0 (Eth2) と呼ばれていた PoS を採用したビーコンチェーンは、コンセンサスレイヤー ( Consensus Layer )と呼ばれる
 
 [ The Merge(Ethereum.org)](https://ethereum.org/ja/roadmap/merge)
 
