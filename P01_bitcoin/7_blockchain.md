@@ -153,20 +153,24 @@ https://www.blockstream.info/testnet/block/000000002b35701826c61e9657b464e641833
 
 を実際に計算してみてみる
 
-![
-](image-3.png)
+### 初期状態の様子
 
 ![
-](image-4.png)
+](image-3.png)
+### Txに対するハッシュ値を求める
+$K$から$H_K$を求める
+![Alt text](image-4.png)
 
 ![Alt text](image-5.png)
 
+### 二つのハッシュ値を連結させたものにfダブルハッシュをかける
+$H_K$と$H_J$から$H_{JK}$を求める
 ![Alt text](image-6.png)
 
 ![Alt text](image-7.png)
 
 ![Alt text](image-8.png)
-
+### 最終的な値がマークルルートと一致しているかを確認する
 ![Alt text](image-9.png)
 ## まとめ
 - ブロックチェーンの構造
