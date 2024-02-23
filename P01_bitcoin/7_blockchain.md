@@ -133,18 +133,18 @@
 ![Alt text](image-1.png)
 
 トランザクションKがブロックに含まれているかどうかを検証するとき、マークルパスとしてH_ABCDEFGH, H_MNOP, H_IJ, H_Lの4つ値があれば検証可能である
-
-1. H_K → Kから計算
-2. H_KL → H_KとH_Lから計算
-3. H_IJKL → H_IJとH_KLから計算
-4. H_IJKLMNOP → H_IJKLとH_MNOPから計算
-5. Root → H_ABCDEFGHとH_IJKLMNOPから計算
+####  手順
+1. $H_{K}$ → $K$から計算
+2. $H_{KL}$ → $H_{K}$と$H_{L}$から計算
+3. $H_{IJKL}$ → $H_{IJ}$と$H_{KL}$から計算
+4. $H_{IJKLMNOP}$ → $H_{IJKL}$と$H_{MNOP}$から計算
+5. Root → $H_{ABCDEFGH}$と$H_{IJKLMNOP}$から計算
 6. 計算されたRootが既知のマークルルートと一致しているかどうかを確認．
 
 ## マークルツリーの効率性
 トランザクション数が大きくなるとマークルパスのサイズも大きくなるはずだがどれくらいのサイズが削減できるのか
 
-画像の挿入
+![Alt text](image-2.png)
 
 - ブロックサイズの増え方に比べてマークルパスのサイズの増え方は緩やか
 - 4KBから16MBに増える場合でも128Byteから512Byteにしか増えない
