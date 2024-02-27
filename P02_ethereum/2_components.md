@@ -17,14 +17,17 @@
 
 # 各構成要素が保持するデータ
 
-Ethereumの構成要素について、もう少し詳細をみてみよう。
+Ethereumの構成要素について、より詳細に確認してみよう。
 
 ## EOA (Externally Owned Account)
 - EOAはBitcoinにおけるアドレスのようなもの
 - 作成の基本的なプロセスはBitcoinと同じ
+<center>
+<img src="./img/eoaprocess.svg" width="60%">
+</center>
 
 ただし...
-- Bitcoinとは異なり、SHA-256ではない
+- Bitcoinとは異なり、ハッシュ関数はSHA-256ではない
     - `なぜ?: 新しいハッシュ関数でより安全と言われているから`
 - Bitcoin Addressとは異なり、後ろにチェックサムが付いていない
     - `なぜ?: 将来的にアドレスに文字を対応させて使う想定だから (e.g., knskito.eth)`
