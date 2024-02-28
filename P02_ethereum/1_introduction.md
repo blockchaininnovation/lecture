@@ -1,6 +1,5 @@
 <center>
-
-  ![](../chart.drawio.svg)
+  <img src="../chart.drawio.svg" width="100%">
 
   **Ethereum: 送金からプログラムへ**
 
