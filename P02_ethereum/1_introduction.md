@@ -158,6 +158,10 @@ Ethereumは、最も重いチェーンを「正しい」状態遷移の記録と
 - スマートコントラクト用のプログラムは、人間が書きやすいように **Solidity** (Ethereum用に開発された言語、Javascriptに近い) で記述する仕様になっている
 - EVMは、トランザクションを実行する際にSolidityコードをコンピューターが認識出来るbytecode (16進数) 形式へと変換する
 
+<center>
+<img src="./img/evm.svg" width="50%">
+</center>
+
 たとえばこちらのSolidityコード
 ```solidity
 // SPDX-License-Identifier: MIT

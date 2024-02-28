@@ -129,8 +129,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 ## ブロックの作成
 ### Etherreumブロックのデータ構造
-- マイナーノードはMempool (のPending pool) に溜まったトランザクションから、任意のトラン
-ザクションを選択してブロックに格納する
+- マイナーノードはMempool (のPending pool) に溜まったトランザクションから、任意のトランザクションを選択してブロックに格納する
   - このとき、gasLimitとgasPriceがトランザクションを選ぶ際の参考になる
   - 普通は計算量に対して得られる手数料が高そうなトランザクションを選択する
 - トランザクションは、マークル・パトリシアツリー構造でブロックに格納される
