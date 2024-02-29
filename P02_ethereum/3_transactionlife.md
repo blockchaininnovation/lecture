@@ -143,7 +143,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - Ethereumのブロックは、Bitcoinのそれ以上に様々な情報を格納している
 
 <center>
-<img src="./img/blockstructure.drawio.svg" width="80%">
+<img src="./img/blockstructure.drawio.svg" width="60%">
 </center>
  
 ### ブロックヘッダの新要素
@@ -152,7 +152,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 | ---- | ---- | ---- |
 | sha3Uncles | Uncleブロックのブロックヘッダリストをハッシュ化したもの| 詳細は後述
 | extraData | 任意のデータ (32byteまで)|
-| gasLimit | ブロック全体のgasLimit|　詳細は後述
+| gasLimit | ブロック全体のgasLimit| 詳細は後述
 | gasUsed | ブロックに格納された全トランザクションのgasUsedの合計|
 | logsBloom | ブロック内の全トランザクションの実行ログ (Bloom Filter形式)|
 | miner | ブロックを作成したノードが持つ、報酬受取用のアドレス|
@@ -172,7 +172,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
 
 <center>
-<img src="./img/uncle.svg" width="75%">
+<img src="./img/uncle.svg" width="60%">
 </center>
 
 ### Block Gas Limitについて
