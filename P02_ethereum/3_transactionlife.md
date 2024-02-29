@@ -60,7 +60,7 @@ Ethereumネットワークのノードは、full node, light node, archive node�
 
 
 `なぜ？：マイニングに参加する障壁を下げることで、マイナーノードの分散化を図りたいから`
-- full node: 550GB-1.1TB, archive node: 9.5TB (2022年1月時点)
+- full node: 550GB-1.1TB, archive node: 12TB (2024年1月時点)
 - Bitcoinのfull node: 375GB
 
 ### Ethereumネットワークへの参加について
@@ -85,11 +85,11 @@ Ethereumネットワークのノードは、full node, light node, archive node�
 - 検証内容は基本的にビットコインと同様 (だがUTXOとアカウントベースという設計の違いが存在)
 
   - トランザクションがEthereumで採用されているRLPフォーマットという形式に沿っているか
-    - RLPフォーマットの詳細な説明については時間の都合上割愛
-    - 興味がある方はこちらの動画をご参照ください
+    - RLPフォーマットの詳細な説明については割愛
+    - 興味がある方は[こちらの動画](https://goblockchain.network/2020/01/rlp-merkle-patrical-tree/)などをご参照ください
   - トランザクションのgasLimitがintrinsic gas以上に設定されているか
     - 次で説明
-  - 送信者(EOA) の残高が必要な額 gasLimit × feePerGas + value(送金するetherの量) 以上か
+  - 送信者(EOA) の残高が必要な額 `gasLimit × feePerGas + value(送金するetherの量)` 以上か
   - デジタル署名が有効か
   - トランザクションのnonceが、送信者(EOA)のnonceよりも大きいか？
     - 復習: トランザクションのnonceは、送信者(EOA)によるトランザクションがこれまでいくつ実行されてきたかを表していました
@@ -107,6 +107,9 @@ Ethereumネットワークのノードは、full node, light node, archive node�
 
 これにも満たないgasLimitが設定されていたら、トランザクションは絶対に実行不可なので弾く
 
+<center>
+<img src="./img/intrinsic.drawio.svg" width="60%">
+</center>
 
 ## 各ノードは、問題が無いトランザクションのみを溜め、かつ他のノードに伝搬する
 各ノードが検証の済んだトランザクションを溜めておく領域をMempoolと呼ぶ
@@ -152,8 +155,8 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 | mixHash | nonce と合わさることでPoWのための十分な計算がされたことの証明になる256bitのハッシュ
 | number | ブロックの番号 (genesis blockを0として累積)
 | totalDifficulty | このブロック以前のブロックのdifficultyの総和
-| State Root | このブロックの全トランザクションが実行された後の、全てのアカウント状態をマークルパトリシアツリーで要約したRoot値のハッシュ値(KECCAK-256ハッシュ形式)
-| Receipts Root | このブロックの全レシートをマークルパトリシアツリーで要約したRoot値のハッシュ値(KECCAK-256ハッシュ形式)
+| State Root | このブロックの全トランザクションが実行された後の、全てのアカウント状態をマークルパトリシアツリーで要約したRoot値のハッシュ値(Keccak-256ハッシュ形式)
+| Receipts Root | このブロックの全レシートをマークルパトリシアツリーで要約したRoot値のハッシュ値(Keccak-256ハッシュ形式)
 
 ### Uncle Blockについて
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
@@ -289,7 +292,7 @@ nodeでも把握することは出来る。ただしarchive nodeが持つ状態�
 
 ## 各ノードは、問題が無いブロックのみを自身のチェーンに反映する
 ## Ethereumは、最も重いチェーンを「正しい」状態遷移の記録とする
-
+  
 ### GHOSTプロトコルについて
 - Ethereumでは、Bitcoinとは異なり「最も長いチェーン」を正統な記録とする (Nakamoto
 consensus) わけではない!
