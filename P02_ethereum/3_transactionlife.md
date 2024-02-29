@@ -141,22 +141,26 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 - ここまでは基本的にBitcoinと同じ
   - しかし、Ethereumにおけるブロックの作成作業はこれだけに留まらない!
   - Ethereumのブロックは、Bitcoinのそれ以上に様々な情報を格納している
-  
+
+<center>
+<img src="./img/blockstructure.drawio.svg" width="80%">
+</center>
+ 
 ### ブロックヘッダの新要素
 
-| 名称 | 役割 |
-| ---- | ---- |
-| shaUncles | Uncleブロックのブロックヘッダリストをハッシュ化したもの
-| extraData | 任意のデータ (32byteまで)
-| gasLimit | ブロック全体のgasLimit
-| gasUsed | ブロックに格納された全トランザクションのgasUsedの合計
-| logsBloom | ブロック内の全トランザクションの実行ログ (Bloom Filter形式)
-| miner | ブロックを作成したノードが持つ、報酬受取用のアドレス
-| mixHash | nonce と合わさることでPoWのための十分な計算がされたことの証明になる256bitのハッシュ
-| number | ブロックの番号 (genesis blockを0として累積)
-| totalDifficulty | このブロック以前のブロックのdifficultyの総和
-| State Root | このブロックの全トランザクションが実行された後の、全てのアカウント状態をマークルパトリシアツリーで要約したRoot値のハッシュ値(Keccak-256ハッシュ形式)
-| Receipts Root | このブロックの全レシートをマークルパトリシアツリーで要約したRoot値のハッシュ値(Keccak-256ハッシュ形式)
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+| sha3Uncles | Uncleブロックのブロックヘッダリストをハッシュ化したもの| 詳細は後述
+| extraData | 任意のデータ (32byteまで)|
+| gasLimit | ブロック全体のgasLimit|　詳細は後述
+| gasUsed | ブロックに格納された全トランザクションのgasUsedの合計|
+| logsBloom | ブロック内の全トランザクションの実行ログ (Bloom Filter形式)|
+| miner | ブロックを作成したノードが持つ、報酬受取用のアドレス|
+| mixHash | nonce と合わさることでPoWのための十分な計算がされたことの証明になる256bitのハッシュ|
+| number | ブロックの番号 (genesis blockを0として累積)|
+| totalDifficulty | このブロック以前のブロックのdifficultyの総和| `なぜ?: Bitcoin以上にブロックチェーンが頻繁に分岐する環境下で、最長のチェーンに含まれるブロックを効率的に把握したいから`
+| State Root | このブロックの全トランザクションが実行された後の、全てのアカウント状態をマークルパトリシアツリーで要約したRoot値のハッシュ値 (Keccak-256ハッシュ形式)| 詳細は後述
+| Receipts Root | このブロックの全レシートをマークルパトリシアツリーで要約したRoot値のハッシュ値 (Keccak-256ハッシュ形式)| 詳細は後述
 
 ### Uncle Blockについて
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
@@ -166,6 +170,10 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
+
+<center>
+<img src="./img/uncle.svg" width="75%">
+</center>
 
 ### Block Gas Limitについて
 - Ethereumのブロックには、ブロックサイズの上限が設定されていない
@@ -215,26 +223,25 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - State data
   - Receipt data
 
-つまりスマートコントラクト用に書かれたプログラムの実行結果は、archive nodeも持っていない!
+**つまりスマートコントラクト用に書かれたプログラムの実行結果は、archive nodeも持っていない!**
 - ハッシュ化したものだけをstorage rootとして保持している。
 - (プログラムのコード自体はエンコード化されたものがcontract creation トランザクションのinputに入っている)
-- 「あるEOAの過去の残高」などの情報は、ブロックチェーン内のトランザクションデータを計算することでfull
-nodeでも把握することは出来る。ただしarchive nodeが持つ状態データを参照した方が早い。
+- 「あるEOAの過去の残高」などの情報は、ブロックチェーン内のトランザクションデータを計算することでfull nodeでも把握することは出来る。ただしarchive nodeが持つ状態データを参照した方が早い。
 
 ## マイナーノードは、ブロック内のトランザクションを実行する
 マイナーノードは、各トランザションに対して以下の処理を行う:
 1. 状態ツリーにあるトランザクション作成者(EOA)のnonceを1増やす
 2. 実行に必要であろうether (gasLimit * feePerGas + value) を作成者 (EOA) の残高から徴収
 3. inputにある処理を (EVMを用いて) 実行
-   1. もし結局Gasが足りなければ、out of gas exceptionエラーとして処理を中断
+   - もし結局Gasが足りなければ、out of gas exceptionエラーとして処理を中断
 4. 実行結果に関するレシートを発行
 5. 処理にかかったGas feeのうち、priority fee部分 (priorityFeePerGas * gasUsed) を自身のアドレスへ送金
-   1. もしGasが余ったならば、その分は作成者(EOA)に返金
+   - もしGasが余ったならば、その分は作成者(EOA)に返金
 
 
 マイナーノードは、ブロックに対して以下の処理を行う:
 1. 状態ツリーとレシートツリーを作成する
-   1. Full nodeの場合、120ブロック経過したらlocal storageから削除
+   - Full nodeの場合、120ブロック経過したらlocal storageから削除
 2. ブロックヘッダーにState rootとReceipt rootを書き込む
 3. ブロックヘッダーにgasUsedを書き込む
 
