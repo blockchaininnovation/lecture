@@ -201,10 +201,15 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 ### State Root, Receipts Rootについて
 - Ethereumでは、トランザクションを実行した結果として、状態とレシートをマークルパトリシアツリー状にしたRootもブロックに格納する 
-- ただしトランザクションとは違い、ブロックに格納されるのはRoot部分のみ!
-- 復習: EOAとCAが保持する状態データ
-- 復習: Message CallトランザクションとContract Creationのレシート
+- ただしトランザクションとは違い、**ブロックに格納されるのはRoot部分のみ!**
 - 状態ツリーとレシートツリーの全歴史は、archive nodeが保持している
+  - full nodeは直近120ブロックまでのデータを保持している
+
+<center>
+<img src="./img/blockroot.drawio.svg" width="100%">
+</center>
+
+
 
 <!-- 芝野さん授業スライドの図を挿入 -->
 
@@ -247,6 +252,10 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 ## マイナーノードは、ブロックを既存のチェーンに含まれるいずれかのブロックに繋ぐ
 ここはBitcoinと同じ。親のブロックヘッダのハッシュを自身のブロックヘッダに格納することでチェーンを形成する
+
+<center>
+<img src="./img/blockchain.drawio.svg" width="90%">
+</center>
 
 ## マイナーノードは、PoW (Proof-of-Work) を経てブロックを完成させる
 - 現在のEthereumはBitcoinと同様にPoWを採用している
