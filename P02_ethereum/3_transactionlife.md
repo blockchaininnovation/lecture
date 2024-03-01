@@ -288,6 +288,9 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 ## マイナーノードは、完成したブロックを各ノードに伝搬する
 
+- トランザクションと同様、ブロックはfull nodeとarchive nodeへ伝搬される
+- Bitcoinと同様に隣接するノードへの伝搬が繰り返される (gossip-based flooding protocol)
+  
 ## 各ノードは、受け取ったブロックに問題が無いかを独立に検証する
 
 - 各ノードは、受け取ったブロックについて以下の内容を検証する
