@@ -28,7 +28,10 @@
 
 # トランザクションのライフサイクル
  
-Ethereumの構成要素がどのように動くのか、トランザクションのライフサイクルを軸に詳細をみてみよう。
+ここまでEthereumの構成要素を確認してきましたが、これらはどのように連動しているのでしょうか。
+あるトランザクションが作成されてから実行され、ブロックチェーンに格納されるまでのライフサイクルを軸に詳細を確認してましょう。
+
+Introductionで示したとおり、トランザクションのライフサイクルは大きく以下のような流れになっています。
 
 ```
 EOAは、トランザクション(Message Call or Contract Creation)を各ノードに伝搬する
@@ -208,10 +211,6 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 <center>
 <img src="./img/blockroot.drawio.svg" width="100%">
 </center>
-
-
-
-<!-- 芝野さん授業スライドの図を挿入 -->
 
 改めて整理すると、状態(state)に関して各ノードが保持するデータは以下の通り:
 
