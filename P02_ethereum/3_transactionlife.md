@@ -173,6 +173,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
+  - 以下の図では親の親を共有している(文字通りの)Uncle blockを示しているが、これだけをUncle blockと呼ぶ場合もある
 
 <center>
 <img src="./img/uncle.svg" width="60%">
@@ -257,17 +258,15 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 </center>
 
 ## マイナーノードは、PoW (Proof-of-Work) を経てブロックを完成させる
-- 現在のEthereumはBitcoinと同様にPoWを採用している
+- 以前のEthereumはBitcoinと同様にPoWを採用していた
   - 現在はProof-of-Stake型へと以降している
   - `なぜ?: ブロック作成にかかる時間を短縮し、処理速度の向上を図りたいから (後述)`
 - ただしEtherumのPoWは、オリジナルのEthashというアルゴリズムを採用している
   - `なぜ?: マイナーノードの寡占化を可能な限り防ぎたいから`
   - 当時Bitcoinのマイニングは、それ専用の演算マシンであるASICが開発されたためにマイナーの寡占化が進んでいた
   - この現状を鑑みて、Ethereumは演算を繰り返す形ではなく、メモリからデータを繰り返し呼び出して比較する形でnonceを探すPoWを実装した (ASIC-resistantなどと呼ばれる)
-- Ethashの詳細については時間の都合上説明を割愛するが、以下の資料が非常にわかりや
+- Ethashの詳細については説明を割愛するが、たとえば[こちらの資料](https://www.etarou.work/posts/4983481)が非常にわかりや
 すい
-  - 【第5回】Ethereumの全体像を理解する - MiningとConsensus
-  - https://www.etarou.work/posts/4983481
 
 ### block intervalと難易度調整について
 - Ethereumのblock intervalは、Bitcoinの10分に対して、15秒に設定されている
@@ -280,11 +279,8 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
     - Parent blockのdifficultyとtimestamp
     - Uncle blockのdifficultyとtimestampを元に計算されている。
   - 昔はuncle blockは用いられていなかった
-- 計算方法の詳細については時間の都合上説明を割愛するが、以下の資料が非常にわかり
+- 計算方法の詳細については説明を割愛するが、たとえば[こちらの資料](https://blockchain.gunosy.io/entry/ethereum-difficulty-summary)が非常にわかり
 やすい
-  - Ethereumのディフィカルティに関するまとめ
-    - https://blockchain.gunosy.io/entry/ethereum-difficulty-summary - Ethereumのディ
-フィカルティ算出方法
 
 ## マイナーノードは、完成したブロックを各ノードに伝搬する
 
@@ -294,6 +290,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 ## 各ノードは、受け取ったブロックに問題が無いかを独立に検証する
 
 - 各ノードは、受け取ったブロックについて以下の内容を検証する
+  - トランザクションの検証はlight nodeを含む全てのノードが行っていたが、ブロックの検証はlight node以外のノードが行う
 - 検証内容は基本的にビットコインと同様 (だがUTXOとアカウントベースという設計の違いが存在)
 - トランザクションと同様、検証に通ったブロックのみを隣接ノードへと転送する
   - ブロックのデータ構造が正しいか
@@ -305,9 +302,6 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - ブロックに含まれるすべてのトランザクションが 「独立したトランザクション検証」のチェックリストをすべて満たすか
   - ブロックに含まれるすべてのトランザクションを実行した結果である、State ｒoot, Receipts root, gasUsed, logsBloomが正しいか
 
-謝罪: ブロックの検証はBitcoinと同様に全てのfull (or archive) nodeが行うのか？それともマイナーノードだけが行うのか？ギリギリまで調べていたのですが、結局わかりませんでした。申し訳ありません。
-*トランザクションの検証はlight node含む全てのノードが行っています。
-
 ## 各ノードは、問題が無いブロックのみを自身のチェーンに反映する
 ## Ethereumは、最も重いチェーンを「正しい」状態遷移の記録とする
   
@@ -316,12 +310,17 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 consensus) わけではない!
 - 代わりに「最も重いチェーン」を正統とする
 - これはGHOST (Greedy Heaviest Observed Subtree) プロトコルと呼ばれる
-  - *元々はBitcoinに対する改善提案でした
+  - 元々はBitcoinに対する改善提案でした
 - チェーン選択のアルゴリズムは比較的単純で、小ブロックのサブツリー数を比較し続けるだけ
   - 特に頻繁に分岐するブロックチェーンでは、このように「長さより重さ」で選択すべきではないか?
+
+<center>
+<img src="./img/ghost.gif" width="90%">
+</center>
+
 - 頻繁に分岐するブロックチェーンにおいては、攻撃に必要なコストもより高くなる
   - 以下の例では、攻撃者がメインチェーンとなるためには、さらに6ブロックがAチェーンに必要
-  - *言い換えれば、合意形成においてUncle (or Orphan) blocksにも意味を持たせることが出来る
+  - 言い換えれば、合意形成においてUncle (or Orphan) blocksにも意味を持たせることが出来る
 
 ### EthererumのGHOSTプロトコルについて
 Ethereumでは、このようなGHOSTプロトコルに以下の変更を加えている
