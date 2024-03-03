@@ -215,14 +215,14 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 改めて整理すると、状態(state)に関して各ノードが保持するデータは以下の通り:
 
-- Light node
+- **Light node**
   - Transaction root, state root, receipt root (block header)
-- Full node
+- **Full node**
   - Transaction root, state root, receipt root (block header)
   - Transaction data (block)
   - State data (latest 120 blocks)
   - Receipt data (latest 120 blocks)
-- Archive node
+- **Archive node**
   - Transaction root, state root, receipt root (block header)
   - Transaction data (block)
   - State data
@@ -300,9 +300,11 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - Transaction gasLimitの合計 ≦ Block gasLimitになっているか
   - 適切なUncle blockを格納しているか
   - ブロックに含まれるすべてのトランザクションが 「独立したトランザクション検証」のチェックリストをすべて満たすか
-  - ブロックに含まれるすべてのトランザクションを実行した結果である、State ｒoot, Receipts root, gasUsed, logsBloomが正しいか
+  - ブロックに含まれるすべてのトランザクションを実行した結果である、State root, Receipts root, gasUsed, logsBloomが正しいか
 
 ## 各ノードは、問題が無いブロックのみを自身のチェーンに反映する
+ここは特に記載すべきことはなし
+
 ## Ethereumは、最も重いチェーンを「正しい」状態遷移の記録とする
   
 ### GHOSTプロトコルについて
@@ -315,12 +317,17 @@ consensus) わけではない!
   - 特に頻繁に分岐するブロックチェーンでは、このように「長さより重さ」で選択すべきではないか?
 
 <center>
-<img src="./img/ghost.gif" width="90%">
+<img src="./img/ghost.gif" width="80%">
 </center>
 
 - 頻繁に分岐するブロックチェーンにおいては、攻撃に必要なコストもより高くなる
-  - 以下の例では、攻撃者がメインチェーンとなるためには、さらに6ブロックがAチェーンに必要
-  - 言い換えれば、合意形成においてUncle (or Orphan) blocksにも意味を持たせることが出来る
+- たとえば以下の例では、攻撃者がメインチェーンとなるためには、GHOSTプロトコルの場合はさらに5ブロックが必要
+  - Nakamoto Consensusの場合はすでにメインチェーンを奪われてしまっている
+- 言い換えれば、合意形成においてUncle (or Orphan) blocksにも意味を持たせることが出来る
+
+<center>
+<img src="./img/ghostlong.drawio.svg" width="100%">
+</center>
 
 ### EthererumのGHOSTプロトコルについて
 Ethereumでは、このようなGHOSTプロトコルに以下の変更を加えている
