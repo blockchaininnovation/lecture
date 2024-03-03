@@ -24,7 +24,8 @@
   - [gitの使い方．](#gitの使い方)
     - [gitを初めて使うのでどうすればよいかわからない](#gitを初めて使うのでどうすればよいかわからない)
     - [初期設定](#初期設定)
-    - [GitHubに公開鍵を登録．](#githubに公開鍵を登録)
+      - [GitHubに公開鍵を登録．](#githubに公開鍵を登録)
+      - [VSCodeインストール](#vscodeインストール)
     - [よく使うコマンド](#よく使うコマンド)
       - [commit](#commit)
       - [push](#push)
@@ -46,7 +47,7 @@
 ざっと，以下の流れで作るとよいでしょう．
 
 情報ソースを探し，そこから理解した内容をマインドマップにまとめ，その後文章を作成していく，という流れです．
-
+文章はMarkdown形式で記述します．
 ![](contrtibuting/flow.drawio.svg)
 
 
@@ -297,7 +298,7 @@ GitHubでは，このマージを行う際に，誰かのレビューを受け�
 #### 初期設定
 初めてGitHubでgitを使う際に行う設定は以下です．
 
-#### GitHubに公開鍵を登録．
+##### GitHubに公開鍵を登録．
 SSH経由でgitの通信を行うのが一般的です．
 そのとき，SSHはパスワードによる認証でなく，SSH2の公開鍵暗号形式での認証になります．
 
@@ -307,6 +308,16 @@ SSH経由でgitの通信を行うのが一般的です．
 手順はこの辺を参考に：
 - https://www.hijiki-blog.org/tech/github-ssh-key/
 - https://qiita.com/shizuma/items/2b2f873a0034839e47ce
+
+##### VSCodeインストール
+何で書いてもいいですが，VSCodeが便利です．
+インストールして使いましょう．
+https://code.visualstudio.com/
+
+入れておくと便利な拡張：
+- Markdown All in One https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+- Draw.io Integration https://marketplace.visualstudio.com/items?itemName=hediet.vscode-drawio
+- Git History https://marketplace.visualstudio.com/items?itemName=donjayamanne.githistory
 
 #### よく使うコマンド
 よく使うコマンドについてまとめておきます．
