@@ -1,19 +1,28 @@
-- [ガバナンスとEIP(Ethereum Improvement Proporsal)](#ガバナンスとeipethereum-improvement-proporsal)
-  - [どのように仕様変更するのか？](#どのように仕様変更するのか)
+- [ガバナンスとEIP (Ethereum Improvement Proporsal)](#ガバナンスとeip-ethereum-improvement-proporsal)
+  - [Ethereum自体の仕様をどのように変更するのか？](#ethereum自体の仕様をどのように変更するのか)
   - [いくつかのEIP紹介](#いくつかのeip紹介)
 - [スケーラビリティ問題](#スケーラビリティ問題)
-  - [The Merge](#the-merge)
-  - [Layer2](#layer2)
-  - [ブロックチェーンのトリレンマ](#ブロックチェーンのトリレンマ)
+  - [ボトルネック](#ボトルネック)
+  - [ブロックチェーンの外部ネットワークでのトランザクションの処理](#ブロックチェーンの外部ネットワークでのトランザクションの処理)
+  - [BitcoinとEthereumにおける、スケーラビリティ問題に対する解決手法の違い。](#bitcoinとethereumにおけるスケーラビリティ問題に対する解決手法の違い)
 - [再びEthereumとは何か？](#再びethereumとは何か)
 
 
-# ガバナンスとEIP(Ethereum Improvement Proporsal)
-## どのように仕様変更するのか？
-- Ethereumの仕様変更は、Bitcoinと同様、EIP (Ethereum Improvement Proposal) に基づく
+# ガバナンスとEIP (Ethereum Improvement Proporsal)
+
+## Ethereum自体の仕様をどのように変更するのか？
+- Ethereumの仕様変更は、Bitcoinと同様、**EIP (Ethereum Improvement Proposal)** に基づく
 - オープンソースソフトウェア開発と同様、Githubや掲示板、メーリングリストなどで議論される
+
+<center>
+<img src="./img/eip1.png" width="40%"> <img src="./img/eip2.png" width="45%">
+</center>
+
+*Source: https://github.com/ethereum/execution-specs/tree/master/network-upgrades#getting-the-considered-for-inclusion-cfi-status
+
 - とはいえ新たな仕様は各ノードがそれぞれの意志で反映させることになる
-- コンセンサスが取れない場合、最終的にブロックチェーンは分岐し市場の判断に委ねられる
+- コンセンサスがどうしても取れない場合、**最終的にブロックチェーンは分岐し、どちらが正統かは市場の判断に委ねられる**
+- このような分岐は、これまでもすでに複数回発生している
 
 e.g., 
 EthereumにおけるThe DAOハッキング事件 (2016)
@@ -25,8 +34,7 @@ BitcoinにおけるSegwit (Segregated Witness) 機能の実装 (2017)
 - Bitcoin Cash
   - Bitcoin Cash ABC
 - Bitcoin Gold
-- Bitcoin Diamond
-- …
+- Bitcoin Diamond, Bitcoin X, Super Bitcoin…
 
 EthereumにおけるThe Merge (2022)
 - Ethereum
@@ -34,35 +42,33 @@ EthereumにおけるThe Merge (2022)
 
 
 ## いくつかのEIP紹介
-EIPの一覧は https://eips.ethereum.org/all で確認可能
+EIPの一覧は[こちら](https://eips.ethereum.org/all)から確認可能
 - 仕様変更の提案 (Core) のみならず、プログラマへの呼びかけ (ERC; Ethereum Request for Comments) も存在する
 
 ERCに分類されるEIPには、例えば以下が存在する
 
-EIP20, EIP721, EIP1155: 異なるEOAが作成したスマートコントラクトを跨げるように、トークンの規格を設定した
-
-- EIP20
+- **EIP20**
   - 1つ1つがユニークではないトークン (Fungible Token) の規格を設定した
-  - e.g.,投票用に総発行量1,000枚の伊東トークンを発行する
-- EIP721 
+  - e.g.,投票用に総発行量1,000枚のトークンを発行する
+- **EIP721** 
   - 1つ1つがユニークなトークン (NFT; Non-Fungible Token) の規格を設定した
-  - e.g., 1000種類の異なる画像と紐付けられた伊東トークンを発行する
-- EIP1155
+  - e.g., 1000種類の異なる画像と紐付けられたトークンを発行する
+- **EIP1155**
   - 条件を満たすとユニークになるトークン (Semi-Fungible Token) の規格を設定した
-  - e.g., 投票後にNFTへと変わる1000枚の伊東トークンを発行する
+  - e.g., 投票後にNFTへと変わる1000枚のトークンを発行する
 
-これらはEthereumの仕様変更ではなく、利便性のために書式を統一しよう、という呼びかけ
+これらはEthereumの仕様変更ではなく、利便性のために書式を統一しようという呼びかけである
 
 Coreに分類されるEIPには、例えば以下が存在する
 
-EIP86, EIP2938 (未実装, 現在検討中)
-- Account Abstractionの提案
-- EOAとCAの区別を無くして、全てのアカウントをCAに統一する (！)
-- 署名は、トランザクションのデータ領域であるinputにコントラクトとして記載する
-- これにより、楕円曲線暗号以外の署名も使用出来る
-- これにより、署名無しのトランザクションも必要に応じて作成出来る
+- **EIP86, EIP2938** (未実装, 現在検討中)
+  - Account Abstractionの提案
+  - EOAとCAの区別を無くして、全てのアカウントをCAに統一する (！)
+  - 署名は、トランザクションのデータ領域であるinputにコントラクトとして記載する
+  - これにより、楕円曲線暗号以外の署名も使用出来る
+  - これにより、署名無しのトランザクションも必要に応じて作成出来る
 
-このように、Bitcoinと比較して根本的な仕様変更が積極的に議論・実装されている印象がある
+Bitcoinと比較して根本的な仕様変更が積極的に議論・実装されている印象がある
 
 
 # スケーラビリティ問題
