@@ -175,6 +175,8 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
   - 以下の図では親の親を共有している(文字通りの)Uncle blockを示しているが、これだけをUncle blockと呼ぶ場合もある
 
+バリデーターノードは、トランザクションに加えてUncle blockの情報もブロックに格納します。Uncle blockとは、メインチェーンから分岐したブロックのことです。各ブロックに任意のUncle blockのブロックヘッダを2つまで格納することが出来ます。Ethereumは、Block intervalがBitcointと比較するとより頻繁に分岐するため、Uncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えています。
+
 <center>
 <img src="./img/uncle.svg" width="60%">
 </center>
@@ -191,6 +193,14 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   -  1Gwei = 10^8 wei
   - ただし次の仕組みが示すとおり、ターゲット値は15,000,000Gweiである
 
+
+Ethereumのブロックには、ブロックサイズの上限が設定されていません（Bitcoinは4MB）。その代わりに、block用のgasLimitが設定されており、ブロックに格納された全トランザクションのgasLimitの合計がこのblock gasLimitを超えてはならないことになっています。
+（ここで、Block gasLimitとTransaction gasLimitはしばしば混同されるので注意してください。前者はバリデーターノードが決める変数で、後者はEOAが決める変数です）
+
+Ethereumにおいて、バリデーターノードはトランザクションの実行も担うため、彼らの負担は容量よりも計算量で把握した方が適切です。このような「スマートコントラクト用のプラットフォームとして計算量(gas)を軸に物事を考えよう」という思想はEthereumのブロックチェーンにおいて一貫しています。
+
+バリデーターノードは、Block gasLimitを30,000,000Gweiまで増やすことが出来ます。ただしこれから説明する仕組みのとおり、ターゲット値は15,000,000Gweiとなっています。
+
 ### baseFeePerGasの決定ルールについて
 - baseFeePerGasはブロック毎に固定で、以下のルールに沿って内生的に決まる
   - 1つ前のブロックのBlock gasLimitが…
@@ -203,6 +213,19 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 - 直感的に言えば、手数料に難易度調整のような仕組みを導入している
 - `なぜ？: (Bitcoinのように) EOAにfeePerGasを決めさせるよりも、支払う手数料を最適化出来そうだから`
 
+baseFeePerGasはブロック毎に固定で、以下のルールに沿って内生的に決まります。
+
+1つ前のブロックのBlock gasLimitが最大値(30,000,000Gwei)の何％であるかによって、baseFeePerGasの増減割合が決まります。
+
+- 0%の場合 → -12.5%
+- 0〜50%の場合 → -12.5〜±0%
+- 50%の場合 → ±0%
+- 50〜100%の場合 → ±0〜 +12.5 %
+- 100%の場合 → +12.5% 
+
+
+つまり：Txが増える → バリデーターノードがBlock gasLimitを増やす → 次のbaseFeePerGasが増加する → EOAが高い手数料を忌避してTxを作らなくなる → 混雑の緩和に繋がる(and vice versa)という流れが想定されています。直感的に言えば、手数料に難易度調整のような仕組みを導入していると言えます。これは、EOAにfeePerGasを決めさせるよりも、支払う手数料を最適化できそうであるため
+
 ### State Root, Receipts Rootについて
 - Ethereumでは、トランザクションを実行した結果として、状態とレシートをマークルパトリシアツリー状にしたRootもブロックに格納する 
 - ただしトランザクションとは違い、**ブロックに格納されるのはRoot部分のみ!**
@@ -212,6 +235,11 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 <center>
 <img src="./img/blockroot.drawio.svg" width="100%">
 </center>
+
+
+Ethereumでは、トランザクションを実行した結果として、状態とレシートをマークルパトリシアツリー状にしたRootもブロックに格納することになっています。トランザクションとは違い、ブロックに格納されるのはRoot部分のみです。
+
+EOAとCAが保持する状態データと、Message CallトランザクションとContract Creationのレシートは、全ての歴史をarchive nodeが保持していることを思い出してください。
 
 改めて整理すると、状態(state)に関して各ノードが保持するデータは以下の通り:
 
