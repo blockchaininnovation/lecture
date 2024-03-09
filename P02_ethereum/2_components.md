@@ -11,30 +11,42 @@
   - [Contract Creation トランザクションのデータ構造](#contract-creation-トランザクションのデータ構造)
   - [Contract Creation トランザクションのレシート](#contract-creation-トランザクションのレシート)
     - [補足: Internal トランザクションのデータ構造](#補足-internal-トランザクションのデータ構造)
-    - [補足: Internal トランザクションのレシート](#補足-internal-トランザクションのレシート)
+  - [データ構造を実際に確認してみましょう](#データ構造を実際に確認してみましょう)
 - [まとめ](#まとめ)
 
 
 # 各構成要素が保持するデータ
 
-Ethereumの構成要素について、もう少し詳細をみてみよう。
+Ethereumの構成要素である2種類のアカウントと2種類のトランザクションについて、詳細を確認してみましょう。
 
 ## EOA (Externally Owned Account)
 - EOAはBitcoinにおけるアドレスのようなもの
 - 作成の基本的なプロセスはBitcoinと同じ
+<center>
+<img src="./img/eoaprocess.svg" width="40%">
+</center>
 
 ただし...
-- Bitcoinとは異なり、SHA-256ではない
+- Bitcoinとは異なり、ハッシュ関数はSHA-256ではない
     - `なぜ?: 新しいハッシュ関数でより安全と言われているから`
 - Bitcoin Addressとは異なり、後ろにチェックサムが付いていない
     - `なぜ?: 将来的にアドレスに文字を対応させて使う想定だから (e.g., knskito.eth)`
     - *アドレス自体にチェックサムを付けかつ誤読を防ぐ文字列にエンコーディングする仕組みもあるにはある
 
-**EOAが保持するデータ ( = 状態 = state )**
+**EOAが保持する「状態 (state)」データ**
+<center>
+<img src="./img/1_eoa.png" width="10%">
+
+**Ethereum Address (EOA)**: 
+0x001d3f1ef827552ae1114027bd3ecf1f086ba0f9
+</center>
+
 | 名称 | 役割 |
 | ---- | ---- |
 | Nonce | EOAのトランザクションがこれまでにいくつ実行されたか |
 | Balance | EOAが所持している残高 (wei) |
+
+*Nonce: number used onceの略。一度だけしか使われない数のこと。　
 
   - Bitcoin (のUTXO) とは異なり、アカウントが残高を保持している (この設計をアカウントベースと呼ぶ)
   - 取引 (0.3BTC from Alice to Carol) ではなく残高 (Alice 0.7→0.4ETH; Carol 0→0.3ETH)
@@ -61,23 +73,35 @@ Ethereumの構成要素について、もう少し詳細をみてみよう。
   - そもそもCAは秘密鍵を持たないことを思い出しましょう
 - 具体的には、EOAのアドレスとそのEOAが保持するnonceをハッシュ化して作成する
 
-**CAが保持するデータ ( = 状態 = state )**
+<center>
+<img src="./img/caaddress.svg" width="60%">
+</center>
+
+**CAが保持する「状態 (state)」データ**
+
+<center>
+<img src="./img/2_ca.png" width="10%">
+
+**Ethereum Address (CA):** 0xa4803f17607B7cDC3dC579083d9a14089E87502b 
+</center>
+
 | 名称 | 役割 |
 | ---- | ---- |
-| Nonce | CAのトランザクションがこれまでにいくつ実行されたか |
+| Nonce | CAが別のCAをこれまでいくつ生成したか |
 | Balance | CAが所持している残高 (wei) |
 | Code Hash | コントラクトの中身 (プログラムコード) をハッシュ化 |
 | Storage Root | コントラクトの結果をハッシュ化 |
 
+- CAのnonceは、別のCAを生み出すinternal transactionが実行された場合にのみ増える
 - コントラクトの結果は、複数のアウトプット (e.g., コントラクト5回目, ‘送金が完了しました’) をマークル・パトリシアツリーに格納する形式で保存される。
 - ただし、CAが保持するのは、根(root)の部分のみ。
-- `なぜ?: コントラクトの全てのアウトプットを結果としてブロックチェーンに記録すると、容量を圧迫してしまうから`
+  - `なぜ?: コントラクトの全てのアウトプットを結果としてブロックチェーンに記録すると、容量を圧迫してしまうから`
 
 ### 補足: マークル・パトリシアツリー
 - マークルツリー + パトリシアツリー
 - データ探索の効率性をさらに高めるために採用されている
 - Ethereumにおける木構造でのデータ保存は、全てマークル・パトリシアツリーとなっている
-- 時間の都合上詳細な説明は割愛、以下の資料を参照のこと
+- 詳細な説明は割愛するが、興味がある方はたとえば以下の資料を参照のこと
   - https://qiita.com/yanagisawa-kentaro/items/bfdbb5564d1751c3d2ea (JP)
   - https://wiki.nebulas.io/en/latest/go-nebulas/design-overview/merkle_trie.html (EN)
 
@@ -85,20 +109,20 @@ Ethereumの構成要素について、もう少し詳細をみてみよう。
 
 Bitcoinの送金に相当する、いわゆるトランザクション
 
-| 名称 | 役割 |
-| ---- | ---- |
-|blockhash| このtxを含むブロックのブロックヘッダーハッシュ
-|blocknumber| このtxを含むブロックが何番目か
-|transaction index| このtxがブロックの中で何番目のトランザクションか
-|from| このtxを作成したEOAのアドレス
-|to| このtxの宛先 (EOA or CA) のアドレス
-|nonce| 作成者であるEOAにとってこのtxが何番目か
-|hash| このtx自体のハッシュ
-|value| 送金するetherの量 (wei)
-|data| データ領域 (16進数の数列にエンコード化されている)
-|gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
-|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+|blockhash| このtxを含むブロックのブロックヘッダーハッシュ| ブロックに入ってからの話なので、最初はnull
+|blocknumber| このtxを含むブロックが何番目か| ブロックに入ってからの話なので、最初はnull
+|transaction index| このtxがブロックの中で何番目のトランザクションか|
+|from| このtxを作成したEOAのアドレス| ビットコインと異なり、fromと署名欄は統合している `なぜ？: Ethereumは将来的に楕円曲線暗号以外の署名形式もサポートするつもりだから (後半で詳述)`
+|to| このtxの宛先 (EOA or CA) のアドレス|
+|nonce| 作成者であるEOAにとってこのtxが何番目か|
+|hash| このtx自体のハッシュ|
+|value| 送金するetherの量 (wei)|
+|data| データ領域 (16進数の数列にエンコード化されている)| 引数を入れてCAに送ることでコントラクトを実行
+|gasLimit| EOAがtx実行に対して支払えるGasの最大量| 手数料 (以下に詳述)
+|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額| 手数料 (以下に詳述)
+|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額| 手数料 (以下に詳述)
 
 
 ## Ethereumの手数料 (gas)
@@ -116,10 +140,10 @@ Bitcoinの送金に相当する、いわゆるトランザクション
   - Ethereumのマイナーノード
     - 「ブロックに多く格納出来ない分、大きなトランザクションには高い手数料が欲しいな...」
     - 「複雑なコントラクトを動かすトランザクションには高い手数料が欲しいな...」 
-- タクシーの料金表示で、走行距離と運賃だけでなく消費燃料の量と価格も出るイメージ
-  - gas: 1km走らせるのに必要なガソリン量
-  - feePerGas: (EOAが支払える) ガソリンのリッター価格
-  - gasLimit:  (EOAが支払える) ガソリン量
+- 直感的には、タクシーの料金表示で、走行距離と運賃だけでなく消費燃料の量と価格も出るイメージ
+  - gas: 1km走らせるのに必要なガソリン量みたいなもの
+  - feePerGas: (EOAが支払える) ガソリンのリッター価格みたいなもの
+  - gasLimit:  (EOAが支払える) ガソリン量みたいなもの
 
 
 ### 各用語の意味
@@ -168,14 +192,14 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 
 - いざマイナーノードがtxの実行を試みると、EOAが指定した手数料が不十分だったなんてこともありうる
 
-実際の手数料 = feePerGas * gasUsed　>　EOAが支払い可能な手数料 = feePerGas * gasLimit
+`実際の手数料 = feePerGas * gasUsed`　>　`EOAが支払い可能な手数料 = feePerGas * gasLimit`
 
 - この場合txは実行されないが、 feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはマイナーノードが獲得) される
   - そうしなければスパム攻撃対策にならない
 
 - 反対にtxを実行した結果、EOAが指定した手数料が余る場合もある
 
-実際の手数料 = feePerGas * gasUsed　<　EOAが支払い可能な手数料 = feePerGas * gasLimit　
+`実際の手数料 = feePerGas * gasUsed`　<　`EOAが支払い可能な手数料 = feePerGas * gasLimit`　
 
 - この場合txは実行され、feePerGas * gasLimit 分のetherは消費 (i.e., baseFeePerGas * gasLimitはburnされ、priorityFee * gasLimitはマイナーノードが獲得) される
 - 余ったetherはEOAに返却される
@@ -184,93 +208,87 @@ Bitcoinの送金に相当する、いわゆるトランザクション
 ## Message Call トランザクションのレシート
 トランザクションの実行後、以下のレシートが発行される
 
-| 名称 | 役割 |
-| ---- | ---- |
-| blockhash | 実行txを含むブロックのブロックヘッダーハッシュ |
-| blocknumber | 実行txを含むブロックが何番目か |　
-| transaction index | 実行txがブロックの中で何番目のトランザクションか |
-| contractAddress | 作成したCAのアドレス |
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+| blockhash | 実行txを含むブロックのブロックヘッダーハッシュ |トランザクション実行後なので、最初から値が入っている
+| blocknumber | 実行txを含むブロックが何番目か |　トランザクション実行後なので、最初から値が入っている
+| transaction index | 実行txがブロックの中で何番目のトランザクションか |トランザクション実行後なので、最初から値が入っている
+| contractAddress | 作成したCAのアドレス |Contract Creationではないので、必ずnull
 | from | txを作成したEOAのアドレス |
 | to | 宛先 (EOA or CA) のアドレス |
 | hash | 実行tx自体のハッシュ |
-| gasUsed | txの実行に使ったGasの量 |
+| gasUsed | txの実行に使ったGasの量 | このMessage Callを引き金にCAがinternal transactionを連鎖的に発する場合もある
 | cumulativeGasUsed | txの実行に使ったGasの量 (internal transaction 含む) |
 | logs | txの実行ログ |
 | logsBloom | ブロック内の全txの実行ログ (Bloom Filter形式) |
-| root | 実行の結果変化したアカウントの状態 (state) の要約 |
+| root | 実行の結果変化したアカウントの状態 (state) の要約 | 詳細は後述
 
 ## Contract Creation トランザクションのデータ構造
 コントラクトを新たに生成するためのトランザクション
 
-| 名称 | 役割 |
-| ---- | ---- |
-|blockhash| このtxを含むブロックのブロックヘッダーハッシュ
-|blocknumber| このtxを含むブロックが何番目か
-|transaction index|  このtxがブロックの中で何番目のトランザクションか
-|from| このtxを作成したEOAのアドレス
-|to| このtxの宛先 (EOA or CA) のアドレス
-|nonce| 作成者であるEOAにとってこのtxが何番目か
-|hash| このtx自体のハッシュ
-|value| 送金するetherの量 (wei)
-|data| データ領域 (16進数の数列にエンコード化されている)
-|gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
-|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+|blockhash| このtxを含むブロックのブロックヘッダーハッシュ| ブロックに入ってからの話なので、最初はnull
+|blocknumber| このtxを含むブロックが何番目か| ブロックに入ってからの話なので、最初はnull
+|transaction index|  このtxがブロックの中で何番目のトランザクションか| ブロックに入ってからの話なので、最初はnull
+|from| このtxを作成したEOAのアドレス|
+|to| このtxの宛先 (EOA or CA) のアドレス| 必ずzero address “0x000…” が宛先となる
+|nonce| 作成者であるEOAにとってこのtxが何番目か|
+|hash| このtx自体のハッシュ|
+|value| 送金するetherの量 (wei)|
+|data| データ領域 (16進数の数列にエンコード化されている)| 作成したいCAの中身 (プログラム) を記入
+|gasLimit| EOAがtx実行に対して支払えるGasの最大量|
+|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額|
+|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額|
 
 ## Contract Creation トランザクションのレシート
 トランザクションの実行後、以下のレシートが発行される
 
-| 名称 | 役割 |
-| ---- | ---- |
-| blockhash | 実行txを含むブロックのブロックヘッダーハッシュ |
-| blocknumber | 実行txを含むブロックが何番目か |　
-| transaction index | 実行txがブロックの中で何番目のトランザクションか |
-| contractAddress | 作成したCAのアドレス |
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+| blockhash | 実行txを含むブロックのブロックヘッダーハッシュ |トランザクション実行後なので、最初から値が入っている
+| blocknumber | 実行txを含むブロックが何番目か |　トランザクション実行後なので、最初から値が入っている
+| transaction index | 実行txがブロックの中で何番目のトランザクションか |トランザクション実行後なので、最初から値が入っている
+| contractAddress | 作成したCAのアドレス | 今度はアドレスが入る
 | from | txを作成したEOAのアドレス |
-| to | 宛先 (EOA or CA) のアドレス |
+| to | 宛先 (EOA or CA) のアドレス | 必ずzero address “0x000…” が宛先となる
 | hash | 実行tx自体のハッシュ |
 | gasUsed | txの実行に使ったGasの量 |
-| cumulativeGasUsed | txの実行に使ったGasの量 (internal transaction 含む) |
+| cumulativeGasUsed | txの実行に使ったGasの量 (internal transaction 含む) | Internal transactionを生まないため、必ずgasUsedと等しくなる
 | logs | txの実行ログ |
 | logsBloom | ブロック内の全txの実行ログ (Bloom Filter形式) |
-| root | 実行の結果変化したアカウントの状態 (state) の要約 |
+| root | 実行の結果変化したアカウントの状態 (state) の要約 | 詳細は後述
  
 
 ### 補足: Internal トランザクションのデータ構造
 CAから発せられる、ブロックチェーンに記録されない処理 (正式にはトランザクションではない)
 
-| 名称 | 役割 |
-| ---- | ---- |
-|blockhash| このtxを含むブロックのブロックヘッダーハッシュ
-|blocknumber| このtxを含むブロックが何番目か
-|transaction index|  このtxがブロックの中で何番目のトランザクションか
-|from| このtxを作成したEOAのアドレス
-|to| このtxの宛先 (EOA or CA) のアドレス
-|nonce| 作成者であるEOAにとってこのtxが何番目か
-|hash| このtx自体のハッシュ
-|value| 送金するetherの量 (wei)
-|data| データ領域 (16進数の数列にエンコード化されている)
-|gasLimit| EOAがtx実行に対して支払えるGasの最大量
-|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額
-|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額
+*Internal Transactionなので、レシートは発行されない
 
-### 補足: Internal トランザクションのレシート
-トランザクションの実行後、以下のレシートが発行される
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+|blockhash| このtxを含むブロックのブロックヘッダーハッシュ| ブロックに入ってからの話なので、最初はnull
+|blocknumber| このtxを含むブロックが何番目か| ブロックに入ってからの話なので、最初はnull
+|transaction index|  このtxがブロックの中で何番目のトランザクションか| ブロックに入ってからの話なので、最初はnull
+|from| このtxを作成したEOAのアドレス| 
+|to| このtxの宛先 (EOA or CA) のアドレス|
+|nonce| 作成者であるEOAにとってこのtxが何番目か|
+|hash| このtx自体のハッシュ|
+|value| 送金するetherの量 (wei)|
+|data| データ領域 (16進数の数列にエンコード化されている)|
+|gasLimit| EOAがtx実行に対して支払えるGasの最大量| null EOAが出したMessage Callに依存
+|maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額| null EOAが出したMessage Callに依存
+|maxFeePerGas| EOAがtx実行のために支払えるGasの最大金額| null EOAが出したMessage Callに依存
 
-| 名称 | 役割 |
-| ---- | ---- |
-| blockhash | 実行txを含むブロックのブロックヘッダーハッシュ |
-| blocknumber | 実行txを含むブロックが何番目か |　
-| transaction index | 実行txがブロックの中で何番目のトランザクションか |
-| contractAddress | 作成したCAのアドレス |
-| from | txを作成したEOAのアドレス |
-| to | 宛先 (EOA or CA) のアドレス |
-| hash | 実行tx自体のハッシュ |
-| gasUsed | txの実行に使ったGasの量 |
-| cumulativeGasUsed | txの実行に使ったGasの量 (internal transaction 含む) |
-| logs | txの実行ログ |
-| logsBloom | ブロック内の全txの実行ログ (Bloom Filter形式) |
-| root | 実行の結果変化したアカウントの状態 (state) の要約 |
+
+## データ構造を実際に確認してみましょう
+
+アカウントやトランザクションのデータ構造は、[Etherscan](https://etherscan.io/)などのエクスプローラーサイトを通じて直接確認することができます。
+この資料で各要素の意味はおおまかに掴めたと思いますので、ぜひ実際の中身を確認してみてください。
+
+<center>
+<img src="./img/etherscan.png" width="75%">
+</center>
 
 
 # まとめ
