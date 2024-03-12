@@ -83,6 +83,10 @@ EthereumのPoSは、おおまかには次の仕組みでブロック作成者を
 
 EOAは32ETHをdeposit contractに預けることで、アカウント用の鍵とは別にValidator Signing KeyとWithdrawal Keyの2種類 (それぞれ秘密・公開鍵から成る) が得られます。
 
+<center>
+<img src="./img/validator.drawio.svg" width="100%">
+</center>
+
 この様にValidator用の鍵を別途用意するのは、次の3つの理由によります。
 1. セキュリティ上、アカウント用の鍵とバリデータ用の鍵は分けておきたい
 2. SaaS(Staking as a Service)などを運用する余地を残しておきたい(詳細後述)
@@ -109,6 +113,10 @@ Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞ�
 ### ランダムな選択
 
 Ethereumのブロックチェーンは、12秒をslot、32slot (6.4分) をepochと呼び、slot, epoch単位でブロックの提案や合意形成、報酬などを管理しています。Bitcoinではslotは (block intervalとして) 約10分になるように設計されていました。Bitcoinにおけるdifficultyの概念はEthereumには存在しません。
+
+<center>
+<img src="./img/slot.drawio.svg" width="90%">
+</center>
 
 ### 提案ノードの選択
 
