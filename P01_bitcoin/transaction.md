@@ -1347,11 +1347,11 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 - $0 < nonWitnessDataSize < 1$ なので
 
-$ 4 \geqq  BlockWeight  = nonWitnessDataSize*4 + WitnessDataSize >  WitnessDataSize $ 
+$4 \geqq  BlockWeight  = nonWitnessDataSize*4 + WitnessDataSize >  WitnessDataSize$ 
 
 すなわち
 
-$0 \leqq WitnessDataSize \leqq 4$ 
+$0 \leqq WitnessDataSize < 4$ 
 
 である（単位は MB）
 
