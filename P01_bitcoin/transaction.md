@@ -1407,7 +1407,7 @@ https://en.bitcoin.it/wiki/BIP_0141
   - scriptPubKey は`0x6a24aa21a9ed <Double-SHA256(witness root hash | witness reserved value)>`
   - `witness reserved value`は容量確保のための予約語で、現在はコンセンサスの意味はない
   - なので 32 バイトの`0000 ... 0000`が設定されることが多いよう
-  <!-- TODO これ，意味としては式の中は「|」でビットの和を取っているということで実際は何も計算してなくてwitness root hashだけの値をダブルハッシュしているってこと？ -->
+  <!-- TODO これ，意味としては式の中は「|」でビットのORを取っているということで実際は何も計算してなくてwitness root hashだけの値をダブルハッシュしているってこと？ -->
 
 ## トランザクション方式について
 
