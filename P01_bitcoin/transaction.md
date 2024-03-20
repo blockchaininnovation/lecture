@@ -1257,7 +1257,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 - SegWit に対応していないノードでは Witness Data が無視される
   - 検証に通らない（署名がない）ため、トランザクションは失敗する
-<!-- TODO ここ要調査 -->
+<!-- TODO Segwit付きのTxは検証に失敗して伝搬されないという意味か，それともWitnessに対応したLockingScriptが解除できない（ P2WPKH、P2WSHを解除できない）ということなのか-->
 
 ## SegWit の導入理由について
 
