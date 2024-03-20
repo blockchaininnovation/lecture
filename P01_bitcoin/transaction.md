@@ -919,9 +919,10 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 # トランザクションの種類
 
-- 以下が 5 つの標準的なトランザクションである
+- 以下が 旧来からのBitcoinにおける5つの標準的なトランザクションである
   - これら以外にも P2TR （Pay to Taproot）や P2WPKH （Pay to Witness Public Key Hash）など様々ある
     - 参考リンク (https://medium.com/geekculture/understanding-bitcoin-transaction-output-types-with-bigquery-c625643f2ab5)
+    - P2TRとP2WPKHについては[後述](#トランザクション方式について)
 <!-- TODO P2TRとP2WPKHがTaprootによって新しく追加された部分？もしそうならそれも追加で記述が必要． -->
 
 | 名称                           | 説明                                   |
@@ -1068,7 +1069,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 
 ## Pay-to-Script-Hash (P2SH)
-
+<!-- TODO 受け取り側の都合により送金側のTxサイズが大きくなってしまっていたのを解消，ということを最初に書く -->
 - 複雑な script を単純化できるようにしたもの
   - 複雑なスクリプトを使用するのは現実的に難しい（以下の[例](#p2sh-の使用例)を参照）
 - スクリプトそのものの代わりにそのスクリプトのハッシュ値をロッキングスクリプトに用いる
@@ -1212,7 +1213,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 - 創設者の「Satoshi Nakamoto」も「Coinbase Script」で遊んでいる（有名なので紹介する）
 
   - `The Times 03/Jan/2009 Chancellor on brink of second bailout for banks.`
-  - タイムズ紙のその日の見出しらしい（マイニング開始の日付を残すためだとか、真相は不明）
+  - 英国タイムズ紙のその日の見出しらしい（マイニング開始の日付を残すためだとか）
 
 ## Coinbase トランザクションの承認について
 
@@ -1241,8 +1242,8 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
   - 署名データの扱いに関しては後述の[データ構造について](#データ構造について)を参照のこと
 
 - SegWit は 2017 年にソフトフォークとして実装された
-
-  - とても分かりにくいと思うのだが、**ブロックサイズの上限を変更しているわけではない**
+  - ブロックに入れられる容量を増やすために実施された
+  - しかしながら，**ブロックサイズの上限を変更しているわけではない**
 
     ```
     ブロックサイズの上限自体を変更する（コードを書き換える）と後方互換性を保てないため、ハードフォークするしかない。
@@ -1256,6 +1257,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 - SegWit に対応していないノードでは Witness Data が無視される
   - 検証に通らない（署名がない）ため、トランザクションは失敗する
+<!-- TODO ここ要調査 -->
 
 ## SegWit の導入理由について
 
@@ -1285,7 +1287,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 ### トランザクション展性（Malleability）の克服
 
-- トランザクション展性（Malleability）とは、トランザクション ID の改ざん容易性のこと
+- トランザクション展性（Malleability）とは、トランザクション ID の改ざん可能性のこと
 
   - もう少し直感的に言うなら、トランザクションの意味を失わないようにしたまま、txid を変更すること
   - これにより２重支払いが引き起こされる可能性がある
@@ -1294,15 +1296,15 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
   - アンロックに無害なスクリプトを追加すれば、txid だけ変わる（`OP_NOP`など何もしないオペコードを追加するなど）
   - 同じトランザクション内容なのに txid だけ変わると、不一致が起こる（作成したトランザクションが見つからないなど）
+  - 自身の作る同じUTXOから同じ金額のTxでもtxidが異なるTxをいくつも生成できてしまうことを意味する．
 
-- したがって、Unlocking Script がトランザクションデータの中にあるのは脆弱であるといえる
 
 - SegWit は Unlocking Script を「Witness Data」に移動することで、この脆弱性に対応した
-
+<!-- TODO 同じWitnessで同じようにUnlockingSrcriptに意味のないスクリプトを埋め込めばtxid変えられるのでは？ -->
   - txid の作成において Witness Data は無視されるから
 
 - この改善によって「ライトニングネットワーク」が誕生した
-
+<!-- TODO Segwit以前にもLightning Networkってあったのでは？ -->
   - オフチェーンでのシステムを安全に展開できるようになった
 
 ---
@@ -1310,43 +1312,54 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 ## ブロックウェイト（Block Weight）
 
 - 以下の式で定義される値を「ブロックウェイト」という
+  
+  これは，Segwitにおいてブロックの大きさを表す表現方法．
 
-  $BlockWeight = nonWitnessDataSize*3 + TotalDataSize \iff nonWitnessDataSize*4 + WitnessDataSize$
+  $BlockWeight = nonWitnessDataSize*3 + TotalDataSize = nonWitnessDataSize*4 + WitnessDataSize$
 
-  - $nonWitnessDataSize$ は Witness Data を除いたブロックサイズ（単位は MB）
-  - $TotalDataSize$ は Witness Data も含めた全体のブロックサイズ（単位は MB）
+  - $nonWitnessDataSize$ は Witness Data を除いたブロックサイズ
+  - $TotalDataSize$ は Witness Data も含めた全体のブロックサイズ
 
     - すなわち、 $TotalDataSize = nonWitnessDataSize + WitnessDataSize$
     - ブロックサイズの上限は変わっていないため、 $0 < TotalDataSize \leqq 1MB$
 
-  - $BlockWeight$ の単位は「Weight Unit（WU）」（上記式では MWU）である
-  - また、 $0 < BlockWeight \leqq 4,000,000WU$ である
+  - $BlockWeight$ の単位は「Weight Unit（WU）」（上記式では MWU）と表現される．
+    - 単位はByte，MegaByteと同じ（1 WU = 1 B, 1 MWU = 1 MB)
+  - また、 $0 < BlockWeight \leqq 4,000,000 WU$ である
 
-- **SegWit 対応ノードではブロックウェイトが、ブロックサイズに代わる制限となる**
+- **SegWit 対応ノードではブロックウェイトが、ブロックサイズに代わる１ブロックあたりの容量の制限となる**
   - すなわち、ブロックサイズが１ MB 以内という制限ではなく、**ブロックウェイトが 4,000,000WU 以内という制限に置き換わる**
 
 ## ブロックサイズについて
 
 ### 非 SegWit トランザクションの場合
 
-- Witness Data が存在しないため、 $TotalDataSize = nonWitnessDataSize + 0$ より $TotalDataSize = nonWitnessDataSize$
+- Witness Data が存在しないため$witnessDataSize = 0$、すなわち$TotalDataSize = nonWitnessDataSize + 0$ より $TotalDataSize = nonWitnessDataSize$
 - また $TotalDataSize \leqq 1MB$ より、 $nonWitnessDataSize \leqq 1MB$
-- したがって、 $BlockWeight = nonWitnessDataSize*3 + TotalDataSize \leqq 1*3 + 1 = 4$ （単位はそれぞれ MWU、MB）
-- 以上より、ブロックウェイトが 4,000,000WU 以内という条件に必要十分である（この条件で後方互換性を保てる）
+- したがって、 $BlockWeight = nonWitnessDataSize*3 + TotalDataSize \leqq 1*3 + 1 = 4$
+- 以上より、ブロックウェイトが 4,000,000 WU 以内という条件と同値である（この条件で後方互換性を保てる）
 
 ### SegWit トランザクションの場合
 
-- $0 < BlockWeight \leqq 4,000,000WU$ 、 $0 < nonWitnessDataSize$ 、 $0 \leqq WitnessDataSize$ である
+- $0 < BlockWeight \leqq 4,000,000WU$であり，Segwit Txの場合は $0 < nonWitnessDataSize$ 、 $0 \leqq WitnessDataSize$ である
 
-  - $0 = WitnessDataSize$ になることなどほぼないだろう（理論的には可能）
+  - $0 = WitnessDataSize$ になることはほぼない
 
-- この条件において、 $0 < nonWitnessDataSize < 1$ 、 $0 \leqq WitnessDataSize \leqq 4$ である（単位は MB）
+- $0 < nonWitnessDataSize < 1$ なので
+
+$ 4 \geqq  BlockWeight  = nonWitnessDataSize*4 + WitnessDataSize >  WitnessDataSize $ 
+
+すなわち
+
+$0 \leqq WitnessDataSize \leqq 4$ 
+
+である（単位は MB）
 
   - 実際データサイズは、1 ～ 2.2 MB の範囲であることが多いようだ
 
 ## データ構造について
 
-- 従来のトランザクションデータ構造に、新たに以下の項目が追加される
+- 従来のトランザクションのデータ構造に、新たに以下の項目が追加される
 
   | 名称    | 説明                                    | 役割                         |
   | ------- | --------------------------------------- | ---------------------------- |
@@ -1375,26 +1388,39 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
 
 - witness の構成例 `02 87<署名値 135byte> 34<公開鍵 52byte>`
 
-  - 前から順に var_int、witness_data、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
+  - 前から順に var_int、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
+<!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう． 
+https://en.bitcoin.it/wiki/BIP_0141
+ここを見るとやはりscriptPubKeyと書いてあった．OP_RETURNなので処理されない領域．OP_RETURNに続いて，普通のLocking Scriptが書いてある？そうしないとマイニング報酬が受け取れない．コインベースからのvoutを２つ作って，そのうちの一つがこのコミットメントを表現している，ということかも．
+コミットメントとあるが・・？
+マークルツリーっていうことは，ブロック内のTxでwitnessがあるものを使ってマークルツリーを作っているっていうこと？
+なんでそんなことしているんだろう．通常のTxのマークルルートだけではなぜ不十分なのか．
+135バイトの署名値とは？BitcoinのECDSA署名は512bitだったはず．
+このwitteness_dataが署名の代わりに使われ，実質1MB→4MBを実現しているコアの部分のはずなためもっと詳しく説明すべき．
 
-- Witness データは改ざん対策として、Witness データのルートハッシュを、Coinbase トランザクションの scriptPubKey においている
+公開鍵もなぜ52byte？
+楕円曲線上の点なので64byteじゃない？圧縮された公開鍵でも33byteだが・・．
+-->
+- Witness データは改ざん対策として、Witness データのルートハッシュを、Coinbase トランザクションの scriptPubKey (Locking Script, Coinbase Tx
+では任意の値を入れられる)においている
   - ルートハッシュの計算方法は Merkle tree と同じ
   - scriptPubKey は`0x6a24aa21a9ed <Double-SHA256(witness root hash | witness reserved value)>`
   - `witness reserved value`は容量確保のための予約語で、現在はコンセンサスの意味はない
   - なので 32 バイトの`0000 ... 0000`が設定されることが多いよう
+  <!-- TODO これ，意味としては式の中は「|」でビットの和を取っているということで実際は何も計算してなくてwitness root hashだけの値をダブルハッシュしているってこと？ -->
 
 ## トランザクション方式について
 
 - P2PKH、P2SH に対応するものとしてそれぞれ P2WPKH、P2WSH がある
-- 署名の効率化を行う提案である「BIP-143」を使用した方法を示す
+- 署名の効率化を行う提案である「BIP-143」にて示されている
 - それぞれのトランザクションの種類は Locking Script で「何バイトのハッシュが使われるか」で判別される
 
-### Pay-to-witness-public-key-hash（P2WPKH）
+### Pay-to-witness-public-key-hash （P2WPKH）
 
 - P2WPKH は 20 バイトのハッシュを使用する
 
 - #### Unlocking / Locking Script / Witness のフォーマット
-
+LokingScriptを対応するVinにおけるUnlockingSrcriptで解除する，というのではなく代わりにTx内のフィールドに規定されているWitnessで解除するように変わった．
   - Locking Script
 
     `OP_0 <20-byte-key-hash>`
@@ -1405,32 +1431,47 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
     - `OP_PUSHBYTES_20`後続の 20 バイトをスタックにプッシュするという意味
     - ただ、`OP_PUSHBYTES_<数>`はオペコードとしては扱わない（そういうルール）
 
+<!-- TODO OP_PUSHBYTES_20が消えている解釈がわけわからん．普通にOPコードいれて14と対応している，ということではない？ -->
   - Unlocking Script
 
     - 空である
 
   - Witness
 
-    ` <署名><公開鍵>`
+    ` 02 87<署名値 135byte> 34<公開鍵 52byte>`
 
   - つなぎあわせた以下の Script が True になれば OK
 
     `<Witness> <ScriptCode>`
 
     - `ScriptCode`は`0x1976a914 {20-byte-key-hash} 88ac`で作成されるもの
-    - `19`は後続の 25 バイト（`76a9 ... 88ac`のこと）をスタックにプッシュするという意味
+    - `19`は後続の 25 バイト（`76a9 ... 88ac`のこと）をスタックにプッシュするという意味 (OP_PUSHBYTES_20)
     - `76a914`、`88ac`はそれぞれ P2PKH で出てきた`OP_DUP OP_HASH160`、`OP_EQUALVERIFY OP_CHECKSIG`のことである
+    - つまり`<ScriptCode>`は，
+    `OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG`のこと．
 
   - すなわち`ScriptCode`は P2PKH における Unlocking Script と同じである
 
-  - したがって、`<Witness> <ScriptCode>`は P2PKH の`<Unlocking Script> <Unlocking Script>`と同じ操作である
+  - したがって、`<Witness> <ScriptCode>`は P2PKH の`<Unlocking Script> <Locking Script>`と同じ操作である
+  <!-- TODO 同じ操作ってなに？UnlockingSrcriptは空とあるが，ScriptPubKeyには何をいれる？ 
+  P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは違うってこと？
+  それをクライアントはどうやって検出する？
+  -->
+  - 全体の処理としては
+  
+    `<Witness> <ScriptCode>`
 
+    `02 87<署名値 135byte> 34<公開鍵 52byte> <OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG>`
+
+    <!-- TODO これの実行をしてどうやって検証されるのか流れを示す必要あり -->
+
+<!-- TODO 何と何を比べればよい？というか全体で3バイトしか節約してなくて，ブロックサイズが1MBから実質4MBまで拡張できているのは納得感がない． -->
     - しかし比べてみると、Script Code を使うことで Locking Script より 3 バイト節約できている
 
 ### Pay-to-witness-script-hash（P2WSH）
 
 - P2WSH は 32 バイトのハッシュを使用する
-
+<!-- TODO  P2WPKHと用途は何が違う？ -->
 - #### Unlocking / Locking Script / Witness のフォーマット
 
   - Locking Script
@@ -1438,7 +1479,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
     `OP_0 <32-byte-hash>`
 
     - `<32-byte-hash>`は Witness Script を SHA256 関数に通した値
-    - Witness Script は witness の最後のデータのこと（Witness のところを参照のこと）
+    - Witness Script は witness の最後のデータのこと（以下Witness のところを参照のこと）
 
   - Unlocking Script
 
@@ -1452,7 +1493,7 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
     - なので`<WitnessScript>`は`M <公開鍵 1> ... <公開鍵 N> N OP_CHECKMULTISIG`のようになっている（マルチシグの場合）
 
   - 検証では以下の操作を行う
-
+<!-- TODO Bitcoinスクリプトですべての処理を記述すべき 上と同様に`<Witness> <ScriptCode>`を評価していっている？-->
     1. `<WitnessScript>`のハッシュ（SHA256）が`<32-byte-hash>`と同じ（True）かを確認する
     2. `True`なら`OP_0 <署名>`がスタックにプッシュされる
     3. `<WitnessScript>`を逆シリアル化して 2 のスタックにプッシュする
@@ -1461,17 +1502,13 @@ Locking ScriptであるならばそれはBitcoin Scriptで表現されるもの�
   - したがって、やってる操作の内容は P2SH と同じである
 
 # まとめ
+  - トランザクションは資金残高の移動を表現するデータである
+  - ブロックチェーンの改ざん耐性により，記録されたトランザクションの永続化を実現している
+  - Txは大きく分けて3種類
+    - 通常のトランザクション
+      - 送金トランザクションはここに含まれる
+    - Coinbaseトランザクション
+      - マイニング報酬の支払い
+    - Segwitトランザクション
+      - 送金Txであるが，サイズが圧縮されている
 
-- とても長くなってしまったが、最後に以下のことをしっかりと再確認してほしい
-
-  - ### トランザクションは資金残高を管理するデータである
-  - ### ブロックチェーンはそのデータを正確に記録するためのものである
-
-- これらを実現するために様々な技術や概念が利用された
-- そしてさらなる利便性のために、様々なトランザクションが生まれたのである
-
-- また今回紹介した技術的な内容は全体の、ほんの一部に過ぎない
-
-# Note for me
-
-- About ECDSA
