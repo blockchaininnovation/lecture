@@ -1316,7 +1316,7 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
   - しかしながら，**ブロックサイズの上限を変更しているわけではない**
 
     ```
-    ブロックサイズの上限自体を変更する（コードを書き換える）と後方互換性を保てないため、ハードフォークするしかない。
+    ブロックサイズの上限自体を変更すると後方互換性を保てないため、ハードフォークするしかない。
     しかしハードフォークは利用者にとっても開発者にとっても、望ましいことではない。
     そこでブロックサイズの上限は変えないが、実際にはデータが 1 MBを超えても互換性を保てる仕組みとして登場したのがSegWitである。
     そのため、従来のブロックサイズ上限 1 MBもサポートしている。
@@ -1370,8 +1370,10 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
 
 - SegWit は Unlocking Script を「Witness Data」に移動することで、この脆弱性に対応した
 
-  - それゆえ SegWit の Unlocking Script は空でないといけない
-  <!-- todo 同じWitnessで同じようにUnlockingSrcriptに意味のないスクリプトを埋め込めばtxid変えられるのでは？ -->
+  - それゆえ SegWit の Unlocking Script は基本的には空でないといけない
+
+    - BIP-16 プロトコルにネストされた時などはこれに限らない（詳細は[ここ](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#user-content-P2WPKH_nested_in_BIP16_P2SH)を参照のこと）
+    <!-- todo 同じWitnessで同じようにUnlockingSrcriptに意味のないスクリプトを埋め込めばtxid変えられるのでは？ -->
 
   - txid の作成において Witness Data は無視されるから
 
@@ -1396,7 +1398,7 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
     - ブロックサイズの上限は変わっていないため、 $0 < TotalDataSize \leqq 1MB$
 
   - $BlockWeight$ の単位は「Weight Unit（WU）」（上記式では MWU）と表現される．
-    - 単位は Byte，MegaByte と同じ（1 WU = 1 B, 1 MWU = 1 MB)
+    - 単位は Byte，MegaByte と同じ（1 WU = 1 B, 1 MWU = 1 MB）
   - また、 $0 < BlockWeight \leqq 4,000,000 WU$ である
 
 - **SegWit 対応ノードではブロックウェイトが、ブロックサイズに代わる１ブロックあたりの容量の制限となる**
@@ -1458,33 +1460,53 @@ $0 \leqq WitnessDataSize < 4$
 
   - 参考 (https://learnmeabitcoin.com/technical/general/compact-size/)
 
-- witness の構成例 `02 87<署名値 135byte> 34<公開鍵 52byte>`
+- witness の構成例（P2WPKH の場合） `02 47<署名値 71byte> 21<公開鍵 33byte>`
 
   - 前から順に var_int、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
-  <!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう．
-  https://en.bitcoin.it/wiki/BIP_0141
-  ここを見るとやはりscriptPubKeyと書いてあった．OP_RETURNなので処理されない領域．OP_RETURNに続いて，普通のLocking Scriptが書いてある？そうしないとマイニング報酬が受け取れない．コインベースからのvoutを２つ作って，そのうちの一つがこのコミットメントを表現している，ということかも．
-  コミットメントとあるが・・？
-  マークルツリーっていうことは，ブロック内のTxでwitnessがあるものを使ってマークルツリーを作っているっていうこと？
-  なんでそんなことしているんだろう．通常のTxのマークルルートだけではなぜ不十分なのか．
-  135バイトの署名値とは？BitcoinのECDSA署名は512bitだったはず．
-  このwitteness_dataが署名の代わりに使われ，実質1MB→4MBを実現しているコアの部分のはずなためもっと詳しく説明すべき．
+
+<!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう．
+https://en.bitcoin.it/wiki/BIP_0141
+ここを見るとやはりscriptPubKeyと書いてあった．OP_RETURNなので処理されない領域．OP_RETURNに続いて，普通のLocking Scriptが書いてある？そうしないとマイニング報酬が受け取れない．コインベースからのvoutを２つ作って，そのうちの一つがこのコミットメントを表現している，ということかも．
+
+=> RE: その解釈であっていると思います。実際 Bitcoin scan でトランザクションを確認した限りでは、コインベースからのアウトプットは最低二つはありました。マイナーへの送金アウトプットとコミットメントでした。
+
+コミットメントとあるが・・？　=> RE: コミットメントとあるが・・？ 何が言いたいのでしょうか？ハッシュツリーへのコミットメントという意味ではないのですか？
+
+マークルツリーっていうことは，ブロック内の Tx で witness があるものを使ってマークルツリーを作っているっていうこと？
+なんでそんなことしているんだろう．通常の Tx のマークルルートだけではなぜ不十分なのか．
+
+=> RE: 以下にあるように Witness はいったん Witness データだけでハッシュツリーを作成するようです。そのデータをコインベースのハッシュに組み込み、マークルルートを確認することで Witness データが改ざんされていないことを担保するのではないでしょうか。SegWit ではマークルツリーを作成する際に Witness は含めないそうです（txid を使用するため　https://learnmeabitcoin.com/technical/block/merkle-root/）。
+
+135 バイトの署名値とは？Bitcoin の ECDSA 署名は 512bit だったはず．
+この witteness_data が署名の代わりに使われ，実質 1MB→4MB を実現しているコアの部分のはずなためもっと詳しく説明すべき．
+
+=> RE: ここはSegWitのデータサイズのコアではありません。SegWitのコアはそもそものサイズの上限が変更されたことです。しかしその変更は後方互換性がある、というのがSegWitのすべてです。SegWitであってもトランザクションのデータは1MBしか含めることができません。しいて言えばUnlocking Scriptが占めていた容量を追加で使えるようになったくらいです。正直現在の説明からどういう内容を追加すれば理解できるようにできるか自分ではわからないです。Bitcoinのソースコードも、
+
+/** The maximum allowed size for a serialized block, in bytes (only for buffer size limits) */
+static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
+
+となっているところからも実質4MBをサポートしているのは何も不思議ではありません。
 
 公開鍵もなぜ 52byte？
 楕円曲線上の点なので 64byte じゃない？圧縮された公開鍵でも 33byte だが・・．
+
+=> RE: こちらのミスでした。修正しました。
 -->
 
-- Witness データは改ざん対策として、Witness データのルートハッシュを、Coinbase トランザクションの scriptPubKey (Locking Script, Coinbase Tx
-  では任意の値を入れられる)においている
+- Witness データは改ざん対策として、Witness データのルートハッシュを、Coinbase トランザクションの scriptPubKey (Locking Script, Coinbase Tx では任意の値を入れられる)においている
+
   - ルートハッシュの計算方法は Merkle tree と同じ
-  - scriptPubKey は`0x6a24aa21a9ed <Double-SHA256(witness root hash | witness reserved value)>`
+  - scriptPubKey は`0x6a24aa21a9ed <Double-SHA256(witness root hash | witness reserved value)>`　（witness root hash と witness reserved value のダブルハッシュ）
   - `witness reserved value`は容量確保のための予約語で、現在はコンセンサスの意味はない
   - なので 32 バイトの`0000 ... 0000`が設定されることが多いよう
-  <!-- TODO これ，意味としては式の中は「|」でビットのORを取っているということで実際は何も計算してなくてwitness root hashだけの値をダブルハッシュしているってこと？ -->
+
+  <!-- todo これ，意味としては式の中は「|」でビットのORを取っているということで実際は何も計算してなくてwitness root hashだけの値をダブルハッシュしているってこと？
+  => RE: witness root hash と witness reserved value のダブルハッシュです
+   -->
 
 ## トランザクション方式について
 
-- P2PKH、P2SH に対応するものとしてそれぞれ P2WPKH、P2WSH がある
+- P2PKH、P2SH の SegWit バージョンが、それぞれ P2WPKH、P2WSH である（使用用途はそれぞれ P2PKH、P2SH と同じ）
 - 署名の効率化を行う提案である「BIP-143」にて示されている
 - それぞれのトランザクションの種類は Locking Script で「何バイトのハッシュが使われるか」で判別される
 
@@ -1506,7 +1528,12 @@ $0 \leqq WitnessDataSize < 4$
     - `OP_PUSHBYTES_20`後続の 20 バイトをスタックにプッシュするという意味
     - ただ、`OP_PUSHBYTES_<数>`はオペコードとしては扱わない（そういうルール）
 
-<!-- TODO OP_PUSHBYTES_20が消えている解釈がわけわからん．普通にOPコードいれて14と対応している，ということではない？ -->
+<!-- todo OP_PUSHBYTES_20が消えている解釈がわけわからん．普通にOPコードいれて14と対応している，ということではない？
+
+=> RE: OP_0 OP_PUSHBYTES_20 <20-byte-key-hash> という構造なのですが、(https://en.bitcoin.it/wiki/Script) によると、
+「スクリプトについて話すとき、これらの価値を押し出す言葉は通常省略されます。」の欄に N/A 表記されており、Bitcoinのコードにも定数として用意されていないので asm形式の部分では排除しています。
+分かりにくければ追加します。
+ -->
 
 - Unlocking Script
 
@@ -1514,7 +1541,7 @@ $0 \leqq WitnessDataSize < 4$
 
 - Witness
 
-  ` 02 87<署名値 135byte> 34<公開鍵 52byte>`
+  `02 48<署名値 72byte> 21<公開鍵 33byte>`
 
 - つなぎあわせた以下の Script が True になれば OK
 
@@ -1529,26 +1556,36 @@ $0 \leqq WitnessDataSize < 4$
 - すなわち`ScriptCode`は P2PKH における Unlocking Script と同じである
 
 - したがって、`<Witness> <ScriptCode>`は P2PKH の`<Unlocking Script> <Locking Script>`と同じ操作である
-<!-- TODO 同じ操作ってなに？UnlockingSrcriptは空とあるが，ScriptPubKeyには何をいれる？
-P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは違うってこと？
-それをクライアントはどうやって検出する？
+
+<!-- todo 同じ操作ってなに？UnlockingSrcriptは空とあるが，ScriptPubKeyには何をいれる？　=> RE: 同じ検証方法に帰結するということです。Unlocking Scriptの中は記載していますが何が不明でしょうか？
+P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは違うってこと？ => RE: そうです。上記の通り <Witness> <ScriptCode> になります。Witness、ScriptCodeのそれぞれの中身を見てみると、
+ <Witness> <ScriptCode> という操作によって、すでに紹介した P2PKH と同じスクリプトが出来上がるという話です。
+
+それをクライアントはどうやって検出する？ => RE: #トランザクションの構造 で説明した任意のFlagによって判別します。## トランザクション方式について で説明したとおり、P2WPKHかP2WSHはLocking Scriptのサイズで判別します。
 -->
+
 - 全体の処理としては
 
   `<Witness> <ScriptCode>`
 
-  `02 87<署名値 135byte> 34<公開鍵 52byte> <OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG>`
+  `<02 48{署名値 72byte} 21{公開鍵 33byte}> <OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG>`
 
-  <!-- TODO これの実行をしてどうやって検証されるのか流れを示す必要あり -->
+  <!-- TODO これの実行をしてどうやって検証されるのか流れを示す必要あり　=> RE: 図を作って説明するということでいいですか？ -->
 
-<!-- TODO 何と何を比べればよい？というか全体で3バイトしか節約してなくて，ブロックサイズが1MBから実質4MBまで拡張できているのは納得感がない． -->
+<!-- todo 何と何を比べればよい？というか全体で3バイトしか節約してなくて，ブロックサイズが1MBから実質4MBまで拡張できているのは納得感がない．
+=> RE: 節約して拡張を目的としているわけではないです。逆にUnlocking Scriptが Witnessに移動した分おまけで広くなった程度の認識です。「署名データは最大でトランザクションデータのおよそ 65%ほどを占める」と書きましたが、そこから推しはかるに650,000バイトほど多く使えるようになっただけです。どんなに頑張っても4MBにはなりません。繰り返しますが、データは1MBしか入りません。
+ -->
 
-    - しかし比べてみると、Script Code を使うことで Locking Script より 3 バイト節約できている
+- しかし P2PKH と比べてみると、Script Code を使うことで Locking Script が 3 バイト節約できている
+
+  - P2PKH: `OP_DUP OP_HASH160 OP_PUSHBYTES_20 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG`
+  - P2WPKH: `OP_0 OP_PUSHBYTES_20 {20-byte-key-hash}`
+  - `OP_HASH160`、`OP_EQUALVERIFY`、`OP_CHECKSIG`がないだけ、3 バイト少ない
 
 ### Pay-to-witness-script-hash（P2WSH）
 
 - P2WSH は 32 バイトのハッシュを使用する
-<!-- TODO  P2WPKHと用途は何が違う？ -->
+<!-- todo  P2WPKHと用途は何が違う？ => P2SHのSegWitバージョンなのです。## トランザクション方式について でも言及していますがもう一度書いた方がいいですか？伝わってなさそうなので、## トランザクション方式について の説明を少し変えます -->
 - #### Unlocking / Locking Script / Witness のフォーマット
 
   - Locking Script
@@ -1570,7 +1607,9 @@ P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは�
     - なので`<WitnessScript>`は`M <公開鍵 1> ... <公開鍵 N> N OP_CHECKMULTISIG`のようになっている（マルチシグの場合）
 
   - 検証では以下の操作を行う
-    <!-- TODO Bitcoinスクリプトですべての処理を記述すべき 上と同様に`<Witness> <ScriptCode>`を評価していっている？-->
+    <!-- TODO Bitcoinスクリプトですべての処理を記述すべき 上と同様に`<Witness> <ScriptCode>`を評価していっている？　
+    => RE: 三段階に分かれているため、P2WPKHとも少し違います。ですが、P2WPKHと同じく、ある段階まで操作が進むとP2SHの処理に帰結します。これも図にしたほうが良いですか？「Bitcoinスクリプトですべての処理を記述すべき」とありますが、WitnessはそもそもBitcoinスクリプトではないので、スクリプトを並べて順に読んでいけば検証完了にたどり着くわけでもありません。それでも <Witness> <Locking Script> をつなげて表記したほうが良いですか？
+    -->
 
         1. `<WitnessScript>`のハッシュ（SHA256）が`<32-byte-hash>`と同じ（True）かを確認する
         2. `True`なら`OP_0 <署名>`がスタックにプッシュされる
