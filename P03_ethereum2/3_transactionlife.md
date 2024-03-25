@@ -70,19 +70,19 @@ EOAは、トランザクション(Message Call or Contract Creation)を各ノー
 
 - Ethereumは2022年8月にブロック作成要件をPoWからPoSへ移行した
   - ``なぜ？: スケーラビリティ問題に対応するため``
-  - よってここからBitcoinと仕様が大きく変わり始める！
+  - よってここからBitcoin Protocolと仕様が大きく変わり始める！
 - EthereumのPoSは、おおまかには以下の仕組みでブロック作成者を決定する
   - **full (またはarchive) nodeは、自身が管理するEOAからdeposit contractと呼ばれるCAに32ETH以上を預ける (stakeする) ことでバリデータノードになることが出来る**
   - **将来のブロック作成者はバリデータノードの中から定期的に選択される**
   - **このとき以前のブロックに投票するバリデータノードたちも選択される**
   - **上記の選択は確率的だが、各バリデータノードのstake量で重み付けされている**
-- つまりBitcoinのPoWのように、各ノードが採掘作業を重複して行う必要がない
+- つまりBitcoin ProtocolのPoWのように、各ノードが採掘作業を重複して行う必要がない
   - エコ？効率的？
 
 *"PoW vs PoS" はブロックチェーンにおいて最も伝統的な論点の1つであり、現在も様々な観点 (e.g., どちらが公正なのか？ どちらが効率的なのか？ どちらが分散的なのか？ どちらが環境に優しいのか？) で研究・分析が行われています
 
 <!--
-詳しくは後述しますが、スケーラビリティ問題に対応するため、Ethereumは2022年8月にブロック作成要件をPoWからPoSへ移行しました.これによって、Bitcoinと仕様が大きく異なり始めます。
+詳しくは後述しますが、スケーラビリティ問題に対応するため、Ethereumは2022年8月にブロック作成要件をPoWからPoSへ移行しました.これによって、Bitcoin Protocolと仕様が大きく異なり始めます。
 
 EthereumのPoSは、おおまかには次の仕組みでブロック作成者を決定します。
 
@@ -100,7 +100,7 @@ EthereumのPoSは、おおまかには次の仕組みでブロック作成者を
 EOAは32ETHをdeposit contractに預けることで、アカウント用の鍵とは別にValidator Signing KeyとWithdrawal Keyの2種類 (それぞれ秘密・公開鍵から成る) が得られます。
 
 <center>
-<img src="./img/validator.drawio.svg" width="100%">
+<img src="./img/validator.drawio.svg" width="70%">
 </center>
 
 この様にValidator用の鍵を別途用意するのは、次の3つの理由によります。
@@ -115,7 +115,7 @@ EOAは32ETHをdeposit contractに預けることで、アカウント用の鍵�
 バリデータ用の鍵を別途作ることにより、次のような運用が可能になります。
 
 1. 自身が管理するバリデータ鍵をノードに渡すことで、Stakingを委任出来る。この場合、自身でノードを建てずともStakingが行える (Staking as a Service; SaaS)
-2. また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoinにおけるマイニングプールのように少額のETHを集約して共用のバリデータ (Staking Pool)を運用することが可能です。
+2. また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のETHを集約して共用のバリデータ (Staking Pool)を運用することが可能です。
 
 Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞれの特徴を以下にまとめます。
   
@@ -128,7 +128,7 @@ Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞ�
 
 ### ランダムな選択
 
-Ethereumのブロックチェーンは、12秒をslot、32slot (6.4分) をepochと呼び、slot, epoch単位でブロックの提案や合意形成、報酬などを管理しています。Bitcoinではslotは (block intervalとして) 約10分になるように設計されていました。Bitcoinにおけるdifficultyの概念はEthereumには存在しません。
+Ethereumのブロックチェーンは、12秒をslot、32slot (6.4分) をepochと呼び、slot, epoch単位でブロックの提案や合意形成、報酬などを管理しています。Bitcoin Protocolではslotは (block intervalとして) 約10分になるように設計されていました。Bitcoin Protocolにおけるdifficultyの概念はEthereumには存在しません。
 
 <center>
 <img src="./img/slot.drawio.svg" width="90%">
@@ -204,7 +204,7 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 
 ## 提案ノードは、ブロック内のトランザクションを実行する
 
-- Bitcoinと同様、親のブロックヘッダのハッシュを自身のブロックヘッダに格納することでチェーンを形成する 
+- Bitcoin Protocolと同様、親のブロックヘッダのハッシュを自身のブロックヘッダに格納することでチェーンを形成する 
 - ただしThe Mergeを経て...
   - 参照する要素が2種類 (新ブロックヘッダ, execution payload header) に増えた
   - 冗長なので将来的には1つにまとまるかも...
@@ -269,12 +269,12 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 
 ### 報酬メカニズム
 - ブロック提案者とブロック投票者に対してetherが報酬として新規発行される
-  - Bitcoinには投票がないためブロック提案者 (マイニングノード) のみが対象でした
+  - Bitcoin Protocolには投票がないためブロック提案者 (マイニングノード) のみが対象でした
 - 報酬 (および罰則) は、epochごとに計算・反映される
 - 報酬額はバリデータ毎に異なるbase rewardを基本に計算される
   - base reward = 上限を32ETHとした自分のstake量 / (16*sqrt(総stake量))
   - つまり...自分のstake量が減ると後々貰える報酬は減る＆総stake量が増えても減る
-  - Bitcoinの半減期的なイメージ
+  - Bitcoin Protocolの半減期的なイメージ
 - base rewardを64として、各行為に対して以下の重み付けで報酬が発生する:
 
 | 重み | 行為 | 備考 |
