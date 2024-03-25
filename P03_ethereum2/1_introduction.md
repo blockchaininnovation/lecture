@@ -27,7 +27,7 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 
 基本的なコンセプトはそれまでのEthereumと同様である
 
-- [端的に言えばBitcoinの一般化である](../P02_ethereum/1_introduction.md#端的に言えばbitcoinの一般化である)
+- [端的に言えばBitcoin Protocolの一般化である](../P02_ethereum/1_introduction.md#端的に言えばbitcoin-protocolの一般化である)
 - [この一般化を計算機科学の文脈で捉えると...](../P02_ethereum/1_introduction.md#この一般化を計算機科学の文脈で捉えると)
 - [この一般化によって様々なアプリケーション開発が可能となる](../P02_ethereum/1_introduction.md#この一般化によって様々なアプリケーション開発が可能となる)
  
