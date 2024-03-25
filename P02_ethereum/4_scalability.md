@@ -23,6 +23,13 @@
   - いわゆるプレマイン (pre-mine) 方式
 - この初期配布方法が「etherは証券」「etherはbitcoinよりも集権的」といった指摘に繋がっている
 
+<center>
+<img src="./img/foundation.png" width="70%"> 
+
+**Ethereum Foundation**
+</center>
+
+*Source: https://ethereum.org/en/
 
 ## Ethereum自体の仕様をどのように変更するのか？
 - Ethereumの仕様変更は、Bitcoin Protocolと同様、**EIP (Ethereum Improvement Proposal)** に基づく
