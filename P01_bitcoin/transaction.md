@@ -682,9 +682,9 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
   - vout では Bitcoin Script になっている（[後述](#bitcoin-script)）
 
   - 「hex」は「asm」の 16 進数表現
+
     <!-- todo asmデータってアセンブリ形式で表現されているデータではなかったの？以下のデータは上記のJSON中でどこに記載されている？もし省略しているのであれば，以下のデータがどこに表現されているかわかるように省略すべきではない
     => RE: 省略したデータに関しては修正しました。「asmデータってアセンブリ形式で表現されているデータではなかったの？」についてはよく理解できなかったので、「asm」の説明を詳細にしました。これらはデバッグに使用するための値なので＊を付しておきます
-
      -->
 
   - 今回は P2PKH のアンロッキングスクリプトが表現されているが、トランザクションの種類によって対応する Unlocking Script が表現されることに注意
@@ -1031,8 +1031,55 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
     `<Unlocking Script> <Locking Script>`
     `<送金先アドレスに対応する署名> <送金先アドレスの公開鍵> OP_DUP OP_HASH160 <送金先アドレスの公開鍵ハッシュ> OP_EQUALVERIFY OP_CHECKSIG`
 
-  - やっていることは次の２つ - インプットにある公開鍵がアウトプットのものと同じかどうかがチェック - その公開鍵で署名の検証が可能か、すなわち秘密鍵をもっているかをチェック
-  <!-- todo 署名の対象としているMSGは何なのか要確認．=> RE: 簡単に言うと、一時的な公開鍵Rのx座標とある式であらわされる値が一致することを確認するのですが、それを記そうとするとECDSAをカバーしないといけません-->
+  - やっていることは次の２つ
+
+    - インプットにある公開鍵がアウトプットのものと同じかどうかがチェック
+    - その公開鍵で署名の検証が可能か、すなわち秘密鍵をもっているかをチェック
+
+  - #### 署名対象のメッセージについて
+
+    - 署名対象のメッセージは非 SegWit トランザクションと SegWit トランザクションで変わる
+
+      - ここでは非 SegWit トランザクションの署名対象について紹介する
+      - SegWit トランザクションの署名対象が知りたい人は[ここ](https://learnmeabitcoin.com/technical/keys/signature/#segwit-algorithm)を参照のこと
+
+    - 署名対象一覧は以下の通り
+
+      - nVersion
+      - vin
+        - txid
+        - vout
+        - scriptSigSize
+        - scriptSig
+          -nSequence
+      - vout
+        - value
+        - scriptPubKeySize
+        - scriptPubKey
+      - locktime
+      - sighash
+
+  ```
+  sighash について
+
+  「scriptSig（Unlocking Script）について」のセクションでもすでに出てきていた sighash だが、以下のような種類がある
+
+    1. SIGHASH_ALL
+    2. SIGHASH_NONE
+    3. SIGHASH_SINGLE
+
+  sighash は組み合わせることができるのでこれら以外にも種類が多くあるのだが、気になった人はリンクを参照のこと。（https://wiki.bitcoinsv.io/index.php/SIGHASH_flags）
+
+  これらは、トランザクションのどの部分に署名をするか（他人が書き換えられないようにするか）を指定するためのフラグである。
+  基本的には（デフォルトでは）、トランザクションに関するすべてに署名する、 1. SIGHASH_ALL を使用して署名される。
+  （しかし、トランザクション作成時に自己参照に陥るため、 Unlocking Script までを署名に含めることはできない。これはどの sighashも同じ。）
+
+  2 はすべての vin に署名するが、vout は署名しない。3 はすべての vin と、署名される入力と同じインデックスを共有する出力に署名する。
+
+  sighash を使用することで、例えば、vin を書き換え可能にしておきBitcoinを募るといった、クラウドファンディングのようなことができるそう。
+  ```
+
+  <!-- todo 署名の対象としているMSGは何なのか要確認．-->
 
 ## Pay-to-Public-Key
 
@@ -1313,21 +1360,18 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
 - SegWit は 2017 年にソフトフォークとして実装された
 
   - ブロックに入れられる容量を増やすために実施された
-  - しかしながら，**ブロックサイズの上限を変更しているわけではない**
+  - しかしながら，**ブロックサイズの上限を変更しているわけではない** （互換性を保っているという意味）
 
     ```
-    ブロックサイズの上限自体を変更すると後方互換性を保てないため、ハードフォークするしかない。
-    しかしハードフォークは利用者にとっても開発者にとっても、望ましいことではない。
-    そこでブロックサイズの上限は変えないが、実際にはデータが 1 MBを超えても互換性を保てる仕組みとして登場したのがSegWitである。
-    そのため、従来のブロックサイズ上限 1 MBもサポートしている。
-    どのような形で互換性を保っているのかに注目すると、SegWitのイメージがつかめるだろう。
+    公式にはソフトフォークの扱いではあるが、実際にはSegWit導入に伴ってBitcoinのコードが既存のものから書き換えられた。
+    それによってブロックサイズ4MBが実現されている。従来のトランザクションのプロトコル（1MBのブロックサイズ）も
+    サポートしているとあるのものの、SegWitが導入されたノードにおいては実質的なブロックサイズは4MBである。
+    SegWit導入によるマイナーへの負担（検証の負担）は以前とさほど変わらないため、ソフトフォークの扱いになっていると思われる。
     ```
 
-  - ちなみにハードフォークである「SegWit2x」も存在する（ブロックのサイズが 2MB に変更）
+  - コードの変更履歴は[ここ](https://github.com/bitcoin/bitcoin/commit/3babbcb48786372d4b22171674c4cc5a6220c294#diff-74d3d558e2ae1b1c967ea13d01ce15875cc7de50c93c26db73ccb3e4db5cfdacL15)を参照
 
-- SegWit に対応していないノードでは Witness Data が無視される
-  - 検証に通らない（署名がない）ため、トランザクションは失敗する（ UTXO を解除できない）
-  <!-- todo Segwit付きのTxは検証に失敗して伝搬されないという意味か，それともWitnessに対応したLockingScriptが解除できない（ P2WPKH、P2WSHを解除できない）ということなのか-->
+- SegWit によってブロックサイズの上限は**実質的に 4MB になった**
 
 ## SegWit の導入理由について
 
@@ -1417,8 +1461,6 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
 
 - $0 < BlockWeight \leqq 4,000,000WU$であり，Segwit Tx の場合は $0 < nonWitnessDataSize$ 、 $0 \leqq WitnessDataSize$ である
 
-  - $0 = WitnessDataSize$ になることはほぼない
-
 - $0 < nonWitnessDataSize < 1$ なので
 
 $4 \geqq  BlockWeight  = nonWitnessDataSize*4 + WitnessDataSize >  WitnessDataSize$
@@ -1443,26 +1485,34 @@ $0 \leqq WitnessDataSize < 4$
 
 - 比較すると以下のようになる
 
-  - 非 SegWit（従来）　 `[nVersion] [vin] [vout] [nLockTime]`
-  - SegWit 　　　　　　 `[nVersion] [marker] [flag] [vin] [vout] [witness] [nLockTime]`
+  - 従来のトランザクション構造
+
+  ![レガシートランザクションのデータ構造](./img/transaction-structure-detail.drawio.svg)
+
+  - SegWit トランザクションの構造
+
+  ![レガシートランザクションのデータ構造](./img/SegWit-transaction-structure-detail.drawio.svg)
+
+  - 赤の部分が SegWit で追加された部分、破線がなくなった部分
 
 - このように、署名データは ScriptSig から分離され、nLockTime の直前に witness として配置される
-- また witness は署名データであるが、ScriptSig のようなスクリプトではないことに注意
+- また witness は署名データであるが、ScriptSig のような Bitcoin Script ではないことに注意
 
 - `witness`のデータ構造は以下のようになっている
 
   | 名称         | 説明                                      | 役割                                    |
   | ------------ | ----------------------------------------- | --------------------------------------- |
-  | var_int      | トランザクションの vin の長さを表すバイト | vin と witness フィールドとを関連付ける |
-  | witness_data | サイズと署名値で構成されるデータ          | 署名データを保持する                    |
+  | item_counter | トランザクションの vin の長さを表すバイト | vin と witness フィールドとを関連付ける |
+  | size         | 後続のデータのサイズを表す                | 署名検証に必要な情報を提供する          |
+  | witness_data | 署名値や公開鍵で構成されるデータ          | 署名データを保持する                    |
 
-- var_int と witness_data でサイズを示すのに使われる数字は、「Compact size」と呼ばれるフォーマットである
+- item_counter と size に使われる数字は、「Compact size」と呼ばれるフォーマットである
 
   - 参考 (https://learnmeabitcoin.com/technical/general/compact-size/)
 
-- witness の構成例（P2WPKH の場合） `02 47<署名値 71byte> 21<公開鍵 33byte>`
+- witness の構成例（P2WPKH の場合） `02 47 <署名値 71byte> 21 <公開鍵 33byte>`
 
-  - 前から順に var_int、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
+  - 前から順に item_counter、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
 
 <!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう．
 https://en.bitcoin.it/wiki/BIP_0141
@@ -1506,34 +1556,49 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 
 ## トランザクション方式について
 
-- P2PKH、P2SH の SegWit バージョンが、それぞれ P2WPKH、P2WSH である（使用用途はそれぞれ P2PKH、P2SH と同じ）
 - 署名の効率化を行う提案である「BIP-143」にて示されている
 - それぞれのトランザクションの種類は Locking Script で「何バイトのハッシュが使われるか」で判別される
+- 移行の例では P2SH によってネストされていないものを提示する
+
+  - ネストされた場合のコードがどうなるかは[BIP-141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)を参照のこと
 
 ### Pay-to-witness-public-key-hash （P2WPKH）
 
+- [P2PKH](#pay-to-public-key-hash-p2pkh) の SegWit バージョンが P2WPKH である
 - P2WPKH は 20 バイトのハッシュを使用する
 
 - #### Unlocking / Locking Script / Witness のフォーマット
 
-  LokingScript を対応する Vin における UnlockingSrcript で解除する，というのではなく代わりに Tx 内のフィールドに規定されている Witness で解除するように変わった．
+  - Locking Script を対応する Vin における Unlocking Script で解除する，というのではなく代わりに Tx 内のフィールドに規定されている Witness で解除するように変わった．
+  - また、Locking Script は ScriptCode と呼ばれるものに変換されて使用されるようになる（ScriptCode については少し下に記載している）
 
   - Locking Script
 
-    `OP_0 <20-byte-key-hash>`
+    `OP_0 14 <20-byte-key-hash>`
 
     - `<20-byte-key-hash>`は受け取り側の公開鍵を HASH160 関数に通した値
+
     - 先頭の文字が`0014`になる
     - `00`が`OP_0`、`14`が`OP_PUSHBYTES_20`
-    - `OP_PUSHBYTES_20`後続の 20 バイトをスタックにプッシュするという意味
-    - ただ、`OP_PUSHBYTES_<数>`はオペコードとしては扱わない（そういうルール）
+
+    - `00`は「バージョンバイト」と呼ばれ、この ScriptPubKey が P2WPKH または P2WSH になることを示す
+    - `48`は後続の 20 バイト（key-hash）をスタックにプッシュするという意味 (OP_PUSHBYTES_20)
+
+    - ただ、`OP_PUSHBYTES_<数>`はオペコードとしては扱わない
+
+    ```
+    OP_PUSHBYTES_<数> はBitcoinのコードに定数として用意されているオペコードではないため、表記されないことが多い。
+    この文書では、OP_PUSHBYTES_<数> という形ではなく https://en.bitcoin.it/wiki/Script に表記されているような
+    対応する16進数を一応表記しておく。したがって、以降の文章で出てくる 1 バイトの、 0x01 - 0x4b の間の数は無視して構わない。
+    どれも後続の何バイトかをスタックにプッシュするという意味である。
+    ```
 
 <!-- todo OP_PUSHBYTES_20が消えている解釈がわけわからん．普通にOPコードいれて14と対応している，ということではない？
 
 => RE: OP_0 OP_PUSHBYTES_20 <20-byte-key-hash> という構造なのですが、(https://en.bitcoin.it/wiki/Script) によると、
 「スクリプトについて話すとき、これらの価値を押し出す言葉は通常省略されます。」の欄に N/A 表記されており、Bitcoinのコードにも定数として用意されていないので asm形式の部分では排除しています。
 分かりにくければ追加します。
- -->
+-->
 
 - Unlocking Script
 
@@ -1541,17 +1606,22 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 
 - Witness
 
-  `02 48<署名値 72byte> 21<公開鍵 33byte>`
+  `48 <署名値 72byte> 21 <公開鍵 33byte>`
+
+  - `48`は後続の 72 バイト（署名値）をスタックにプッシュするという意味 (OP_PUSHBYTES_72)
+  - `21`は後続の 33 バイト（公開鍵）をスタックにプッシュするという意味 (OP_PUSHBYTES_33)
 
 - つなぎあわせた以下の Script が True になれば OK
 
   `<Witness> <ScriptCode>`
 
-  - `ScriptCode`は`0x1976a914 {20-byte-key-hash} 88ac`で作成されるもの
-  - `19`は後続の 25 バイト（`76a9 ... 88ac`のこと）をスタックにプッシュするという意味 (OP_PUSHBYTES_20)
-  - `76a914`、`88ac`はそれぞれ P2PKH で出てきた`OP_DUP OP_HASH160`、`OP_EQUALVERIFY OP_CHECKSIG`のことである
+  - `ScriptCode`は Locking Script から情報を抽出し、Locking Script の代わりに使用される
+
+  - `ScriptCode`は`0x1976a914 {20-byte-key-hash} 88ac`のフォーマットで作成される
+  - `19`は後続の 25 バイト（`76a9 ... 88ac`のこと）をスタックにプッシュするという意味 (OP_PUSHBYTES_25)
+  - `76a914`、`88ac`はそれぞれ P2PKH で出てきた`OP_DUP OP_HASH160 OP_PUSHBYTES_20`、`OP_EQUALVERIFY OP_CHECKSIG`のことである
   - つまり`<ScriptCode>`は，
-    `OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG`のこと．
+    `OP_PUSHBYTES_25 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG`のこと．
 
 - すなわち`ScriptCode`は P2PKH における Unlocking Script と同じである
 
@@ -1568,13 +1638,17 @@ P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは�
 
   `<Witness> <ScriptCode>`
 
-  `<02 48{署名値 72byte} 21{公開鍵 33byte}> <OP_PUSHBYTES_20 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG>`
+  `<48 {署名値 72byte} 21 {公開鍵 33byte}> <19 OP_DUP OP_HASH160 14 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG>`
 
-  <!-- TODO これの実行をしてどうやって検証されるのか流れを示す必要あり　=> RE: 図を作って説明するということでいいですか？ -->
+- 以下に処理の流れを記しておく
+
+  ![P2WPKHの処理の流れ](./img/process_p2wpkh.drawio.svg)
+
+<!-- TODO これの実行をしてどうやって検証されるのか流れを示す必要あり　=> RE: 図を作って説明するということでいいですか？ -->
 
 <!-- todo 何と何を比べればよい？というか全体で3バイトしか節約してなくて，ブロックサイズが1MBから実質4MBまで拡張できているのは納得感がない．
 => RE: 節約して拡張を目的としているわけではないです。逆にUnlocking Scriptが Witnessに移動した分おまけで広くなった程度の認識です。「署名データは最大でトランザクションデータのおよそ 65%ほどを占める」と書きましたが、そこから推しはかるに650,000バイトほど多く使えるようになっただけです。どんなに頑張っても4MBにはなりません。繰り返しますが、データは1MBしか入りません。
- -->
+-->
 
 - しかし P2PKH と比べてみると、Script Code を使うことで Locking Script が 3 バイト節約できている
 
@@ -1584,6 +1658,7 @@ P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは�
 
 ### Pay-to-witness-script-hash（P2WSH）
 
+- [P2SH](#pay-to-script-hash-p2sh) の SegWit バージョンが P2WSH である
 - P2WSH は 32 バイトのハッシュを使用する
 <!-- todo  P2WPKHと用途は何が違う？ => P2SHのSegWitバージョンなのです。## トランザクション方式について でも言及していますがもう一度書いた方がいいですか？伝わってなさそうなので、## トランザクション方式について の説明を少し変えます -->
 - #### Unlocking / Locking Script / Witness のフォーマット
@@ -1611,12 +1686,16 @@ P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは�
     => RE: 三段階に分かれているため、P2WPKHとも少し違います。ですが、P2WPKHと同じく、ある段階まで操作が進むとP2SHの処理に帰結します。これも図にしたほうが良いですか？「Bitcoinスクリプトですべての処理を記述すべき」とありますが、WitnessはそもそもBitcoinスクリプトではないので、スクリプトを並べて順に読んでいけば検証完了にたどり着くわけでもありません。それでも <Witness> <Locking Script> をつなげて表記したほうが良いですか？
     -->
 
-        1. `<WitnessScript>`のハッシュ（SHA256）が`<32-byte-hash>`と同じ（True）かを確認する
-        2. `True`なら`OP_0 <署名>`がスタックにプッシュされる
-        3. `<WitnessScript>`を逆シリアル化して 2 のスタックにプッシュする
-        4. 3.の Script が True になれば OK
+    1. `<WitnessScript>`のハッシュ（SHA256）が`<32-byte-hash>`と同じ（True）かを確認する
+    2. `True`なら`OP_0 <署名>`がスタックにプッシュされる
+    3. `<WitnessScript>`を逆シリアル化して 2 のスタックにプッシュする
+    4. 3.の Script が True になれば OK
 
   - したがって、やってる操作の内容は P2SH と同じである
+
+  - 以下に P2WSH での 2 of 3 のマルチシグを使用する場合の、処理プロセスの例を挙げる
+
+    ![P2WSHの処理の流れ](./img/process_p2wsh.drawio.svg)
 
 # まとめ
 
