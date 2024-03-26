@@ -29,7 +29,7 @@
 **Ethereum Foundation**
 </center>
 
-*Source: https://ethereum.org/en/
+> Source: https://ethereum.org/en/
 
 ## Ethereum自体の仕様をどのように変更するのか？
 - Ethereumの仕様変更は、Bitcoin Protocolと同様、**EIP (Ethereum Improvement Proposal)** に基づく
@@ -39,7 +39,7 @@
 <img src="./img/eip1.png" width="40%"> <img src="./img/eip2.png" width="45%">
 </center>
 
-*Source: https://github.com/ethereum/execution-specs/tree/master/network-upgrades#getting-the-considered-for-inclusion-cfi-status
+*> Source: https://github.com/ethereum/execution-specs/tree/master/network-upgrades#getting-the-considered-for-inclusion-cfi-status
 
 - とはいえ新たな仕様は各ノードがそれぞれの意志で反映させることになる
 - コンセンサスがどうしても取れない場合、**最終的にブロックチェーンは分岐し、どちらが正統かは市場の判断に委ねられる**
@@ -136,7 +136,7 @@ Bitcoin Protocolと比較して根本的な仕様変更が積極的に議論・�
 <center>
 <img src="../P03_ethereum2/img/the-merge.png" width="50%">
 
-source: https://ethereum.org/en/roadmap/merge/
+> Source: https://ethereum.org/en/roadmap/merge/
 </center>
 
 しかし10%程度にとどまらず、Ethreumはここからさらなる大幅アップデートを繰り返すことで 100,000 TPS (！) を目指している

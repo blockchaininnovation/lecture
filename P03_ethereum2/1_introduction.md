@@ -43,7 +43,7 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 <center>
 <img src="./img/the-merge.png" width="50%">
 
-source: https://ethereum.org/en/roadmap/merge/
+> Source: https://ethereum.org/en/roadmap/merge/
 </center>
 
 
