@@ -4,7 +4,7 @@
 
 # 各構成要素が保持するデータ
 
-各構成要素が保持するデータは、それまでのEthereumと同様である
+各構成要素が保持するデータは、以前のEthereumと同様である
 
 - [EOA (Externally Owned Account)](../P02_ethereum/2_components.md#eoa-externally-owned-account)
 - [CA (Contract Account)](../P02_ethereum/2_components.md#ca-contract-account)
@@ -17,5 +17,5 @@
 
 
 # まとめ
-- 各構成要素が保持するデータは、それまでのEthereumと同様である
-- こうしたEthereumの構成要素がどのようなプロセスで動くのか？というブロックチェーンの議論を、トランザクションのライフサイクルを軸に確認していく。
+- 各構成要素が保持するデータは、以前のEthereumと同様である
+- しかしこれらの構成要素がどう連動するかについて説明する次の資料からは、内容が大きく異なりはじめる
