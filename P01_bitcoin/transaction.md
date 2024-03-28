@@ -1360,18 +1360,20 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
 - SegWit は 2017 年にソフトフォークとして実装された
 
   - ブロックに入れられる容量を増やすために実施された
-  - しかしながら，**ブロックサイズの上限を変更しているわけではない** （互換性を保っているという意味）
+  - SegWit によってブロックに入れられるデータ量の上限は**4MB になった**
 
-    ```
-    公式にはソフトフォークの扱いではあるが、実際にはSegWit導入に伴ってBitcoinのコードが既存のものから書き換えられた。
-    それによってブロックサイズ4MBが実現されている。従来のトランザクションのプロトコル（1MBのブロックサイズ）も
-    サポートしているとあるのものの、SegWitが導入されたノードにおいては実質的なブロックサイズは4MBである。
-    SegWit導入によるマイナーへの負担（検証の負担）は以前とさほど変わらないため、ソフトフォークの扱いになっていると思われる。
-    ```
+- しかし、SegWit を導入していないノードでも、計算上ブロックサイズが 1MB に収まるようになっている
+
+  - SegWit でも、マイニングするためのハッシュ計算対象の情報は従来と変わらない
+  - それはマイニングのコストが変わらないようにするため
+
+  ```
+  実際にはSegWit導入に伴ってBitcoinのコードが既存のものから書き換えられた。（ブロックサイズ上限の定数など）
+  「ソフトフォーク」は、Backward-compatible（後方互換）である変更であり、ハードフォークはそうではない変更である。
+  従来のTxも新しいプロトコル（SegWit）で有効であるので、この変更はソフトフォークであるといえる。
+  ```
 
   - コードの変更履歴は[ここ](https://github.com/bitcoin/bitcoin/commit/3babbcb48786372d4b22171674c4cc5a6220c294#diff-74d3d558e2ae1b1c967ea13d01ce15875cc7de50c93c26db73ccb3e4db5cfdacL15)を参照
-
-- SegWit によってブロックサイズの上限は**実質的に 4MB になった**
 
 ## SegWit の導入理由について
 
@@ -1388,9 +1390,9 @@ size は Tx 中のフィールドとして存在する？測ればよいだけ�
 - 前述したように、Bitcoin のブロックサイズは１ MB という制約がある
 
   - 署名データは最大でトランザクションデータのおよそ 65%ほどを占める
-  - そこで Unlocking Script のデータを「Witness Data」に移すことによって、実質的なトランザクションデータの拡張を実現している
+  - そこで Unlocking Script のデータを「Witness Data」に移すことによって、トランザクションデータの拡張を実現している
 
-- これによって得た実質的な上限は４ MB である
+- これによって得た上限は４ MB である
 
 - 1 つのブロックにより多くのトランザクションを含めることができるようになった
 
@@ -1496,7 +1498,16 @@ $0 \leqq WitnessDataSize < 4$
   - 赤の部分が SegWit で追加された部分、破線がなくなった部分
 
 - このように、署名データは ScriptSig から分離され、nLockTime の直前に witness として配置される
+
 - また witness は署名データであるが、ScriptSig のような Bitcoin Script ではないことに注意
+
+  - witness には Bitcoin Script によって処理される情報が入っている
+  - したがって P2WSH、P2WPKH ではそれぞれで期待されるデータが違う
+
+- Ordinals というプロトコルは Witness 領域に独自のデータを埋め込んで実現している
+
+  - Ordinals については[ここ](https://academy.binance.com/ja/articles/what-are-ordinals-an-overview-of-bitcoin-nfts)を参照のこと
+  - 簡単に言うと、Ordinals は Bitcoin に写真やビデオ、オーディオなどの追加価値を持たせることができるようになるプロトコルである
 
 - `witness`のデータ構造は以下のようになっている
 
@@ -1512,7 +1523,9 @@ $0 \leqq WitnessDataSize < 4$
 
 - witness の構成例（P2WPKH の場合） `02 47 <署名値 71byte> 21 <公開鍵 33byte>`
 
-  - 前から順に item_counter、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
+  - これは witness データそのものである
+  - 前から順に item_counter、 size、witness_data、size、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
+  - このように item_counter は witness の先頭にだけ存在する
 
 <!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう．
 https://en.bitcoin.it/wiki/BIP_0141
@@ -1557,10 +1570,12 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 ## トランザクション方式について
 
 - 署名の効率化を行う提案である「BIP-143」にて示されている
+- Segwit で追加された Tx の種類は 2 種類で、 P2WPKH、P2WSH である
 - それぞれのトランザクションの種類は Locking Script で「何バイトのハッシュが使われるか」で判別される
-- 移行の例では P2SH によってネストされていないものを提示する
+- 以降の例では P2SH によってラップされていないものを提示する
 
-  - ネストされた場合のコードがどうなるかは[BIP-141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)を参照のこと
+  - P2WPKH、P2WSH はそれぞれ P2SH でラップできるが、その場合では以下に挙げる例とは少し構成が変化する
+  - ラップされた場合のコードがどうなるかは[BIP-141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)を参照のこと
 
 ### Pay-to-witness-public-key-hash （P2WPKH）
 
@@ -1581,7 +1596,7 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
     - 先頭の文字が`0014`になる
     - `00`が`OP_0`、`14`が`OP_PUSHBYTES_20`
 
-    - `00`は「バージョンバイト」と呼ばれ、この ScriptPubKey が P2WPKH または P2WSH になることを示す
+    - `00`は「バージョンバイト」と呼ばれ、この ScriptPubKey が P2WPKH または P2WSH であることを示す
     - `48`は後続の 20 バイト（key-hash）をスタックにプッシュするという意味 (OP_PUSHBYTES_20)
 
     - ただ、`OP_PUSHBYTES_<数>`はオペコードとしては扱わない
@@ -1603,6 +1618,8 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 - Unlocking Script
 
   - 空である
+  - 従来の、Locking Script を解除するための Unlocking Script という対応ではなくなっている
+  - 代わりに Witness が使用される
 
 - Witness
 
@@ -1623,7 +1640,7 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
   - つまり`<ScriptCode>`は，
     `OP_PUSHBYTES_25 OP_DUP OP_HASH160 {20-byte-key-hash} OP_EQUALVERIFY OP_CHECKSIG`のこと．
 
-- すなわち`ScriptCode`は P2PKH における Unlocking Script と同じである
+- すなわち`ScriptCode`は P2PKH における Locking Script と同じである
 
 - したがって、`<Witness> <ScriptCode>`は P2PKH の`<Unlocking Script> <Locking Script>`と同じ操作である
 
@@ -1660,6 +1677,7 @@ P2WPKHのときは式の評価方法が<UnlockingSrcript><LockingScript>とは�
 
 - [P2SH](#pay-to-script-hash-p2sh) の SegWit バージョンが P2WSH である
 - P2WSH は 32 バイトのハッシュを使用する
+- また、P2SH で Redeem Script と呼ばれていたものは Witness Script と呼ばれる
 <!-- todo  P2WPKHと用途は何が違う？ => P2SHのSegWitバージョンなのです。## トランザクション方式について でも言及していますがもう一度書いた方がいいですか？伝わってなさそうなので、## トランザクション方式について の説明を少し変えます -->
 - #### Unlocking / Locking Script / Witness のフォーマット
 
