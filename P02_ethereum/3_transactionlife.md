@@ -51,7 +51,7 @@ Ethereumは、最も重いチェーンを「正しい」状態遷移の記録と
 
 ### Ethereumネットワークのノードについて
 Ethereumネットワークのノードは、full node, light node, archive nodeの3種類に大別される
-- Bitcoinは、full node, SPV (軽量) nodeの2種類に大別される
+- Bitcoin Protocolは、full node, SPV (軽量) nodeの2種類に大別される
 - ただしarchive nodeをfull nodeの派生版とみなす分類もある
 - Ethereumにはブロックデータ以外に状態 (state) データというものが存在する (詳細は後述)
 
@@ -64,18 +64,18 @@ Ethereumネットワークのノードは、full node, light node, archive node�
 
 `なぜ？：マイニングに参加する障壁を下げることで、マイナーノードの分散化を図りたいから`
 - full node: 550GB-1.1TB, archive node: 12TB (2024年1月時点)
-- Bitcoinのfull node: 375GB
+- Bitcoin Protocolのfull node: 375GB
 
 ### Ethereumネットワークへの参加について
 - トランザクションはfull nodeとarchive nodeへ伝搬される
-- Bitcoinと同様に隣接するノードへの伝搬が繰り返される (gossip-based flooding protocol)
+- Bitcoin Protocolと同様に隣接するノードへの伝搬が繰り返される (gossip-based flooding protocol)
 
-ただし手前の、最初にノードを建ててネットワークに参加する際の手続きがBitcoinとは異なる
+ただし手前の、最初にノードを建ててネットワークに参加する際の手続きがBitcoin Protocolとは異なる
 
 - Ethereumでは、最初に接続するノードは所与の8個のノードの中から選択される
   - 自身のノードとIDが近いノードが複数個(デフォルトでは3つ)選択される
   - ネットワークのトポロジーに制約がある → Structured P2P network
-- Bitcoinでは、最初に接続するノードを自分で設定することが出来る
+- Bitcoin Protocolでは、最初に接続するノードを自分で設定することが出来る
   - 基本的に所与のノードに接続する (DNSシード) 形だが、オプションでこういうことも可能
   - ネットワークのトポロジーに制約がない → Unstructured P2P network
 
@@ -116,7 +116,7 @@ Ethereumネットワークのノードは、full node, light node, archive node�
 
 ## 各ノードは、問題が無いトランザクションのみを溜め、かつ他のノードに伝搬する
 各ノードが検証の済んだトランザクションを溜めておく領域をMempoolと呼ぶ
-- Bitcoinと同じ
+- Bitcoin Protocolと同じ
 
 EthereumのMempoolは、以下の2階層に分かれている
 
@@ -130,9 +130,9 @@ EthereumのMempoolは、以下の2階層に分かれている
   - この場合、4番目のトランザクションをQueued poolに一旦保持し、3番目が伝搬された後に3番目、4番目の両方をPending poolへと移動する
   
 
-BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
+Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあった
 - 名前は違うがやっていることは同じ
-- ただしUTXO型のBitcoinは親を見ていたが、アカウントベース型のEthereumはnonceを見る
+- ただしUTXO型のBitcoin Protocolは親を見ていたが、アカウントベース型のEthereumはnonceを見る
 
 
 ## マイナーノードは、溜まりから任意のトランザクションをブロックに格納する
@@ -141,9 +141,14 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - このとき、gasLimitとgasPriceがトランザクションを選ぶ際の参考になる
   - 普通は計算量に対して得られる手数料が高そうなトランザクションを選択する
 - トランザクションは、マークル・パトリシアツリー構造でブロックに格納される
-- ここまでは基本的にBitcoinと同じ
+- ここまでは基本的にBitcoin Protocolと同じ
   - しかし、Ethereumにおけるブロックの作成作業はこれだけに留まらない!
-  - Ethereumのブロックは、Bitcoinのそれ以上に様々な情報を格納している
+  - Ethereumのブロックは、Bitcoin Protocolのそれ以上に様々な情報を格納している
+
+バリデーターノードは、Mempool (MempoolのうちPending pool) に溜まったトランザクションから、任意のトランザクションを選択してブロックに格納します。このとき、gasLimitとgasPriceがトランザクションを選ぶ際の参考になります。普通は計算量に対して得られる手数料が高そうなトランザクションを選択します。
+
+トランザクションは、マークル・パトリシアツリー構造でブロックに格納されます。ここまでは基本的にBitcoin Protocolと同じです。しかし、Ethereumにおけるブロックの作成作業はこれだけに留まりません。Ethereumのブロックは、Bitcoin Protocolのそれ以上に様々な情報を格納しているのです。
+
 
 <center>
 <img src="./img/blockstructure.drawio.svg" width="60%">
@@ -161,7 +166,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 | miner | ブロックを作成したノードが持つ、報酬受取用のアドレス|
 | mixHash | nonce と合わさることでPoWのための十分な計算がされたことの証明になる256bitのハッシュ|
 | number | ブロックの番号 (genesis blockを0として累積)|
-| totalDifficulty | このブロック以前のブロックのdifficultyの総和| `なぜ?: Bitcoin以上にブロックチェーンが頻繁に分岐する環境下で、最長のチェーンに含まれるブロックを効率的に把握したいから`
+| totalDifficulty | このブロック以前のブロックのdifficultyの総和| `なぜ?: Bitcoin Protocol以上にブロックチェーンが頻繁に分岐する環境下で、最長のチェーンに含まれるブロックを効率的に把握したいから`
 | State Root | このブロックの全トランザクションが実行された後の、全てのアカウント状態をマークルパトリシアツリーで要約したRoot値のハッシュ値 (Keccak-256ハッシュ形式)| 詳細は後述
 | Receipts Root | このブロックの全レシートをマークルパトリシアツリーで要約したRoot値のハッシュ値 (Keccak-256ハッシュ形式)| 詳細は後述
 
@@ -169,13 +174,13 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
   - Uncle block: メインチェーンから分岐したブロックのこと
   - 具体的には、任意のUncle blockのブロックヘッダを2つまで格納することが出来る
-- `なぜ?:Ethereumのブロックチェーンは、Bitcoinと比べてより頻繁に分岐するから`
+- `なぜ?:Ethereumのブロックチェーンは、Bitcoin Protocolと比べてより頻繁に分岐するから`
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
   - 以下の図では親の親を共有している(文字通りの)Uncle blockを示しているが、これだけをUncle blockと呼ぶ場合もある
 
-バリデーターノードは、トランザクションに加えてUncle blockの情報もブロックに格納します。Uncle blockとは、メインチェーンから分岐したブロックのことです。各ブロックに任意のUncle blockのブロックヘッダを2つまで格納することが出来ます。Ethereumは、Block intervalがBitcointと比較するとより頻繁に分岐するため、Uncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えています。
+バリデーターノードは、トランザクションに加えてUncle blockの情報もブロックに格納します。Uncle blockとは、メインチェーンから分岐したブロックのことです。各ブロックに任意のUncle blockのブロックヘッダを2つまで格納することが出来ます。Ethereumは、Block intervalがBitcoin Protocolと比較するとより頻繁に分岐するため、Uncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えています。
 
 <center>
 <img src="./img/uncle.svg" width="60%">
@@ -183,7 +188,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
 
 ### Block Gas Limitについて
 - Ethereumのブロックには、ブロックサイズの上限が設定されていない
-  - Bitcoinは現状4MB
+  - Bitcoin Protocolは現状4MB
 - その代わりに、block用のgasLimitが設定されており、ブロックに格納された全トランザクションのgasLimitの合計がこのblock gasLimitを超えてはならないことになっている
   - Block gasLimitとTransaction gasLimitはしばしば混同されるので注意！
   - 前者はマイナーノードが決める変数で、後者はEOAが決める変数である
@@ -194,7 +199,7 @@ BitcoinのMempoolもTransaction poolとOrphan transaction poolがあった
   - ただし次の仕組みが示すとおり、ターゲット値は15,000,000Gweiである
 
 
-Ethereumのブロックには、ブロックサイズの上限が設定されていません（Bitcoinは4MB）。その代わりに、block用のgasLimitが設定されており、ブロックに格納された全トランザクションのgasLimitの合計がこのblock gasLimitを超えてはならないことになっています。
+Ethereumのブロックには、ブロックサイズの上限が設定されていません（Bitcoin Protocolは4MB）。その代わりに、block用のgasLimitが設定されており、ブロックに格納された全トランザクションのgasLimitの合計がこのblock gasLimitを超えてはならないことになっています。
 （ここで、Block gasLimitとTransaction gasLimitはしばしば混同されるので注意してください。前者はバリデーターノードが決める変数で、後者はEOAが決める変数です）
 
 Ethereumにおいて、バリデーターノードはトランザクションの実行も担うため、彼らの負担は容量よりも計算量で把握した方が適切です。このような「スマートコントラクト用のプラットフォームとして計算量(gas)を軸に物事を考えよう」という思想はEthereumのブロックチェーンにおいて一貫しています。
@@ -211,7 +216,7 @@ Ethereumにおいて、バリデーターノードはトランザクションの
     - 最大値 (30,000,000Gwei) の100%である → baseFeePerGasは+12.5% 
 - つまり... Txが増える → マイナーノードがBlock gasLimitを増やす → 次のbaseFeePerGasが増加する → EOAが高い手数料を忌避してTxを作らなくなる → 混雑の緩和に繋がる、という流れが想定されている (and vice versa)
 - 直感的に言えば、手数料に難易度調整のような仕組みを導入している
-- `なぜ？: (Bitcoinのように) EOAにfeePerGasを決めさせるよりも、支払う手数料を最適化出来そうだから`
+- `なぜ？: (Bitcoin Protocolのように) EOAにfeePerGasを決めさせるよりも、支払う手数料を最適化出来そうだから`
 
 baseFeePerGasはブロック毎に固定で、以下のルールに沿って内生的に決まります。
 
@@ -274,34 +279,34 @@ EOAとCAが保持する状態データと、Message Callトランザクション
 
 マイナーノードは、ブロックに対して以下の処理を行う:
 1. 状態ツリーとレシートツリーを作成する
-   - Full nodeの場合、120ブロック経過したらlocal storageから削除
+   - Full nodeの場合、128ブロック経過したらlocal storageから削除
 2. ブロックヘッダーにState rootとReceipt rootを書き込む
 3. ブロックヘッダーにgasUsedを書き込む
 
 ## マイナーノードは、ブロックを既存のチェーンに含まれるいずれかのブロックに繋ぐ
-ここはBitcoinと同じ。親のブロックヘッダのハッシュを自身のブロックヘッダに格納することでチェーンを形成する
+ここはBitcoin Protocolと同じ。親のブロックヘッダのハッシュを自身のブロックヘッダに格納することでチェーンを形成する
 
 <center>
 <img src="./img/blockchain.drawio.svg" width="90%">
 </center>
 
 ## マイナーノードは、PoW (Proof-of-Work) を経てブロックを完成させる
-- 以前のEthereumはBitcoinと同様にPoWを採用していた
+- 以前のEthereumはBitcoin Protocolと同様にPoWを採用していた
   - 現在はProof-of-Stake型へと以降している
   - `なぜ?: ブロック作成にかかる時間を短縮し、処理速度の向上を図りたいから (後述)`
 - ただしEtherumのPoWは、オリジナルのEthashというアルゴリズムを採用している
   - `なぜ?: マイナーノードの寡占化を可能な限り防ぎたいから`
-  - 当時Bitcoinのマイニングは、それ専用の演算マシンであるASICが開発されたためにマイナーの寡占化が進んでいた
+  - 当時Bitcoin Protocolのマイニングは、それ専用の演算マシンであるASICが開発されたためにマイナーの寡占化が進んでいた
   - この現状を鑑みて、Ethereumは演算を繰り返す形ではなく、メモリからデータを繰り返し呼び出して比較する形でnonceを探すPoWを実装した (ASIC-resistantなどと呼ばれる)
 - Ethashの詳細については説明を割愛するが、たとえば[こちらの資料](https://www.etarou.work/posts/4983481)が非常にわかりや
 すい
 
 ### block intervalと難易度調整について
-- Ethereumのblock intervalは、Bitcoinの10分に対して、15秒に設定されている
+- Ethereumのblock intervalは、Bitcoin Protocolの10分に対して、15秒に設定されている
   - `なぜ?:スマートコントラクト用プラットフォームとして、処理速度の向上を図りたいから`
   - 送金ならば10分待てるかも知れないが、プログラムの実行はそんなに待てない
 - ただし先述のとおり、block intervalが短いとその分チェーンが分岐しやすくなる
-- Ethereumの難易度調整は、 Bitcoinは2016ブロック毎だったが、1ブロック毎に行われる
+- Ethereumの難易度調整は、 Bitcoin Protocolは2016ブロック毎だったが、1ブロック毎に行われる
   - `なぜ?:より安定的に規定のblock intervalを維持したいため`
   - 難易度調整の仕様はメジャーアップデートの度にコロコロ変更されているが、現在は
     - Parent blockのdifficultyとtimestamp
@@ -313,7 +318,7 @@ EOAとCAが保持する状態データと、Message Callトランザクション
 ## マイナーノードは、完成したブロックを各ノードに伝搬する
 
 - トランザクションと同様、ブロックはfull nodeとarchive nodeへ伝搬される
-- Bitcoinと同様に隣接するノードへの伝搬が繰り返される (gossip-based flooding protocol)
+- Bitcoin Protocolと同様に隣接するノードへの伝搬が繰り返される (gossip-based flooding protocol)
   
 ## 各ノードは、受け取ったブロックに問題が無いかを独立に検証する
 
@@ -336,11 +341,11 @@ EOAとCAが保持する状態データと、Message Callトランザクション
 ## Ethereumは、最も重いチェーンを「正しい」状態遷移の記録とする
   
 ### GHOSTプロトコルについて
-- Ethereumでは、Bitcoinとは異なり「最も長いチェーン」を正統な記録とする (Nakamoto
+- Ethereumでは、Bitcoin Protocolとは異なり「最も長いチェーン」を正統な記録とする (Nakamoto
 consensus) わけではない!
 - 代わりに「最も重いチェーン」を正統とする
 - これはGHOST (Greedy Heaviest Observed Subtree) プロトコルと呼ばれる
-  - 元々はBitcoinに対する改善提案でした
+  - 元々はBitcoin Protocolに対する改善提案でした
 - チェーン選択のアルゴリズムは比較的単純で、小ブロックのサブツリー数を比較し続けるだけ
   - 特に頻繁に分岐するブロックチェーンでは、このように「長さより重さ」で選択すべきではないか?
 
@@ -366,8 +371,9 @@ Ethereumでは、このようなGHOSTプロトコルに以下の変更を加え�
 
 ### Ethererumのマイニング報酬について
 Ethereumでは、ブロックの作成に成功したマイナーノードへ2ETHが新規発行される
-- Bitcoinと異なり半減期はない
-- Bitcoinと異なりblock maturityの設定 (100 confirmations) もない
+- Bitcoin Protocolと異なり半減期はない
+  - したがってBitcoin Protocolのように総発行量があらかじめ決まっているわけでもない
+- Bitcoin Protocolと異なりblock maturityの設定 (100 confirmations) もない
 
 さらに、もしブロックがuncle blockのブロックヘッダを含んでいる場合...
 - 2ETHの報酬が3.125%増える (Uncle inclusion rewards)
