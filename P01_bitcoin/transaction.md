@@ -1511,11 +1511,11 @@ $0 \leqq WitnessDataSize < 4$
 
 - `witness`のデータ構造は以下のようになっている
 
-  | 名称         | 説明                                      | 役割                                    |
-  | ------------ | ----------------------------------------- | --------------------------------------- |
-  | item_counter | トランザクションの vin の長さを表すバイト | vin と witness フィールドとを関連付ける |
-  | size         | 後続のデータのサイズを表す                | 署名検証に必要な情報を提供する          |
-  | witness_data | 署名値や公開鍵で構成されるデータ          | 署名データを保持する                    |
+  | 名称         | 説明                             | 役割                                    |
+  | ------------ | -------------------------------- | --------------------------------------- |
+  | item_counter | witness_data の数を表す          | vin と witness フィールドとを関連付ける |
+  | size         | 後続のデータのサイズを表す       | 署名検証に必要な情報を提供する          |
+  | witness_data | 署名値や公開鍵で構成されるデータ | 署名データを保持する                    |
 
 - item_counter と size に使われる数字は、「Compact size」と呼ばれるフォーマットである
 
@@ -1526,6 +1526,7 @@ $0 \leqq WitnessDataSize < 4$
   - これは witness データそのものである
   - 前から順に item_counter、 size、witness_data、size、witness_data（本来スペースは存在しないが、見やすさを考え筆者が挿入した）
   - このように item_counter は witness の先頭にだけ存在する
+  - item_counter は witness_data の数を表す
 
 <!-- TODO scriptPubKeyではなくscriptSig (Unlocking Script)では？LockingのほうだとコインベースTxからマイナーが送金する際に関係してしまう．
 https://en.bitcoin.it/wiki/BIP_0141
@@ -1574,8 +1575,9 @@ static const unsigned int MAX_BLOCK_SERIALIZED_SIZE = 4000000;
 - それぞれのトランザクションの種類は Locking Script で「何バイトのハッシュが使われるか」で判別される
 - 以降の例では P2SH によってラップされていないものを提示する
 
-  - P2WPKH、P2WSH はそれぞれ P2SH でラップできるが、その場合では以下に挙げる例とは少し構成が変化する
-  - ラップされた場合のコードがどうなるかは[BIP-141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)を参照のこと
+  - P2WPKH,P2WSH の Tx は P2SH の記法で内包できるが、その場合では以下に挙げる例とは少し構成が変化する
+  - ラップされた場合のコードがどうなるかは[BIP-141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#examples)を参照のこと
+  - ラップすることで SegWit を直接サポートしていないウォレットやサービスと互換性を持てる
 
 ### Pay-to-witness-public-key-hash （P2WPKH）
 
