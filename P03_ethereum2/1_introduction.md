@@ -30,8 +30,11 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 基本的なコンセプトはそれまでのEthereumと同様である
 
 - [端的に言えばBitcoin Protocolの一般化である](../P02_ethereum/1_introduction.md#端的に言えばbitcoin-protocolの一般化である)
+  - 送金からプログラムへ
 - [この一般化を計算機科学の文脈で捉えると...](../P02_ethereum/1_introduction.md#この一般化を計算機科学の文脈で捉えると)
+  - 計算機からコンピューターへ
 - [この一般化によって様々なアプリケーション開発が可能となる](../P02_ethereum/1_introduction.md#この一般化によって様々なアプリケーション開発が可能となる)
+  - 集権的な存在が実行や実行結果に介入できないアプリーケーション (DApps) が実現する
  
 
 ## 1.0 から 2.0 での主な変更点
@@ -39,7 +42,7 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 - [スケーラビリティ問題](../P02_ethereum/4_scalability.md#スケーラビリティ問題)に対処するために、2022年の9月に互換性の無い形での大規模な仕様変更 "The Merge" を行った
   - Proof of Work (PoW) から Proof of Stake (PoS) へ (i.e., マイニングの廃止)
   - Execution LayerとConsensus Layerの分離
-- この資料では、**新たなコンセンサスと報酬の仕組みについて詳細に説明する**
+- この資料では、**とくに新たなコンセンサスと報酬の仕組みについて詳細に説明する**
 
 <center>
 <img src="./img/the-merge.png" width="50%">
@@ -52,9 +55,13 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 
 以下の要素はそれまでのEthereumと同様である
 - [2種類のアカウント](../P02_ethereum/1_introduction.md#2種類のアカウント)
+  - EOAとCAがあるよ　
 - [2種類のトランザクション](../P02_ethereum/1_introduction.md#2種類のトランザクション)
+  - Message CallとContract Creationがあるよ
 - [EVM (Ethereum Virtual Machine)](../P02_ethereum/1_introduction.md#evm-ethereum-virtual-machine)
+  - ノードは手元の仮想マシンでトランザクション (スマートコントラクト) を実行するよ
 - [状態 (state) データの管理](../P02_ethereum/1_introduction.md#状態-state-データの管理)
+  - トランザクションの実行結果はブロックチェーン外で管理するよ
 
 さらに "The Merge" 後は以下の要素が加わった。
 
@@ -77,7 +84,7 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 <img src="./img/validator.drawio.svg" width="70%">
 </center>
 
-> 2024年1月において、バリデータの数は約900,000個
+> 2024年4月において、バリデータの数は約1,000,000個
 
 - バリデータ用の鍵を別途作ることにより、次のような運用が可能になる
   - Validator Signing Keyをノードに渡すことで、Stakingを委任できる。この場合、自身でノードを建てずともStakingが行える (Staking as a Service; SaaS)
@@ -93,16 +100,17 @@ Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞ�
  
 
 ## Execution LayerとConsensus Layerの分離
-The Merge以前のブロックはExecution Layerと呼ばれている。
+- Ethereumのブロックチェーンは、トランザクションの実行を担う層 (**Execution Layer**) と正しい状態遷移について合意形成を取る層 (**Consensus Layer**) に分離した
+  - `なぜ？: 将来的に、ブロックチェーンに複数のExecution Layerを重ねることでスケーラビリティ問題に対処しようとしているから (並列処理; Sharding)`
+  - 各層が担当する役割については後述
+- アップデート前からConsensus Layer用のブロックチェーン (Beacon Chain) を並行して動かしており、アップデート時にそれまでのEthereumのブロックチェーンとBeacon Chainを合体した
+  - 直感的には、飛行機が飛びながら別のより大きな飛行機の中に格納されていくイメージ
+  - 結構とんでもないこと
+- だから **"The Merge"** と呼ばれている
+
 <center>
-<img src="../P02_ethereum/img/blockstructure.drawio.svg" width="75%">
+<img src="./img/beacon.drawio.svg" width="80%">
 </center>
-
-- Consensusに関係する部分はBeacon Chainで行う
-- ブロックチェーンが二層になった
-- 直感的には、飛行機が飛びながら別のより大きな飛行機の中に格納されていくイメージ
-- だからThe Mergeと呼ばれている
-
 
 ## トランザクションのライフサイクル
 
