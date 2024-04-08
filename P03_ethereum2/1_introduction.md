@@ -19,8 +19,8 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 - [Ethereum 2.0 とは何か？](#ethereum-20-とは何か)
   - [1.0 から 2.0 での主な変更点](#10-から-20-での主な変更点)
 - [大枠の仕様について](#大枠の仕様について)
-    - [バリデータという概念の導入](#バリデータという概念の導入)
   - [Execution LayerとConsensus Layerの分離](#execution-layerとconsensus-layerの分離)
+  - [バリデータという概念の導入](#バリデータという概念の導入)
   - [トランザクションのライフサイクル](#トランザクションのライフサイクル)
 - [まとめ](#まとめ)
 
@@ -40,14 +40,13 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 ## 1.0 から 2.0 での主な変更点
 
 - [スケーラビリティ問題](../P02_ethereum/4_scalability.md#スケーラビリティ問題)に対処するために、2022年の9月に互換性の無い形での大規模な仕様変更 "The Merge" を行った
-  - Proof of Work (PoW) から Proof of Stake (PoS) へ (i.e., マイニングの廃止)
-  - Execution LayerとConsensus Layerの分離
-- この資料では、**とくに新たなコンセンサスと報酬の仕組みについて詳細に説明する**
+- Proof of Work (PoW) から Proof of Stake (PoS) へ (i.e., マイニングの廃止)
+- この資料では、**PoS移行に伴うEthereumプロトコルの変化部分について説明する**
 
 <center>
 <img src="./img/the-merge.png" width="50%">
 
-> Source: https://ethereum.org/en/roadmap/merge/
+Source: https://ethereum.org/en/roadmap/merge/
 </center>
 
 
@@ -61,55 +60,50 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 - [EVM (Ethereum Virtual Machine)](../P02_ethereum/1_introduction.md#evm-ethereum-virtual-machine)
   - ノードは手元の仮想マシンでトランザクション (スマートコントラクト) を実行するよ
 - [状態 (state) データの管理](../P02_ethereum/1_introduction.md#状態-state-データの管理)
-  - トランザクションの実行結果はブロックチェーン外で管理するよ
+  - トランザクションの実行結果はブロックチェーン外でも管理するよ
 
 さらに "The Merge" 後は以下の要素が加わった。
 
-### バリデータという概念の導入 
-
-- バリデータは、ブロックの作成とブロックの正統性を決めるための投票を担う
-  - 以前はマイナーノードが担当していた
-- EOAは32etherを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
-  - つまりバリデータは、人間がつくるノードがつくるEOAがつくる存在
-  - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3200etherを預ければ100個持てる)
-  - この32etherを預ける行為を**Staking**と呼ぶ
-  - `なぜ？: ブロックの作成や投票の結果、預けた32etherは増減するから`
-- 各バリデータは、アカウント用の鍵とは別にValidator Signing KeyとWithdrawal Keyの2種類 (それぞれ秘密・公開鍵から成る) を得る
-  - `なぜ？: セキュリティ上、アカウント用の鍵とバリデータ用の鍵は分けておきたいから`
-  - `なぜ？: SaaS(Staking as a Service)などを運用する余地を残しておきたいから`
-  - `なぜ？: 楕円曲線暗号よりも署名の集約に適した暗号形式を用いたいから`
-  - 2種類の鍵は、トランザクションを作成することはできず、(文字通り)ブロックの作成・投票における署名とdeposit contractからのether引き出しにのみ用いられる
-
-<center>
-<img src="./img/validator.drawio.svg" width="70%">
-</center>
-
-> 2024年4月において、バリデータの数は約1,000,000個
-
-- バリデータ用の鍵を別途作ることにより、次のような運用が可能になる
-  - Validator Signing Keyをノードに渡すことで、Stakingを委任できる。この場合、自身でノードを建てずともStakingが行える (Staking as a Service; SaaS)
-  - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のetherを集約して共用のバリデータ (Staking Pool) を運用することが可能
-
-Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞれの特徴は以下のとおり
-  
-|  | 自身で用意するもの | 自身で作成するもの | 自身で管理するもの | トラストへの依存 |
-| ---- | ---- | ---- | ---- | ---- |
-| Solo Staking | full (or archive) node, EOA, 32ether以上のether | バリデータ | バリデータ | 低
-| Staking as a Service (SaaS) | EOA, 32ether以上のether | バリデータ |  | 中
-| Staking Pool | EOA, 任意量のether | |  | 高
- 
-
 ## Execution LayerとConsensus Layerの分離
-- Ethereumのブロックチェーンは、トランザクションの実行を担う層 (**Execution Layer**) と正しい状態遷移について合意形成を取る層 (**Consensus Layer**) に分離した
+- Ethereumのブロックチェーンは、トランザクションの実行・検証を担う層 (**Execution Layer**) と正しい状態遷移について合意形成を取る層 (**Consensus Layer**) に分離した
   - `なぜ？: 将来的に、ブロックチェーンに複数のExecution Layerを重ねることでスケーラビリティ問題に対処しようとしているから (並列処理; Sharding)`
-  - 各層が担当する役割については後述
 - アップデート前からConsensus Layer用のブロックチェーン (Beacon Chain) を並行して動かしており、アップデート時にそれまでのEthereumのブロックチェーンとBeacon Chainを合体した
   - 直感的には、飛行機が飛びながら別のより大きな飛行機の中に格納されていくイメージ
-  - 結構とんでもないこと
+  - これは結構とんでもないこと
 - だから **"The Merge"** と呼ばれている
 
 <center>
-<img src="./img/beacon.drawio.svg" width="80%">
+<img src="./img/beacon.drawio.svg" width="90%">
+</center>
+
+- これに伴い、自分のコンピューターをEthereumのノードにするためのソフトウェアも**Execution Client**と**Consensus Client**の2種類になった
+  - Execution Client: トランザクションの実行やブロックの作成を担う
+  - Consensus Client: ブロックチェーンの合意形成を担う
+- 両者は相互依存関係にあり、フルノードを建てる場合にはどちらも必要となる
+  - Execution Clientだけ: どのチェーンが現在の正統なのかわからない
+  - Consensus Clientだけ: ブロックを作成できない
+
+<center>
+<img src="./img/clients.png" width="80%">
+
+Source: https://ethereum.org/en/developers/docs/nodes-and-clients/
+</center>
+
+## バリデータという概念の導入 
+- バリデータは、ブロックの提案とブロックの正統性を決めるための投票を担う
+  - 以前はマイナーノードが担当していた
+  - バリデータの総数や報酬はConsensus Layer上で管理されている
+- EOAは32etherを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
+  - つまりバリデータは、人間がつくるノードがつくるEOAがつくる存在
+  - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3,200etherを使えば100個持てる)
+- この32etherを預ける行為を**Staking**と呼ぶ
+  - `なぜ？: ブロックの作成や投票の結果、預けた32etherは増減するから`
+  - PoSという言葉の背景
+
+<center>
+<img src="./img/validator1.png" width="80%">
+
+Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
 </center>
 
 ## トランザクションのライフサイクル
@@ -152,7 +146,8 @@ EOAは、トランザクション(Message Call or Contract Creation)を各ノー
 ```
 
 # まとめ
-- Ethereumはスケーラビリティ問題に対処すべく、大規模な仕様変更 "The Merge" を行った
-- コンセンサスと報酬の仕組み、およびブロックの構造が大きく変化した
-- これによりトランザクションのライフサイクルも大きく変化した
+- Ethereumはスケーラビリティ問題に対処すべく、PoWからPoSに移行した
+- これに伴いブロックチェーンはExecution LayerとConsensus Layerに分離した
+- これに伴いバリデータという概念が導入された
+- これに伴いトランザクションのライフサイクルも変化した
 
