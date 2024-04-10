@@ -127,7 +127,7 @@ CAくん (プログラムくん)
 よって送信元・送信先アカウントと組み合わせると、トランザクションは3 (+1) 分類
 - EOA to EOA (Message Call) Bitcoin Protocolと同様、ETHの送金
 - EOA to CA (Contract Creation) コントラクトを新たに生成
-- EOA to CA (Message Call) 既存のコントラクトに引数を送り、プログラムを実行
+- EOA to CA (Message Call) 既存のコントラクトに引数を送り、プログラムを実行　【キャスレー：こちらはEOAがCAを通して他のEOAへMessage Callができるという意味？↓のCA to CAにつながるイメージ】
 - CA to CA (*Internal Transaction) 
   - CAが (プログラムに従って) 別のCAにETHを送金したり、新たなCAを作成する場合もある。
   - ただしあくまでトリガーはEOAによるMessage Call
