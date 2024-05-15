@@ -185,6 +185,8 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 
 バリデーターノードは、トランザクションに加えてUncle blockの情報もブロックに格納します。Uncle blockとは、メインチェーンから分岐したブロックのことです。各ブロックに任意のUncle blockのブロックヘッダを2つまで格納することが出来ます。Ethereumは、Block intervalがBitcoin Protocolと比較するとより頻繁に分岐するため、Uncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えています。
 
+【キャスレー：Uncle blockはなぜ必要？⇒ほぼ同時にブロックが生成されることがあるが、最終的に採用されるのは1つだけ。Uncle blockをメインチェーンには入れないが、存在していることで中央集権化のリスクを減らす＆セキュリティも担保される？】
+
 <center>
 <img src="./img/uncle.svg" width="60%">
 </center>
