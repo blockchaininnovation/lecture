@@ -151,6 +151,8 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 
 【キャスレー：マイナーノードはMempoolからgasLimitを越えないものの中から、儲かりそうなトランザクションを選んでる理解？限られた予算で買い物をして一番お得そうなものを買うのと同じイメージでしょうか？】
 
+【キャスレー：Ethereumのブロックは、Bitcoin Protocolのそれ以上に様々な情報を格納してい⇒格納できる情報は、下記画像のブロックヘッダに記載されているものという認識？】
+
 <center>
 <img src="./img/blockstructure.drawio.svg" width="60%">
 </center>
