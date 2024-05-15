@@ -61,6 +61,8 @@ EthereumにおけるThe Merge (2022)
 - Ethereum
 - Ethereum PoW
 
+【キャスレー：議論が繰り返されて最終的に今の形となったという理解？】
+
 
 ## いくつかのEIP紹介
 EIPの一覧は[こちら](https://eips.ethereum.org/all)から確認可能
