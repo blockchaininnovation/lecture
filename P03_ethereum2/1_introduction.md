@@ -100,7 +100,7 @@ Source: https://ethereum.org/en/developers/docs/nodes-and-clients/
 - EOAは32etherを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
   - つまりバリデータは、人間がつくるノードがつくるEOAがつくる存在
   - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3,200etherを使えば100個持てる)
-  【キャスレー 宮下：バリデータを複数もつ事によるメリットやデメリットは何が挙げられますか？】
+【キャスレー 宮下：バリデータを複数もつ事によるメリットやデメリットは何が挙げられますか？】
 - この32etherを預ける行為を**Staking**と呼ぶ
   - `なぜ？: ブロックの作成や投票の結果、預けた32etherは増減するから`
   - PoSという言葉の背景
