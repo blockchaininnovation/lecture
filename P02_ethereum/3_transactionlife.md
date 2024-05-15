@@ -149,6 +149,7 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 
 トランザクションは、マークル・パトリシアツリー構造でブロックに格納されます。ここまでは基本的にBitcoin Protocolと同じです。しかし、Ethereumにおけるブロックの作成作業はこれだけに留まりません。Ethereumのブロックは、Bitcoin Protocolのそれ以上に様々な情報を格納しているのです。
 
+【キャスレー：マイナーノードはMempoolからgasLimitを越えないものの中から、儲かりそうなトランザクションを選んでる理解？限られた予算で買い物をして一番お得そうなものを買うのと同じイメージでしょうか？】
 
 <center>
 <img src="./img/blockstructure.drawio.svg" width="60%">
