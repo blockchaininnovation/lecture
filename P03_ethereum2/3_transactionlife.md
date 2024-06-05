@@ -225,7 +225,10 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 
 【キャスレー：GHOSTプロトコルとは？Greedy Heaviest Observed Subtree⇒鬼ではない……
 　どのチェーンをメインチェーンにするかを決定するプロトコル
-　Bitcoinとの違い⇒Bitcoinは、一番長いチェーンがメインチェーン。Ethereumは、一番重い(heaviest)チェーン】
+　Bitcoinとの違い⇒Bitcoinは、一番長いチェーンがメインチェーン。Ethereumは、一番重い(heaviest)チェーン
+ 　⇒TODO 「先述のGHOSTプロトコル」の部分、リンクあった方がいい？
+  PoSになってからepochの概念が出てきた⇒投票でやるのでfinalizeが使えるようになる、
+  LMD GHOST：ブロックを比較したときにより重い方を正とする】
 
 - どちらもブロックに含まれる投票 (attestation)を用いて「重いチェーン」を決める
   - 復習: 以前のGHOSTプロトコルでは、子ブロックの数を数えていた
@@ -260,8 +263,11 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 - このとき... ①投票は各バリデータのstake量に応じて重み付けされる (ただし32ETHが上限) ②投票数の計算は直近のjustifiedブロックからはじめる
 
 ### Casper FFGについて
-- epochを跨いで分岐した場合の「最も重いチェーン」は、一番先にckeckpointがjustifiedになったチェーンとする
-- 低い投票率や票の割れによってもし4epochの間にfinalizedが発生しなかった場合、投票していない or 少数派に投票しているバリデータのstakeを徐々に没収する (inactivity leak) ことで事後的にfinalizedにする仕様になっている 
+- epochを跨いで分岐した場合の「最も重いチェーン」は、一番先にcheckpointがjustifiedになったチェーンとする
+- 低い投票率や票の割れによってもし4epochの間にfinalizedが発生しなかった場合、投票していない or 少数派に投票しているバリデータのstakeを徐々に没収する (inactivity leak) ことで事後的にfinalizedにする仕様になっている
+
+sourceにjustifiedされたブロックがある⇒新しいブロックが来たときに
+少数派が不利になっていく
 
 ### 報酬メカニズム
 - ブロック提案者とブロック投票者に対してetherが報酬として新規発行される
