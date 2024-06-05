@@ -28,9 +28,9 @@ Pass: x3C594HBVoPG
 - Validator Signing Key: ブロックの提案・投票における署名
   - 公開鍵 バリデータのID的なものとして使われる
   - 秘密鍵 これを持つ者だけがブロックの提案・投票を行える
-- Withdrawal Key: deposit contractからのether引き出し
+- Withdrawal Key: deposit contractからのETH引き出し
   - 公開鍵 バリデータのウォレットアドレス的なものとして使われる
-  - 秘密鍵 これを持つ者だけがstakeしたetherを引き出せる
+  - 秘密鍵 これを持つ者だけがstakeしたETHを引き出せる
 
 <center>
 <img src="./img/validator.png" width="70%">
