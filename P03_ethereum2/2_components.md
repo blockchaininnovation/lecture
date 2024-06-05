@@ -55,8 +55,8 @@ Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞ�
 |  | 自身で用意するもの | 自身で作成するもの | 自身で管理するもの | トラストへの依存 |
 | ---- | ---- | ---- | ---- | ---- |
 | Solo Staking | full (or archive) node, EOA, 32ether以上のether | バリデータ | バリデータ | 低
-| Staking as a Service (SaaS) | EOA, 32ether以上のether | バリデータ |  | 中
-| Staking Pool | EOA, 任意量のether | |  | 高
+| Staking as a Service (SaaS) | EOA, 32ether以上のether | バリデータ | - | 中
+| Staking Pool | EOA, 任意量のether | - | - | 高
 
 
 # まとめ
