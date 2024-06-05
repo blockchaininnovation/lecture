@@ -47,6 +47,7 @@ Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
 - 2種類の鍵はConsesus Clientが管理、Conseus Layerで管理、手元で管理
 - バリデータ用の鍵を別途作ることにより、次のような運用が可能になる
   - Validator Signing Keyをノードに渡すことで、Stakingを委任できる。この場合、自身でConsensus Clientやフルノードを稼働させずともStakingが行える (Staking as a Service; SaaS)
+【キャスレー：素人目線ですが、Stakingを委任した場合では、Consensus Clientやフルノードを稼働させずにStakingを行うことができ、バリデータを自分で管理しなくてよくなるので、Solo StakingよりもSaaSで運用する方が良いのではないかと感じてしまいました。Solo Stakingで運用したほうが良い場合はどんな時でしょうか？】
   - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のetherを集約して共用のバリデータ (Staking Pool) を運用することが可能
 
 Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞれの特徴は以下のとおり
