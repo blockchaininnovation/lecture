@@ -42,21 +42,21 @@ Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
 
 - 具体的に、バリデータは以下のプロセスで作成される
   - EOAの所有者がWithdrawal Keyのペアを作成する
-  - EOAがdeposit contractに32etherを送るトランザクションのinput部分にWithdrawal Keyの公開鍵情報を埋め込む (秘密鍵の情報は手元に残す)
-  - deposit contractが32etherにバリデータインデックスを割り当てる
+  - EOAがdeposit contractに32ETHを送るトランザクションのinput部分にWithdrawal Keyの公開鍵情報を埋め込む (秘密鍵の情報は手元に残す)
+  - deposit contractが32ETHにバリデータインデックスを割り当てる
 - 2種類の鍵はConsesus Clientが管理、Conseus Layerで管理、手元で管理
 - バリデータ用の鍵を別途作ることにより、次のような運用が可能になる
   - Validator Signing Keyをノードに渡すことで、Stakingを委任できる。この場合、自身でConsensus Clientやフルノードを稼働させずともStakingが行える (Staking as a Service; SaaS)
 【キャスレー：素人目線ですが、Stakingを委任した場合では、Consensus Clientやフルノードを稼働させずにStakingを行うことができ、バリデータを自分で管理しなくてよくなるので、Solo StakingよりもSaaSで運用する方が良いのではないかと感じてしまいました。Solo Stakingで運用したほうが良い場合はどんな時でしょうか？】
-  - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のetherを集約して共用のバリデータ (Staking Pool) を運用することが可能
+  - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のETHを集約して共用のバリデータ (Staking Pool) を運用することが可能
 
 Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞれの特徴は以下のとおり
   
 |  | 自身で用意するもの | 自身で作成するもの | 自身で管理するもの | トラストへの依存 |
 | ---- | ---- | ---- | ---- | ---- |
-| Solo Staking | full (or archive) node, EOA, 32ether以上のether | バリデータ | バリデータ | 低
-| Staking as a Service (SaaS) | EOA, 32ether以上のether | バリデータ | - | 中
-| Staking Pool | EOA, 任意量のether | - | - | 高
+| Solo Staking | full (or archive) node, EOA, 32ETH以上のETH | バリデータ | バリデータ | 低
+| Staking as a Service (SaaS) | EOA, 32ETH以上のETH | バリデータ | - | 中
+| Staking Pool | EOA, 任意量のETH | - | - | 高
 
 
 # まとめ
