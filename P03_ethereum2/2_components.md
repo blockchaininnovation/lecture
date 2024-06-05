@@ -61,5 +61,5 @@ Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞ�
 
 # まとめ
 - 各構成要素が保持するデータは、以前のEthereumと同様である
-- バリデータが
+- バリデータが保持するデータにはValidator Signing KeyとWithdrawal Keyがある
 - しかしこれらの構成要素がどう連動するかについて説明する次の資料からは、内容が大きく異なりはじめる
