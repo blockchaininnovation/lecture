@@ -6,6 +6,7 @@ Zcashは、Bitcoin Protocolのプライバシー問題を解決するための�
 Bitcoin送金におけるプライバシーを実現するためにBitcoin Protocolの様々な仕様を追加しています。
 では具体的に、どこを / どのように / なぜそのように 追加したのでしょうか？
 この資料は、Zcashを理解する上で誰しもが抱くであろう上記の疑問を解消することを目指して書かれています。
+尚、取り扱っているバージョンは[Sprout](https://github.com/zcash/zips/blob/main/protocol/sprout.pdf)になります。
 
 `Writer: @ashWhiteHat`
 
@@ -20,9 +21,9 @@ Bitcoin送金におけるプライバシーを実現するためにBitcoin Proto
 
 # Zcashとは何か？
 
-## プライバシー送金が可能なBitcoin Protocolである
+## 匿名送金が可能なBitcoin Protocolである
 
-プライバシー送金: Bitcoin Protocolの課題
+匿名送金: Bitcoin Protocolの課題
 
 ## 2種類のプライバシー
 
@@ -37,16 +38,50 @@ Bitcoin送金におけるプライバシーを実現するためにBitcoin Proto
 
 # Zcashの革新性
 
-## プライバシー送金の課題
+## 匿名送金の課題
 
-- Bitcoin Protocolのプライバシーに取り組んでいるプロジェクトはこれまでにも存在していた
+- Bitcoin Protocolの匿名性に取り組んでいるプロジェクトはこれまでにも存在していた
+
+**ミキサー**
+- 集権サービスを利用することで送金の追跡を不可能にする
+- この方法には以下のような欠点が存在する
+1. ミキシングに必要な量のコインを集めるのに時間がかかる
+2. ミキシングの提供者は送金を追跡できる
+3. ミキシングの提供者がコインを盗む可能性がある
+
+**Zerocoin**
+- ゼロ知識証明により集権サービスを必要としない匿名送金を実現した
+- この方法には以下のような欠点が存在する
+1. 証明サイズが45kBで検証に450msの時間がかかる
+2. 固定額の送金しかできない
+3. 直接送金する方法がない
+4. 送金額や取引のメタデータは秘匿していない
+
+## Zcashの貢献
+
+- 従来の匿名送金では
+1. 集権サービスを用いた匿名送金
+2. 分散で少ない機能性で低いスケーラビリティの匿名送金
+- の2つの方法しか存在しなかった
+
+- Zcashでは、[匿名送金の課題](#匿名送金の課題)を分散性を保ちながら以下のように改善した
+1. トランザクションサイズを1kB以下にする(97.7%の改善)
+2. 検証時間を6ms以下にする(98.6%の改善)
+3. あらゆる送金量での匿名送金を可能にする
+4. 送金額とユーザーの保有するコインの価値を秘匿する
+5. ユーザーの固定アドレスに直接送金される
 
 # アーキテクチャー
 
 # 要素技術
+
+- アーキテクチャーの中で用いられている要素技術の概要と役割を解説する
 
 # まとめ
 
 # 参照
 
 - [Learn Zcash](https://z.cash/learn/who-created-zcash/)
+- [A Privacy-Protecting Digital Currency Built On Strong Science.](https://www.binance.com/ja/research/projects/zcash)
+- [匿名暗号資産（Monero/Zcash/Grin）ブロックチェーンの匿名性に関する考察](https://cir.nii.ac.jp/crid/1050292572094389888)
+- [Zcash Protocol Specification Version 2021.1.19 [Sprout]](https://github.com/zcash/zips/blob/main/protocol/sprout.pdf)
