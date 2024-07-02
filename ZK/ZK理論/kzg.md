@@ -5,7 +5,7 @@
 </center>
 
 ## はじめに
-KZG commitmentsは、polynomial commitments (PC)と呼ばれる暗号スキームの一つです [1]。PCを使うことで、証明者は自身の知るある多項式$f(x)$が$f(\alpha)=\beta$を満たすことを、$f(x)$に明らかにせずに、検証者に示すことができます。この性質により、PCはゼロ知識証明 (ZKP) [2]や、検証可能な秘密分散 [1]、データ可用性サンプリング (data availability samping; DAS) [3-4]など、より実用的な暗号スキームを構成するために応用されています。特に、PCのうちKZG commitmentsは、検証のための計算量が非常に小さい、具体的には多項式の次数に関わらず一定であるため、計算リソースが限られているEthereumなどのブロックチェーン上でも用いることが可能です [5]。この資料では、PCの一般的な性質と安全性を定義し、その後KZG commitmentsの構成を紹介します。
+KZG commitmentsは、polynomial commitments (PC)と呼ばれる暗号スキームの一つです [1]。PCを使うことで、証明者は自身の知るある多項式$f(x)$が$f(\alpha)=\beta$を満たすことを、$f(x)$を明らかにせずに検証者に示すことができます。この性質により、PCはゼロ知識証明 (ZKP) [2]や、検証可能な秘密分散 [1]、データ可用性サンプリング (data availability samping; DAS) [3-4]など、より実用的な暗号スキームを構成するために応用されています。特に、PCのうちKZG commitmentsは、検証のための計算量が非常に小さい、具体的には多項式の次数に関わらず一定であるため、計算リソースが限られているEthereumなどのブロックチェーン上でも用いることが可能です [5]。この資料では、PCの一般的な性質と安全性を定義し、その後KZG commitmentsの構成を紹介します。
 
 `Writer: @SoraSuegami`
 
@@ -42,11 +42,11 @@ HidingとBindingは、直感的には次のように定義されます。
 
 
 ### Polynomial Commitments
-PCスキームは、多項式$f(x)=\Sigma_{i=0}^n a_i x^i$の係数ベクトル$(a_0, \dots, a_n)$をメッセージとするcommitmentsスキームです [1]。つまり、$(a_0, \dots, a_n)$からcommitment $c$を生成し、それを開示するopeningを生成します。加えて、PCでは$c$の中の多項式$f(x)$をある評価点$\alpha$で評価した結果が$\beta$になる、つまり$f(\alpha)=\beta$であることだけを、$(a_0, \dots, a_n)$を明かさずに開示することも可能です。この性質により、**多項式そのものを隠したまま、その多項式が特定の条件を満たしていることを他者に証明できます**。
+PCスキームは、多項式$f(x)=\Sigma_{i=0}^n f_i x^i$の係数ベクトル$(f_0, \dots, f_n)$をメッセージとするcommitmentsスキームです [1]。つまり、$(f_0, \dots, f_n)$からcommitment $c$を生成し、それを開示するopeningを生成します。加えて、PCでは$c$の中の多項式$f(x)$をある評価点$\alpha$で評価した結果が$\beta$になる、つまり$f(\alpha)=\beta$であることだけを、$(f_0, \dots, f_n)$を明かさずに開示することも可能です。この性質により、**多項式そのものを隠したまま、その多項式が特定の条件を満たしていることを他者に証明できます**。
 
 厳密には。PCスキームは次のアルゴリズムによって定義されます [1]。
 - $\textsf{Setup}(1^{\lambda}, n) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ$1^{\lambda}$と最大の次数$n$を受け取り、公開パラメータ$\textsf{pp}$を生成する。
-- $\textsf{Commit}(\textsf{pp}, f(x), r) \rightarrow c$: 入力として公開パラメータ$\textsf{pp}$と多項式$f(x)$、乱数$r$を受け取り、 commitment $c$を出力する。ただし、$f(x)$の実際のデータは、$f(x)$の係数ベクトル$(a_0, \dots, a_n)$になる。また、$f(x)$の次数はアルゴリズム$\textsf{Setup}$で指定された整数$n$以下でなければならない。
+- $\textsf{Commit}(\textsf{pp}, f(x), r) \rightarrow c$: 入力として公開パラメータ$\textsf{pp}$と多項式$f(x)$、乱数$r$を受け取り、 commitment $c$を出力する。ただし、$f(x)$の実際のデータは、$f(x)$の係数ベクトル$(f_0, \dots, f_n)$になる。また、$f(x)$の次数はアルゴリズム$\textsf{Setup}$で指定された整数$n$以下でなければならない。
 - $\textsf{Open}(\textsf{pp}, f(x), r, c) \rightarrow d$: 入力として公開パラメータ$\textsf{pp}$と多項式$f(x)$、乱数$r$、commitment $c$を受け取り、 opening $d$を出力する。
 - $\textsf{VerifyPoly}(\textsf{pp}, f(x), c, d) \rightarrow 1/0$: 入力として公開パラメータ$\textsf{pp}$と多項式$f(x)$、commitment $c$、opening $d$を受け取り、1 (受理)または0 (拒否)を出力する。
 - $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$: 力として公開パラメータ$\textsf{pp}$と多項式$f(x)$、評価点$\alpha$、乱数$r$を受け取り、評価結果$\beta = f(\alpha)$とwitness $\omega_{\alpha}$を出力します。
@@ -118,8 +118,8 @@ $$
     3. $(Q, sQ) \in \mathbb{G}_2^{2}$を計算する。
     2. $\textsf{pp}=((P, sP, s^2P, \dots, s^nP)、(Q, sQ))$を出力する。
 - $\textsf{Commit}(\textsf{pp}, f(x), r) \rightarrow c$:
-    1. $f(x)$を係数ベクトル$(a_0, a_1, \dots, a_n) \in \mathbb{F}_r$としてパースする。
-    2. $c \leftarrow \Sigma_{i = 0}^{n} a_{i}(s^{i}P) \in \mathbb{G}_1$を計算する。
+    1. $f(x)$を係数ベクトル$(f_0, f_1, \dots, f_n) \in \mathbb{F}_r$としてパースする。
+    2. $c \leftarrow \Sigma_{i = 0}^{n} f_{i}(s^{i}P) \in \mathbb{G}_1$を計算する。
     3. $c$を出力する。
 - $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$:
     1. $q(x) = \frac{f(x) - f(\alpha)}{x - \alpha}$を計算する。
@@ -139,15 +139,69 @@ $$
     = e(\omega_{\alpha}, (sQ) - \alpha Q)
 $$
 
-また、証明者は$f(s)P, q(s)P$を計算できるにも関わらず、離散対数問題の困難性より$\textsf{pp}$から$s$を知ることはできません。したがって、これは$s$を証明者に対して隠しながら、証明者に$f(s), q(s)$を計算させるという機能を実現しています。よって、先述のSchwartz–Zippelの補題を用いた議論と合わせると、これはBindingを実現していると言えます。ただし、原論文 [1]の定理3.2で述べられているBindingの証明は、Schwartz–Zippelの補題ではなく、t-SDH仮定という計算量困難性の仮定に基づいていていることに注意してください。
+また、証明者は$f(s)P, q(s)P$を計算できるにも関わらず、離散対数問題の困難性より$\textsf{pp}$から$s$を知ることはできません。なぜなら、$\textsf{pp}$は証明者・検証者とは独立した信頼できる第三者によって生成され、その第三者は$\textsf{pp}$の生成後にスカラー$s$を破棄するからです。なお、実際にそのような第三者を用意することは難しいため、複数のユーザがそれぞれスカラー$s_i$を提供し、それらの総積$s=\prod s_i$を$\textsf{pp}$のスカラーとして用いることが多いです [13]。このようなプロトコルはtrusted setup ceremonyと呼ばれ、少なくとも一人の参加者が誠実で自身のスカラーを破棄すれば、誰も$\textsf{pp}$のスカラーを知ることはできません。
 
-上記の構成は、部分的にHidingを満たしています。具体的には、$f(x)$の係数のうち少なくとも一つが十分にランダムである、例えば$a_i$が254 bit程度の位数の有限体$F_r$からランダムに取られる場合であれば、攻撃者が$c$と次数$n$以下の評価点・評価結果から$f(x)$の係数や他の評価結果を推定することは計算量的に困難だと言えます。しかし、例えば次数が$n=31$で各係数が0もしくは1の場合、係数ベクトルの候補は$2^{32}$個しかないため、攻撃者は$\textsf{pp}$から各候補に対応する$2^{32}$個のcommitmentをそれぞれ生成できます。そのため、どの候補のものが渡されたcommitmentと一致するか確かめることによって、攻撃者はそのcommitmentに対応する$f(x)$の係数および任意の評価結果$f(\alpha)$を知ることができます。この問題を修正するために、原論文 [1]は3.3章でランダムな多項式で元の多項式を秘匿した構成を提案しています。ただし、その構成は検証者がペアリング$e$を3回計算する必要があるため、検証者の計算量を増やしています。それに対して、Plonk [2]などZKPの構成では、評価したい点$\alpha_1,\dots,\alpha_n$で評価結果が0になるような多項式をランダムに生成し、それを$f(x)$に足した多項式に本章で述べたKZG commitmentsの構成を適用することで、$f(x)$の係数を秘匿しています。
+以上のように、KZG Commitmentsは$s$を証明者に対して隠しながら、証明者に$f(s), q(s)$を計算させるという機能を実現しています。よって、先述のSchwartz–Zippelの補題を用いた議論と合わせると、これはBindingを実現していると言えます。ただし、原論文 [1]の定理3.2で述べられているBindingの証明は、Schwartz–Zippelの補題ではなく、t-SDH仮定という計算量困難性の仮定に基づいていていることに注意してください。
+
+上記の構成は、部分的にHidingを満たしています。具体的には、$f(x)$の係数のうち少なくとも一つが十分にランダムである、例えばある$f_i$が254 bit程度の位数の有限体$F_r$からランダムに取られる場合であれば、攻撃者が$c$と次数$n$以下の評価点・評価結果から$f(x)$の係数や他の評価結果を推定することは困難だと言えます。しかし、例えば次数が$n=31$で各係数が0もしくは1の場合、係数ベクトルの候補は$2^{32}$個しかないため、攻撃者は$\textsf{pp}$から各候補に対応する$2^{32}$個のcommitmentをそれぞれ生成できます。そのため、どの候補のものが渡されたcommitmentと一致するか確かめることによって、攻撃者はそのcommitmentに対応する$f(x)$の係数および任意の評価結果$f(\alpha)$を知ることができます。この問題を修正するために、原論文 [1]は3.3章でランダムな多項式で元の多項式を秘匿した構成を提案しています。ただし、その構成は検証者がペアリング$e$を3回計算する必要があるため、検証者の計算量を増やしています。それに対して、Plonk [2]などZKPの構成では、評価したい点$\alpha_1,\dots,\alpha_n$で評価結果が0になるような多項式をランダムに生成し、それを$f(x)$に足した多項式に本章で述べたKZG commitmentsの構成を適用することで、$f(x)$の係数を秘匿しています。
 
 
-### 複数の評価点・単一の評価結果の証明のバッチ化
+### 複数の評価点・複数の評価結果に対する証明のバッチ検証処理
+上述の構成は効率的に$f(\alpha)=\beta$を検証できる一方、複数の多項式を複数の評価点で評価した結果を検証したい場合、単純な方法では各多項式・評価点の組ごとにpairingを実行する必要があります。pairingの計算は楕円曲線の加算やスカラー倍の計算よりも時間がかかるため、KZG commitmentsを多用するためにはpairingの計算回数を減らさなければなりません。そこで、pairingの計算回数を多項式や評価点の個数に関わらず一定(2回)にする圧縮方法を、[2]の3.1章に沿って説明します。
 
+最初に、$t$個の異なる多項式$f^1(x), \dots, f^t(x)$を共通の評価点$\alpha$で評価した結果を検証する場合を考えます。証明者と検証者は次のプロトコルを実行します。
+1. 証明者が各多項式のcommitments $c_1 = \Sigma_{j=0}^{n} f^1_{j}(s^{j}P), \dots, c_t = \Sigma_{j=0}^{n} f^t_{j}(s^{j}P)$を生成し、それらを検証者に送信する。
+2. 検証者は乱数$\gamma$を$\mathbb{F}_r$から取り、それを証明者に送信する。
+3. 証明者は多項式$q(x) \leftarrow \Sigma_{i \in [t]} \gamma^{i-1} \cdot \frac{f^i(x)-f^i(\alpha)}{x-\alpha}$を計算し、$\omega \leftarrow \Sigma_{j=0}^{n} q_i(s^jP) \in \mathbb{G}_1$を検証者に送信する。
+4. 検証者は以下の点$F, v \in \mathbb{G}_1$を計算する。
+$$
+    F \leftarrow \Sigma_{i \in [t]} \gamma^{i-1} c_i\\
+    v \leftarrow \Sigma_{i \in [t]} \gamma^{i-1} \beta_i P
+$$
+5. 検証者は以下の等式が成り立つ場合に1を、そうでない場合に0を出力する。
+$$
+    e(F-v, Q) = e(\omega, sQ - \alpha Q)
+$$
 
-### 複数の評価点・複数の評価結果の証明のバッチ化
+なお、証明者と検証者は何度か通信を繰り返してプロトコルを実行していますが、これはFiat-Shamir変換を用いて非対話的なプロトコル、つまり証明者が一度データを送信すれば通信を必要とせずにそれを検証できるものに変換できます。具体的には、検証者に乱数を選ばせる代わりに、証明者はその前ステップまでで本来検証者に送信するデータ（例: ステップ2では、ステップ1で送信されるcommitments）のハッシュ値を計算し（厳密には、ランダムオラクルと呼ばれる理想化された関数の機能）、その出力を検証者が選んだ乱数と見做します。検証者は、受け取ったデータから同様にハッシュ関数を計算することで、証明者が使用した乱数が正当なものであることを確かめられます。証明者はハッシュ値の原像の衝突を見つけない限り、その乱数を変えずにハッシュ関数へ入力されたデータを変えることが困難であるため、このように生成される乱数は、検証者が対話的に選択した乱数と同じように扱っても問題ないと見なされています。
+
+上述の構成は明らかに正当性を満たします。つまり、すべての$i \in [t]$について$f^i(\alpha)=\beta_i$ならば、5の検証式は成立します。Bindingが成り立つことは、直感的には次のように理解できます。
+1. 乱数$s, \gamma$をそれぞれ変数$x, y$に置き換えると、5の検証式は次の多項式の関係に対応する。
+$$
+    \Sigma_{i \in [t]}(\Sigma_{j=0}^{n}f_j^ix^j)y^{i-1} - \Sigma_{i \in [t]} \beta_i y^{i-1} = \Sigma_{i \in [t]} (\Sigma_{j=0}^{n}q_j^ix^j) y^{i-1}(x - \alpha)
+$$
+2. この多項式の等式が成り立つとき、$y$の各項についてそれぞれ両辺が等しくなるため、すべての$i \in [t]$で$\Sigma_{j=0}^{n}f_j^ix^j - \beta_i = (\Sigma_{j=0}^{n}q_j^ix^j)(x - \alpha)$が同様に成り立つ。
+3. いずれかの$i$で$f^i(\alpha) \neq \beta$である、すなわちすべての$q(x)$について$\Sigma_{j=0}^{n}f_j^ix^j - \beta_i \neq (\Sigma_{j=0}^{n}q_j^ix^j)(x - \alpha)$であるならば、あるランダムな点$x=s, y=\gamma$で$\Sigma_{j=0}^{n}f_j^is^j - \beta_i = (\Sigma_{j=0}^{n}q_j^is^j)(s - \alpha)$が成り立つ確率は、Schwartz–Zippelの補題より無視できるほど小さいことがわかる。
+
+次に、2つの異なる評価点$\alpha_1, \alpha_2$で、それぞれ$t_1$個、$t_2$個の多項式$\{f^i(x)\}_{i \in [t_1]}, \{g^i(x)\}_{i \in [t_2]}$を評価した結果を検証することを考えます。上述のステップ1と同様に各多項式のcommitment$(c_1, \dots, c_{t_1}), (c^{'}_1, \dots, c^{'}_{t_2})$を検証者に送信した後、証明者と検証者は次のプロトコルを実行します。
+1. 検証者は乱数$\gamma, \gamma^{'}$をそれぞれ$\mathbb{F}_q$から取り、それらを証明者に送信する。
+2. 証明者は以下の2つの多項式を計算し、それらのwitness $\omega, \omega^{'}$を検証者に送信する。
+$$
+    h(X) \leftarrow \Sigma_{i \in [t_1]} \gamma^{i-1} \cdot \frac{f^i(x)-f^i(\alpha)}{x-\alpha} \\
+    h^{'}(X) \leftarrow \Sigma_{i \in [t_2]} {\gamma^{'}}^{i-1} \cdot \frac{g^i(x)-g^i(\alpha^{'})}{x-\alpha^{'}} \\
+    \omega \leftarrow \Sigma_{j=0}^{n} h_j(s^jP) \in \mathbb{G}_1 \\
+    \omega^{'} \leftarrow \Sigma_{j=0}^{n} h^{'}_j(s^jP) \in \mathbb{G}_1
+$$
+3. 検証者は乱数$r^{'}$を$\mathbb{F}_q$から取り、次の値を計算する。
+$$
+    F \leftarrow (\Sigma_{i \in [t_1]} \gamma^{i-1}c_i - (\Sigma_{i \in [t_1]} \gamma^{i-1}\beta_i)P) + r^{'}(\Sigma_{i \in [t_2]}  {\gamma^{'}}^{i-1} c^{'}_i - (\Sigma_{i \in [t_2]}  {\gamma^{'}}^{i-1}\beta^{'}_i)P)
+$$
+4. 検証者は以下の等式が成り立つ場合に1を、そうでない場合に0を出力する。
+$$
+    e(F + \alpha \omega + r^{'} \alpha^{'} \omega^{'}, Q) = e(\omega + r^{'} \omega^{'}, sQ)
+$$
+
+同様にFiat-Shamir変換を適用することで、上記の構成を非対話的なプロトコルに変換することが可能です。正当性は次のように確かめられます。
+$$
+    e(F + \alpha \omega + r^{'} \alpha^{'} \omega^{'}, Q)\\
+    = [(\Sigma_{i \in [t_1]} \gamma^{i-1} f(s) - (\Sigma_{i \in [t_1]} \gamma^{i-1}\beta_i)) + r^{'}(\Sigma_{i \in [t_2]}  {\gamma^{'}}^{i-1} g(s) - (\Sigma_{i \in [t_2]}  {\gamma^{'}}^{i-1}\beta^{'}_i)P) + \alpha h(s) + r^{'} \alpha^{'} h^{'}(s)]_T \\
+    = [(\Sigma_{i \in [t_1]} \gamma^{i-1} (f^i(s) - \beta_i) \cdot \alpha \cdot \frac{f^i(s)-f^i(\alpha)}{s-\alpha}) + r^{'}(\Sigma_{i \in [t_1]} {\gamma^{'}}^{i-1}(g^i(s) - \beta^{'}_i) \cdot \alpha^{'} \cdot \frac{g^i(s)-g^i(\alpha^{'})}{s-\alpha^{'}})]_T \\
+    = [(\Sigma_{i \in [t_1]} \gamma^{i-1} s \cdot \frac{f^i(s)-f^i(\alpha)}{s-\alpha}) + r^{'}(\Sigma_{i \in [t_1]} {\gamma^{'}}^{i-1}s \cdot \frac{g^i(s)-g^i(\alpha^{'})}{s-\alpha^{'}})]_T\\
+    = e(h(s) + r^{'}h^{'}(s), sQ)\\
+    = e(\omega + r^{'} \omega^{'}, sQ)
+$$
+Bindingも、前述の評価点が全て共通だった場合と同様に、2つの多項式が等しくない場合に乱数で評価した結果が一致する確率は無視できるほど小さいという性質から理解できます。このように、複数の等式を個別に検証する代わりに、左辺・右辺のランダムな線形和 (random linear combination)が一致するかを検証することで、pairingの計算回数を減らすことが可能です。このテクニックを応用することで、3個以上の評価点に関する検証を同様にバッチ化することができます。
+
 ## References
 1. Kate, A., Zaverucha, G. M., & Goldberg, I. (2010). Polynomial commitments. Tech. Rep.
 2. Gabizon, A., Williamson, Z. J., & Ciobotaru, O. (2019). Plonk: Permutations over lagrange-bases for oecumenical noninteractive arguments of knowledge. Cryptology ePrint Archive.
@@ -161,3 +215,4 @@ $$
 10. Bethencourt, J. (n.d.). Intro to Bilinear Maps. Available at https://people.csail.mit.edu/alinush/6.857-spring-2015/papers/bilinear-maps.pdf
 11. Oveis Gharan, S. (2017). CSE 521: Design and Analysis of Algorithms I. Lecture 7: Schwartz-Zippel Lemma, Perfect Matching. Available at https://courses.cs.washington.edu/courses/cse521/17wi/521-lecture-7.pdf
 12. Fleischhacker, N., Hall-Andersen, M., & Simkin, M. (2024). Extractable Witness Encryption for KZG Commitments and Efficient Laconic OT. Cryptology ePrint Archive.
+13. Ethereum Community. (2022). KZG Ceremony. SUMMONING GUIDES. Available at https://ceremony.ethereum.org/
