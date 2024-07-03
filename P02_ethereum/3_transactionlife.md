@@ -173,16 +173,13 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
   - Uncle block: メインチェーンから分岐したブロックのこと
   - 具体的には、任意のUncle blockのブロックヘッダを2つまで格納することが出来る
-- `なぜ?: Ethereumのブロックチェーンは、ブロック生成速度がBitcoin Protocolと比べて速いため、Nakamoto Consensusのままだとより頻繁に分岐しやすく、分岐した状態で伸びっぱなしになりやすい。
-- そのため、別のコンセンサスアルゴリズムを採用しており、その過程でUncleブロックを使用して、ブロックに情報を格納している。`
+- `なぜ?：Ethereumのブロックチェーンは、ブロック生成速度がBitcoin Protocolと比べて速いため、Nakamoto Consensusのままだとより頻繁に分岐しやすく、分岐した状態で伸びっぱなしになりやすい。そのため、別のコンセンサスアルゴリズムを採用しており、その過程でUncleブロックを使用して、ブロックに情報を格納している。`
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
   - 以下の図では親の親を共有している(文字通りの)Uncle blockを示しているが、これだけをUncle blockと呼ぶ場合もある
 
 バリデーターノードは、トランザクションに加えてUncle blockの情報もブロックに格納します。Uncle blockとは、メインチェーンから分岐したブロックのことです。各ブロックに任意のUncle blockのブロックヘッダを2つまで格納することが出来ます。Ethereumは、Block intervalがBitcoin Protocolと比較するとより頻繁に分岐するため、Uncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えています。
-
-【キャスレー：Uncle blockはなぜ必要？⇒ほぼ同時にブロックが生成されることがあるが、最終的に採用されるのは1つだけ。Uncle blockをメインチェーンには入れないが、存在していることで中央集権化のリスクを減らす＆セキュリティも担保される？】
 
 <center>
 <img src="./img/uncle.svg" width="60%">
