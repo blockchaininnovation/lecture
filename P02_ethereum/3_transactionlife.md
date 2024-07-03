@@ -173,7 +173,8 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
   - Uncle block: メインチェーンから分岐したブロックのこと
   - 具体的には、任意のUncle blockのブロックヘッダを2つまで格納することが出来る
-- `なぜ?:Ethereumのブロックチェーンは、ブロック生成速度がBitcoin Protocolと比べて速いため、Nakamoto Consensusのままだとより頻繁に分岐しやすく、分岐した状態で伸びっぱなしになりやすいため、別のコンセンサスアルゴリズムが必要でその過程でUncle blockを使用しているためブロックに情報を入れている`
+- `なぜ?: Ethereumのブロックチェーンは、ブロック生成速度がBitcoin Protocolと比べて速いため、Nakamoto Consensusのままだとより頻繁に分岐しやすく、分岐した状態で伸びっぱなしになりやすい。
+- そのため、別のコンセンサスアルゴリズムを採用しており、その過程でUncleブロックを使用して、ブロックに情報を格納している。`
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている
