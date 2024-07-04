@@ -121,7 +121,7 @@ Proto-Dankshardingの導入に伴い、Ethereumの仮想マシン（EVM）には
     - トランザクションが持つversioned_hashをEVMに読み込む機能を提供します。
 
 2. point_evaluation_precompile
-    - このプリコンパイルは、与えられた多項式 $p(x)$ のKZGコミットメントと、ポイント $z$ およびその評価値 $y$ が提供された $versioned_hash$ に対応することを証明するKZG Proofを使用して、$f(z)$ が $y$ であることを検証します。プリコンパイルは、192バイトの入力を受け取り、versioned_hash、$z$、$y$、commitment、proofを解析し、コミットメントがversioned_hashに一致することを確認した後、KZG proofを検証します。この検証により、Blobの特定の要素が期待される値を持っていることが証明されます。
+    - このプリコンパイルは、与えられた多項式 $p(x)$ のKZGコミットメントと、ポイント $z$ およびその評価値 $y$ が提供された $versioned_hash$ に対応することを証明するKZG Proofを使用して、$f(z)$ が $y$ であることを検証します。プリコンパイルは、192バイトの入力を受け取り、versioned_hash、$z$ 、$y$ 、commitment、proofを解析し、コミットメントがversioned_hashに一致することを確認した後、KZG proofを検証します。この検証により、Blobの特定の要素が期待される値を持っていることが証明されます。
     - このプリコンパイルを使用することで、$f(\omega^i) = B_i$ という関係を確認し、Blobの $i$ 番目の要素が $B_i$ であることを証明できます。
 
 
