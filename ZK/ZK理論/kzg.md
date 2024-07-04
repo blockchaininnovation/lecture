@@ -24,7 +24,7 @@ Commitmentsスキームを応用することで、例えばオンラインじゃ
 
 厳密には、commitmentsスキームは次のアルゴリズムによって定義されます [7]。
 - $\textsf{Setup}(1^{\lambda}) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ $1^{\lambda}$を受け取り、公開パラメータ $\textsf{pp}$を生成する。
-- $\textsf{Commit}(\textsf{pp}, m, r) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$とメッセージ$m$、乱数 $r$を受け取り、 commitment $c$を出力する。
+- $\textsf{Commit}(\textsf{pp}, m, r) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $r$を受け取り、 commitment $c$を出力する。
 - $\textsf{Open}(\textsf{pp}, m, r, c) \rightarrow d$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $r$、commitment $c$を受け取り、 opening $d$を出力する。
 - $\textsf{Verify}(\textsf{pp}, m, c, d) \rightarrow 1/0$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、commitment $c$、opening $d$を受け取り、1 (受理)または0 (拒否)を出力する。
 
@@ -44,7 +44,7 @@ HidingとBindingは、直感的には次のように定義されます。
 
 
 ### Polynomial Commitments
-PCスキームは、多項式 $f(x)=\Sigma_{i=0}^n f_i x^i$の係数ベクトル $(f_0, \dots, f_n)$をメッセージとするcommitmentsスキームです [1]。つまり、 $(f_0, \dots, f_n)$からcommitment $c$を生成し、それを開示するopeningを生成します。加えて、PCでは $c$の中の多項式$f(x)$をある評価点 $\alpha$で評価した結果が $\beta$になる、つまり $f(\alpha)=\beta$であることだけを、 $(f_0, \dots, f_n)$を明かさずに開示することも可能です。この性質により、**多項式そのものを隠したまま、その多項式が特定の条件を満たしていることを他者に証明できます**。
+PCスキームは、多項式 $f(x)=\Sigma_{i=0}^n f_i x^i$の係数ベクトル $(f_0, \dots, f_n)$をメッセージとするcommitmentsスキームです [1]。つまり、 $(f_0, \dots, f_n)$からcommitment $c$を生成し、それを開示するopeningを生成します。加えて、PCでは $c$の中の多項式 $f(x)$をある評価点 $\alpha$で評価した結果が $\beta$になる、つまり $f(\alpha)=\beta$であることだけを、 $(f_0, \dots, f_n)$を明かさずに開示することも可能です。この性質により、**多項式そのものを隠したまま、その多項式が特定の条件を満たしていることを他者に証明できます**。
 
 厳密には。PCスキームは次のアルゴリズムによって定義されます [1]。
 - $\textsf{Setup}(1^{\lambda}, n) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ $1^{\lambda}$と最大の次数 $n$を受け取り、公開パラメータ $\textsf{pp}$を生成する。
@@ -57,10 +57,8 @@ PCスキームは、多項式 $f(x)=\Sigma_{i=0}^n f_i x^i$の係数ベクトル
 これらのアルゴリズムが以下の2つの関係を満たすとき、commitmentsスキームは正当性 (correctness)があると言われます [1]。
 ```math
 \begin{align*}
-    Pr[\textsf{VerifyPoly}(\textsf{pp}, f(x), c, \textsf{Open}(\textsf{pp}, f(x), r, c))=1] \geq 1 - \textsf{negl}(\lambda)
-\end{align*}
-\begin{align*}
-    Pr[\textsf{VerifyEval}((\textsf{pp}, c, \alpha, \textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r)))] \geq 1 - \textsf{negl}(\lambda)
+    &Pr[\textsf{VerifyPoly}(\textsf{pp}, f(x), c, \textsf{Open}(\textsf{pp}, f(x), r, c))=1] \geq 1 - \textsf{negl}(\lambda) \\
+    &Pr[\textsf{VerifyEval}((\textsf{pp}, c, \alpha, \textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r)))] \geq 1 - \textsf{negl}(\lambda)
 \end{align*}
 ```
 特に後者の条件は、 $f(\alpha)=\beta$を満たす正当な $f(x)$、 $\alpha$、 $\beta$に対して生成されたwitnessは、十分に高い確率で $\textsf{VerifyEval}$によって受理されることを要請しています。
@@ -88,24 +86,30 @@ KZG commitmentの構成を説明するために必要な記号を準備します
     \mathbb{G}_2 &= \{\mathcal{O}, Q, 2Q, \dots, (r-1)Q\}
 \end{align*}
 ```
-同様に、$\mathbb{G}_T$はある有限体上の整数$g$の乗算を繰り返して得られる集合として定義され、$r$乗すると1になります。つまり、
-$$
+同様に、 $\mathbb{G}_T$はある有限体上の整数 $g$の乗算を繰り返して得られる集合として定義され、 $r$乗すると1になります。つまり、
+```math
+\begin{align*}
     g^r = 1 \\
     \mathbb{G}_T = \{1, g, g^2, \dots, g^{r-1}\}
-$$
+\end{align*}
+```
 pairing $e$は次の2つの性質を満たします [9]。
 1. 非縮退性
-任意の$P \in \mathbb{G}_1$（$Q \in \mathbb{G}_2$）に対して、$e(P, Q) = 1$ならば$Q = \mathbb{O}$ ($P = \mathbb{O}$)である。
+任意の $P \in \mathbb{G}_1$（ $Q \in \mathbb{G}_2$）に対して、 $e(P, Q) = 1$ならば $Q = \mathbb{O}$ ( $P = \mathbb{O}$)である。
 2. 双線型性
-$$
-    e(P_1 + P_2, Q) = e(P_1, Q) e(P_2, Q) \\
-    e(P, Q_1 + Q_2) = e(P, Q_1) e(P, Q_2)
-$$
+```math
+\begin{align*}
+    e(P_1 + P_2, Q) &= e(P_1, Q) e(P_2, Q) \\
+    e(P, Q_1 + Q_2) &= e(P, Q_1) e(P, Q_2)
+\end{align*}
+```
 
-これらの性質より、pairingは$aP$、$bQ$のスカラーの乗算に対応していることがわかります。
-$$
+これらの性質より、pairingは $aP$、 $bQ$のスカラーの乗算に対応していることがわかります。
+```math
+\begin{align*}
     e(aP, bQ) = e(P, bQ)^a = (e(P, Q)^b)^a = e(P, Q)^{ab}
-$$
+\end{align*}
+```
 
 現在実用されているpairingの構成では、 $\mathbb{G}_{T}$は $\mathbb{G}_1, \mathbb{G}_2$と異なる集合であり、効率的に（多項式時間以内に） $g^{x} \in \mathbb{G}_{T}$の要素を $xP \in \mathbb{G}_{1}$や $xQ \in \mathbb{G}_{2}$に変換することはできません。したがって、pairing $e$の乗算結果を $e$の入力として使うことはできないので、**pairingでは1度しか点同士の乗算を行えません**。以上のようなpairingの性質は、bilinear mapとして抽象化されています [10]。
 
@@ -119,7 +123,7 @@ KZG commitmentsは、端的には剰余の定理の関係が成り立つこと�
 直感的には、証明者が検証者に $f(\alpha)=\beta$になることを示すためには、
 証明者がこのような $q(x)$を直接検証者に送信し、検証者には $f(x) - \beta$が $q(x)(x - \alpha)$と多項式として等しいことを確かめてもらえば良いと言えます。しかし、この方法では検証者の計算量・通信量が多項式の次数 $n$に対して線形以上のオーダーで増加するため、効率的ではありません。
 
-そこで、多項式として等式を検証する代わりに、あるランダムな一点$s$で多項式を評価した結果が等しいこと、すなわち $f(s) - \beta = q(s)(s - \alpha)$を検証することを考えます。証明者は $f(s), q(s)$を検証者に送信すると、検証者はこの等式が整数として成立することだけを確かめられれば良いため、検証者の計算量・通信量は $n$に関わらず一定になることがわかります。では、この方式はBindingの性質を実現している、つまり悪意のある証明者が $f(\alpha) \neq \beta$ではない $f(x), \alpha, \beta$に対して有効な $q(s)$を提出することを防いでいるでしょうか？仮に $s$がランダムかつ、証明者が $s$を知ることができなければ、Schwartz–Zippelの補題によりBindingが無視できるほど小さい確率を除いて成り立つことを証明できます [11]。具体的には、非零の次数 $n$の多項式で $g(x)=0$となる点 $x$は高々 $n$個しかないため、サイズ $|S|$の集合から評価点 $s \in S$を一様にランダムに取った時に、 $g(s)=0$となる確率、すなわち $s$がその $n+1$個の点のいずれかに一致する確率は高々 $\frac{n}{|S|}$になります。今回の例では、 $g(x) = f(x) - \beta - q(x)(x - \alpha)$、 $|S| \approx 2^{254}$であるため、次数 $n$が100万程度でも $g(s)=0$になる確率は $\frac{1000000}{2^{254}} \approx 3.45447×10^{-71}$で、無視できる程小さい値になります。
+そこで、多項式として等式を検証する代わりに、あるランダムな一点 $s$で多項式を評価した結果が等しいこと、すなわち $f(s) - \beta = q(s)(s - \alpha)$を検証することを考えます。証明者は $f(s), q(s)$を検証者に送信すると、検証者はこの等式が整数として成立することだけを確かめられれば良いため、検証者の計算量・通信量は $n$に関わらず一定になることがわかります。では、この方式はBindingの性質を実現している、つまり悪意のある証明者が $f(\alpha) \neq \beta$ではない $f(x), \alpha, \beta$に対して有効な $q(s)$を提出することを防いでいるでしょうか？仮に $s$がランダムかつ、証明者が $s$を知ることができなければ、Schwartz–Zippelの補題によりBindingが無視できるほど小さい確率を除いて成り立つことを証明できます [11]。具体的には、非零の次数 $n$の多項式で $g(x)=0$となる点 $x$は高々 $n$個しかないため、サイズ $|S|$の集合から評価点 $s \in S$を一様にランダムに取った時に、 $g(s)=0$となる確率、すなわち $s$がその $n+1$個の点のいずれかに一致する確率は高々 $\frac{n}{|S|}$になります。今回の例では、 $g(x) = f(x) - \beta - q(x)(x - \alpha)$、 $|S| \approx 2^{254}$であるため、次数 $n$が100万程度でも $g(s)=0$になる確率は $\frac{1000000}{2^{254}} \approx 3.45447×10^{-71}$で、無視できる程小さい値になります。
 
 では、いかにして $s$を証明者に対して隠しながら、同時に証明者に $f(s), q(s)$を計算させることができるでしょうか？これを実現するために、KZG commitmentsは楕円曲線とpairingを利用します。以下がその基本的な構成になります [1, 12]。
 - $\textsf{Setup}(1^{\lambda}, n) \rightarrow \textsf{pp}$: 
@@ -133,7 +137,7 @@ KZG commitmentsは、端的には剰余の定理の関係が成り立つこと�
     3. $c$を出力する。
 - $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$:
     1. $q(x) = \frac{f(x) - f(\alpha)}{x - \alpha}$を計算する。
-    2. $q(x)$を係数ベクトル$(q_0, q_1, \dots, q_n) \in \mathbb{F}_r$としてパースする。
+    2. $q(x)$を係数ベクトル $(q_0, q_1, \dots, q_n) \in \mathbb{F}_r$としてパースする。
     3. $\omega_{\alpha} \leftarrow \Sigma_{i = 0}^{n} q_{i}(s^{i}P) \in \mathbb{G}_1$を計算する。
     4. $\omega_{\alpha}$を出力する。
 - $\textsf{VerifyEval}(\textsf{pp}, c, \alpha, \beta, \omega_{\alpha}) \rightarrow 1/0$:
@@ -151,7 +155,7 @@ KZG commitmentsは、端的には剰余の定理の関係が成り立つこと�
 \end{align*}
 ```
 
-また、証明者は $f(s)P, q(s)P$を計算できるにも関わらず、離散対数問題の困難性より $\textsf{pp}$から $s$を知ることはできません。なぜなら、 $\textsf{pp}$は証明者・検証者とは独立した信頼できる第三者によって生成され、その第三者は $\textsf{pp}$の生成後にスカラー$s$を破棄するからです。なお、実際にそのような第三者を用意することは難しいため、複数のユーザがそれぞれスカラー $s_i$を提供し、それらの総積 $s=\prod s_i$を $\textsf{pp}$のスカラーとして用いることが多いです [13]。このようなプロトコルはtrusted setup ceremonyと呼ばれ、少なくとも一人の参加者が誠実で自身のスカラーを破棄すれば、誰も $\textsf{pp}$のスカラーを知ることはできません。
+また、証明者は $f(s)P, q(s)P$を計算できるにも関わらず、離散対数問題の困難性より $\textsf{pp}$から $s$を知ることはできません。なぜなら、 $\textsf{pp}$は証明者・検証者とは独立した信頼できる第三者によって生成され、その第三者は $\textsf{pp}$の生成後にスカラー $s$を破棄するからです。なお、実際にそのような第三者を用意することは難しいため、複数のユーザがそれぞれスカラー $s_i$を提供し、それらの総積 $s=\prod s_i$を $\textsf{pp}$のスカラーとして用いることが多いです [13]。このようなプロトコルはtrusted setup ceremonyと呼ばれ、少なくとも一人の参加者が誠実で自身のスカラーを破棄すれば、誰も $\textsf{pp}$のスカラーを知ることはできません。
 
 以上のように、KZG Commitmentsは $s$を証明者に対して隠しながら、証明者に $f(s), q(s)$を計算させるという機能を実現しています。よって、先述のSchwartz–Zippelの補題を用いた議論と合わせると、これはBindingを実現していると言えます。ただし、原論文 [1]の定理3.2で述べられているBindingの証明は、Schwartz–Zippelの補題ではなく、t-SDH仮定という計算量困難性の仮定に基づいていていることに注意してください。
 
@@ -191,7 +195,7 @@ KZG commitmentsは、端的には剰余の定理の関係が成り立つこと�
 2. この多項式の等式が成り立つとき、 $y$の各項についてそれぞれ両辺が等しくなるため、すべての $i \in [t]$で $\Sigma_{j=0}^{n}f_j^ix^j - \beta_i = (\Sigma_{j=0}^{n}q_j^ix^j)(x - \alpha)$が同様に成り立つ。
 3. いずれかの $i$で $f^i(\alpha) \neq \beta$である、すなわちすべての $q(x)$について $\Sigma_{j=0}^{n}f_j^ix^j - \beta_i \neq (\Sigma_{j=0}^{n}q_j^ix^j)(x - \alpha)$であるならば、あるランダムな点 $x=s, y=\gamma$で $\Sigma_{j=0}^{n}f_j^is^j - \beta_i = (\Sigma_{j=0}^{n}q_j^is^j)(s - \alpha)$が成り立つ確率は、Schwartz–Zippelの補題より無視できるほど小さいことがわかる。
 
-次に、2つの異なる評価点 $\alpha_1, \alpha_2$で、それぞれ $t_1$個、 $t_2$個の多項式 $\{f^i(x)\}_{i \in [t_1]}, \{g^i(x)\}_{i \in [t_2]}$を評価した結果を検証することを考えます。上述のステップ1と同様に各多項式のcommitment $(c_1, \dots, c_{t_1}), (c^{'}_1, \dots, c^{'}_{t_2})$を検証者に送信した後、証明者と検証者は次のプロトコルを実行します。
+次に、2つの異なる評価点 $\alpha_1, \alpha_2$で、それぞれ $t_1$個、 $t_2$個の多項式 $\{f^i(x)\}_{i \in [t_1]}$, $\{g^i(x)\}_{i \in [t_2]}$を評価した結果を検証することを考えます。上述のステップ1と同様に各多項式のcommitment $(c_1, \dots, c_{t_1})$, $(c^{'}_1, \dots, c^{'}_{t_2})$を検証者に送信した後、証明者と検証者は次のプロトコルを実行します。
 1. 検証者は乱数 $\gamma, \gamma^{'}$をそれぞれ $\mathbb{F}_q$から取り、それらを証明者に送信する。
 2. 証明者は以下の2つの多項式を計算し、それらのwitness $\omega, \omega^{'}$を検証者に送信する。
 ```math
