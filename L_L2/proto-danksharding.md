@@ -137,7 +137,7 @@ zkRollupで Blob を検証するナイーブな方法は、Blobをプライベ�
 
 ### 同値性証明の手順：
 
-1. 多項式コミットメントの集合:$C_1, C_2, C_k$など複数のコミットメントが存在し、それぞれが異なるスキーム（例えばKate, FRI, Bulletproofなど）に基づいています。
+1. 多項式コミットメントの集合: $C_1, C_2, C_k$ など複数のコミットメントが存在し、それぞれが異なるスキーム（例えばKate, FRI, Bulletproofなど）に基づいています。
 2. 評価ポイントの選択: これらのコミットメントのハッシュ値を取り、$z=hash(C_1 ... C_k)$それを多項式 $P$を評価する点 $z$として使用します。
 3. 証明の公開と検証: 各コミットメント $C_i$ に対して、$C_i(z)=a$となる証明$O_i$を公開し、$a$が全てのケースで同じであることを検証します。
 
@@ -146,6 +146,7 @@ zkRollupは、この同値性証明を利用して、公開データがversioned
 このテクニックを使えば、zk-snarkの公開入力としてblobを利用することができ、zkRollupのdata availabilityとしてblobが利用できるようになります。
 
 BLS12-381ではない任意のSNARKの場合はこちらをご覧ください。
+
 https://notes.ethereum.org/@vbuterin/proto_danksharding_faq#Moderate-approach-works-with-any-ZK-SNARK
 
 
