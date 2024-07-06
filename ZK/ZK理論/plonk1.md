@@ -1,6 +1,6 @@
 <center>
 
-  # ゼロ知識証明の理論1: Plonkの概要
+  # ゼロ知識証明の理論 前編: Plonkの概要
 
 </center>
 
@@ -46,11 +46,11 @@ Plonkの証明者は次に、算術回路の充足可能性問題を、ゲート
 
 次に、copy constraintsについて説明します。これは、あるゲート $i$の出力 $c_i$が別のゲート $j$の入力 $a_j$ (もしくは $b_j$)と等しい場合に、それらのワイヤの値が等しい、つまり $x_{c_i} = x_{a_j}$ (もしくは $x_{c_i} = x_{b_j}$)であるという制約条件になります。もしワイヤの値がgate constraintsのみで制約される場合、悪意のある証明者は $x_{c_i}$とは異なる $x_{a_j}$を使うことで、回路を正しく評価していないにも関わらず全ての制約条件を満たすことができてしまうため、copy constraintsも追加で必要になります。
 
-では、どのようにしてcopy constraintsを単純な等式で表すことができるでしょうか？各ワイヤごとにワイヤ間の等式 $x_{c_i} = x_{a_j}$を定めると、等式の種類がワイヤ数に比例して増えるため望ましくありません。そこで、値のコピーが全てのワイヤで成り立つことだけを確認すればいいという点を利用して、ワイヤ間の等式をまとめて確認します。具体的には、次のような累積値 (アキュムレータ)を計算します。ただし、 $\beta, \gamma$は証明者が予測できないような乱数です。便宜的に、 $1 \leq i \leq n, n+1 \leq i \leq 2n, 2n+1 \leq i \leq 3n$の場合、 $x_i$はそれぞれ $x_{a_i}, x_{b_i}, x_{c_i}$を表すとし、 $\sigma(i)$は、 $i \in [3n]$番目のワイヤの値がコピーされるワイヤを表します。
+では、どのようにしてcopy constraintsを単純な等式で表すことができるでしょうか？各ワイヤごとにワイヤ間の等式 $x_{c_i} = x_{a_j}$を定めると、等式の種類がワイヤ数に比例して増えるため望ましくありません。そこで、値のコピーが全てのワイヤで成り立つことだけを確認すればいいという点を利用して、ワイヤ間の等式をまとめて確認します。具体的には、次のような累積値 (アキュムレータ)を計算します。ただし、 $\beta, \gamma$は証明者が予測できないような乱数です。便宜的に、 $0 \leq i < n, n \leq i < 2n, 2n \leq i < 3n$の場合、 $x_i$はそれぞれ $x_{a_i}, x_{b_i}, x_{c_i}$を表すとし、 $\sigma(i)$は、 $i$番目のワイヤの値がコピーされるワイヤを表します。
 ```math
 \begin{align*}
-    F &= \prod_{i \in [3n]} (x_{i} + \beta \cdot i + \gamma) \\
-    G &= \prod_{i \in [3n]} (x_{i} + \beta \cdot \sigma(i) + \gamma) 
+    F &= \prod_{i=0}^{3n-1} (x_{i} + \beta \cdot i + \gamma) \\
+    G &= \prod_{i=0}^{3n-1} (x_{i} + \beta \cdot \sigma(i) + \gamma) 
 \end{align*}
 ```
 $x_i = x_{\sigma(i)}$が全ての $i$で成り立つならば、累積値の値は $x_i$と $x_{\sigma(i)}$を入れ替えても同じように計算されるはずなので、 $F=G$が成り立ちます。
@@ -58,14 +58,14 @@ $x_i = x_{\sigma(i)}$が全ての $i$で成り立つならば、累積値の値�
 
 
 ## 制約条件から多項式へ
-最後に、KZG commitmentsを利用するために、制約条件を多項式へ変換します。その基礎となるテクニックが多項式補間です。ある2点を通る直線 (1次多項式)、3点を通る2次曲線 (2次多項式)を一意に決められるように、ある $n$点を通る $n-1$次多項式を求めることができます。よって、例えば左入力のワイヤの値 $(1, x_{a_1}), \dots, (n, x_{a_n})$から $a(i) = x_{a_i}$を満たす $n-1$次多項式 $a(x)$を求められます。なお、実際のプロトコルでは、$\textbf{g}^n = 1$を満たす1の累乗根 $\textbf{g}$を用いて、自然数 $i$の代わりに $\textbf{g}^{i-1}$を使用します。これにより、高速フーリエ変換 (fast Fourier transform; FFT)を利用して高速に多項式の評価と補間を行うことが可能になります。
+最後に、KZG commitmentsを利用するために、制約条件を多項式へ変換します。その基礎となるテクニックが多項式補間です。ある2点を通る直線 (1次多項式)、3点を通る2次曲線 (2次多項式)を一意に決められるように、ある $n$点を通る $n-1$次多項式を求めることができます。よって、例えば左入力のワイヤの値 $(0, x_{a_0}), \dots, (n-1, x_{a_{n-1}})$から $a(i) = x_{a_i}$を満たす $n-1$次多項式 $a(x)$を求められます。なお、実際のプロトコルでは、$\textbf{g}^n = 1$を満たす1の累乗根 $\textbf{g}$を用いて、自然数 $i$の代わりに $\textbf{g}^{i}$を使用します。これにより、高速フーリエ変換 (fast Fourier transform; FFT)を利用して高速に多項式の評価と補間を行うことが可能になります。
 
 gate constaintsは以下のように多項式に変換されます。
-1. パラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$を多項式補間して、 $n-1$次多項式 $\textbf{q}_L(x), \textbf{q}_R(x), \textbf{q}_O(x), \textbf{q}_M(x), \textbf{q}_C(x)$を求める。全ての $i\in [n]$で、それぞれ $\textbf{q}_L(\textbf{g}^{i-1})=q_{L_i}, \textbf{q}_R(\textbf{g}^{i-1})=q_{R_i}, \textbf{q}_O(\textbf{g}^{i-1})=q_{O_i}, \textbf{q}_M(\textbf{g}^{i-1})=q_{M_i}, \textbf{q}_C(\textbf{g}^{i-1})=q_{C_i}$が成立する。
-2. ワイヤの値 $\textbf{x}_a=(x_{a_i})_{i \in [n]}, \textbf{x}_b=(x_{b_i})_{i \in [n]}, \textbf{x}_c=(x_{c_i})_{i \in [n]}$を多項式補間して、 $n-1$次多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を求める。全ての $i\in [n]$で、それぞれ $\textbf{a}(\textbf{g}^{i-1}) = x_{a_i}, \textbf{b}(\textbf{g}^{i-1}) = x_{b_i}, \textbf{c}(\textbf{g}^{i-1}) = x_{c_i}$が成立する。
+1. パラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$を多項式補間して、 $n-1$次多項式 $\textbf{q}_L(x), \textbf{q}_R(x), \textbf{q}_O(x), \textbf{q}_M(x), \textbf{q}_C(x)$を求める。全ての $i\in \{0,\dots,n-1\}$で、それぞれ $\textbf{q}_L(\textbf{g}^{i})=q_{L_i}, \textbf{q}_R(\textbf{g}^{i})=q_{R_i}, \textbf{q}_O(\textbf{g}^{i})=q_{O_i}, \textbf{q}_M(\textbf{g}^{i})=q_{M_i}, \textbf{q}_C(\textbf{g}^{i})=q_{C_i}$が成立する。
+2. ワイヤの値 $\textbf{x}_a=(x_{a_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_b=(x_{b_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_c=(x_{c_i})_{i \in \{0,\dots, n-1\}}$を多項式補間して、 $n-1$次多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を求める。全ての $i\in \{0,\dots, n-1\}$で、それぞれ $\textbf{a}(\textbf{g}^{i}) = x_{a_i}, \textbf{b}(\textbf{g}^{i}) = x_{b_i}, \textbf{c}(\textbf{g}^{i}) = x_{c_i}$が成立する。
 3. 多項式の等式 $\textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x) = 0$が成り立つことを、KZG commitmentsで証明する。
 
-copy constraintsを多項式に変換する際は、 $i > n$についても 1の累乗根で表せるようにするために、定数 $k_1, k_2 \in \mathbb{F}_q$を用いて、 $n+1 \leq i \leq 2n$を $k_1\textbf{g}^i$、$2n+1 \leq i \leq 3n$を $k_2\textbf{g}^i$で表します。なお、集合 $(\textbf{g}^0, \dots, \textbf{g}^{n-1}), (k_1 \textbf{g}^{0}, \dots, k_1 \textbf{g}^{n-1}), (k_2 \textbf{g}^0, \dots, k_2 \textbf{g}^{n-1})$は別個なものになっているため、 $i \in [3n]$と1対1で対応しています。そして、累積値に対応する多項式を次のように定義します。ただし、 $L_i(x) = \prod_{j \in [n], i\neq j} \frac{x-\textbf{g}^{j-1}}{\textbf{g}^{i-1}-\textbf{g}^{j-1}}$であり、 $L_i(\textbf{g}^{i-1})=1$、 $j \neq i$で $L_i(\textbf{g}^{j-1})=0$であるという特徴を持ちます。
+copy constraintsを多項式に変換する際は、 $i \geq n$についても 1の累乗根で表せるようにするために、定数 $k_1, k_2 \in \mathbb{F}_q$を用いて、 $n \leq i < 2n$を $k_1\textbf{g}^i$、$2n \leq i < 3n$を $k_2\textbf{g}^i$で表します。なお、集合 $(\textbf{g}^0, \dots, \textbf{g}^{n-1}), (k_1 \textbf{g}^{0}, \dots, k_1 \textbf{g}^{n-1}), (k_2 \textbf{g}^0, \dots, k_2 \textbf{g}^{n-1})$は別個なものになっているため、 $i \in \{0,\dots, 3n-1\}$と1対1で対応しています。そして、累積値に対応する多項式を次のように定義します。ただし、 $L_i(x) = \prod_{j \in \{0,\dots, n-1\}, i\neq j} \frac{x-\textbf{g}^{j}}{\textbf{g}^{i}-\textbf{g}^{j}}$であり、 $L_i(\textbf{g}^{i})=1$、 $j \neq i$で $L_i(\textbf{g}^{j})=0$であるという特徴を持ちます。
 ```math
 z(x) = L_1(x) + \Sigma_{i \in [n-1]} (L_{i+1}(x) \prod_{j \in [i]} \frac{(x_{j} + \beta \textbf{g}^j + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^j + \gamma)(x_{2n+j} + \beta k_2 \textbf{g}^j + \gamma)}{(x_{j} + \beta \sigma(j) + \gamma)(x_{n+j} + \beta \sigma(n+j) + \gamma)(x_{2n+j} + \beta \sigma(2n+j) + \gamma)})
 ```
@@ -73,18 +73,18 @@ $z(x)$は次の関係を満たす漸化式になっています。
 ```math
 \begin{align*}
     &z(1)=1 \\
-    &z(\gamma^{i+1})=z(\gamma^{i})\frac{(x_{i} + \beta \textbf{g}^i + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^i + \gamma)(x_{2n+i} + \beta k_2 \textbf{g}^i + \gamma)}{(x_{i} + \beta \sigma(i) + \gamma)(x_{n+i} + \beta \sigma(n+i) + \gamma)(x_{2n+i} + \beta \sigma(2n+i) + \gamma)}
+    &z(\textbf{g}^{i+1})=z(\textbf{g}^{i})\frac{(x_{i} + \beta \textbf{g}^i + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^i + \gamma)(x_{2n+i} + \beta k_2 \textbf{g}^i + \gamma)}{(x_{i} + \beta \sigma(i) + \gamma)(x_{n+i} + \beta \sigma(n+i) + \gamma)(x_{2n+i} + \beta \sigma(2n+i) + \gamma)}
 \end{align*}
 ```
 特に2つ目の式を変形すると、
 ```math
-z(\gamma^{i+1})(x_{i} + \beta \sigma(i) + \gamma)(x_{n+i} + \beta \sigma(n+i) + \gamma)(x_{2n+i} + \beta \sigma(2n+i) + \gamma) = z(\gamma^{i})(x_{i} + \beta \textbf{g}^i + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^i + \gamma)(x_{2n+i} + \beta k_2 \textbf{g}^i + \gamma)
+z(\textbf{g}^{i+1})(a(\textbf{g}^i) + \beta \sigma(i) + \gamma)(b(\textbf{g}^i) + \beta \sigma(n+i) + \gamma)(c(\textbf{g}^i) + \beta \sigma(2n+i) + \gamma) = z(\textbf{g}^{i})(a(\textbf{g}^i) + \beta \textbf{g}^i + \gamma)(b(\textbf{g}^i) + \beta k_1 \textbf{g}^i + \gamma)(c(\textbf{g}^i) + \beta k_2 \textbf{g}^i + \gamma)
 ```
 が成り立ちます。 $\textbf{g}^{n}=1$であるため、その総積をとると、
 ```math
 \begin{align*}
-&\prod_{i=0}^{n-1}(x_{i} + \beta \sigma(i) + \gamma)(x_{n+i} + \beta \sigma(n+i) + \gamma)(x_{2n+i} + \beta \sigma(2n+i) + \gamma) \\
-=&\prod_{i=0}^{n-1}(x_{i} + \beta \textbf{g}^i + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^i + \gamma)(x_{2n+i} + \beta k_2 \textbf{g}^i + \gamma)
+&\prod_{i=0}^{n-1}(a(\textbf{g}^i) + \beta \sigma(i) + \gamma)(b(\textbf{g}^i) + \beta \sigma(n+i) + \gamma)(c(\textbf{g}^i) + \beta \sigma(2n+i) + \gamma) \\
+=&\prod_{i=0}^{n-1}(a(\textbf{g}^i) + \beta \textbf{g}^i + \gamma)(b(\textbf{g}^i) + \beta k_1 \textbf{g}^i + \gamma)(c(\textbf{g}^i) + \beta k_2 \textbf{g}^i + \gamma)
 \end{align*}
 ```
 が成り立ちますが、これはcopy constaintsにおける累積値の等式 $F=G$に対応していることがわかります。
