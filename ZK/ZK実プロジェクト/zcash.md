@@ -121,6 +121,8 @@ Bitcoin送金におけるプライバシーを実現するためにBitcoin Proto
 
 具体的な鍵構成は以下のようになっている。
 
+![鍵構成](./img/key_structure.png)
+
 | 項目 | 役割 | 可視性 |
 | ---- | ---- | ---- |
 | **Shielded Payment Address** | 2つの公開鍵の`Paying Key`と`Transmission Key`から作られる。 |  パブリック |
@@ -190,10 +192,6 @@ Bitcoin送金におけるプライバシーを実現するためにBitcoin Proto
 ### Noteコミットメントの証明
 
 ### 二重支払いの防止
-
-## コミットメントツリー
-
-## Nullifier
 
 ## ブロック生成報酬
 
