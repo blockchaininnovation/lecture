@@ -24,6 +24,16 @@ ZKEVMは、Ethereumでサポートされているようなトランザクショ�
     - [メリット：証明生成時間が速い](#メリット証明生成時間が速い)
     - [デメリット：互換性が少ない](#デメリット互換性が少ない-1)
     - [プロジェクト](#プロジェクト-3)
+  - [ZkEvmの設計（Privacy and Scaling Explorations）](#zkevmの設計privacy-and-scaling-explorations)
+    - [ZkEvmの課題](#zkevmの課題)
+    - [ZkEvmの課題の解決](#zkevmの課題の解決)
+      - [Recursion](#recursion)
+      - [Lookup](#lookup)
+      - [最新のアプローチ](#最新のアプローチ)
+    - [ZkEvmの現状](#zkevmの現状)
+    - [計算量](#計算量)
+    - [費用](#費用)
+    - [結論](#結論)
 - [まとめ](#まとめ)
 - [参照](#参照)
 
@@ -153,6 +163,90 @@ VyperやSolidityの言語で書かれたアプリケーションは動作する�
 - [ZKSync](https://zksync.io/)
 - [Warp](https://warpgate.pro/)
 
+# ZkEvmの設計（Privacy and Scaling Explorations）
+
+Privacy and Scaling ExplorationsがどのようにEthereum互換のZkEvmを実現しようとしているかを解説する。  
+EVMの実行の正当性を保証するためには、主に3つのことを証明しなくてはならない。  
+
+1. オペコードのロジックが正しく実行されたこと
+2. オペコードが正しい順番で呼び出されたこと
+3. オペコードのコンピューターのリソースへの読み書きが正しく行われたこと
+
+開発の簡易化の観点から証明は2つに分けられる。
+
+- 状態証明：ストレージ、メモリやスタックが正しく実行されたことを証明する。正しい位置の読み書きが行われたかの検証はEVM証明で行われる。
+- EVM証明：オペコードが正しい順番で正しいロジックを実行したことを証明する。
+
+これらの2つの証明を用いることでEVMの実行の正当性を保証する。
+
+## ZkEvmの課題
+
+上記の1~3までを実現するにはゼロ知識証明では回路のサイズが大きくなりすぎてしまうという問題が存在した。  
+また、オペコードのメモリやスタック等のコンピューターへのリソースのアクセスがランダムに行われることもあるため固定の回路を用いる従来の方法では実現することができなかった。  
+この2つの課題に対して新たな手法が取られ解決された。
+
+## ZkEvmの課題の解決
+
+ゼロ知識証明では、コンピュテーションを算術回路と呼ばれる形式に変換し、証明を生成する。この算術回路の長さを削減することが証明生成時間の削減に繋がる。この算術回路の長さの短縮には主に2つのアプローチが取られる。
+
+一つ目は、大きな算術回路をより小さい算術回路に分割し、それぞれの小さいコンピュテーションに対して別々に証明を生成することで証明をする算術回路のサイズの最大値を削減する方法。
+
+二つ目は、コンピュテーションから算術回路に変換をする際にサイズが膨れやすい処理（ZK-Unfriendlyと呼ばれる）を証明生成の前に予め計算し、その予め計算されたデータを証明生成の際に参照することで特定のコンピュテーションによる算術回路の法外な肥大化を防ぐ方法。
+
+一つ目のアプローチを証明を証明するという再帰の関係からRecursionと呼び、二つ目のアプローチを予め計算されているデータを検索参照することからLookupと呼ぶ。
+
+### Recursion
+
+Recursionは大きなコンピュテーションを小さいステップに分割し、順に証明を行うことで証明の生成に必要なデータ量と時間を削減する方法である。
+
+仮にBitcoinの状態遷移が正しく行われたことを証明しようとする。証明を生成する際にはGenesis Blockから現在のブロックまでのトランザクションとブロックの情報が必要となる。また、新たなブロックが追加された場合は再度、Genesis Blockから証明の生成を再計算する必要がある。
+
+Recursionではブロックごとに証明を生成し、新たなブロックに対する証明を作る際に一つ前のブロックに対する証明の正当性も証明する。これにより全体を再計算する必要がなくなり、証明生成に必要なデータと計算量はブロック一つ分となる。
+
+しかし、この証明生成には高負荷な処理が必要であり、また、証明自体の証明も複雑である。より軽量に証明の正当性を検証できるAccumulationというスキーマも開発されたがそれでもZKEVMのような複雑な処理の証明は難しかった。
+
+### Lookup
+
+Lookupはコンピュテーションから算術回路に変換する際に肥大化しやすい処理を予め計算し、参照テーブルを予め計算し、そのデータを証明生成時に参照することで算術回路の肥大化を防ぐ方法である。
+
+ボトルネックとなる処理というのは1ビット単位での制約が必要となるRange Checkやビット演算のXORなどのオペレーションである。また、ZKVMではStackやMemory、Storageなどのリソースへの読み書きの一貫性の証明も必要となるためアクセスレコードをLookup Tableで管理している。
+
+しかし、前述した通り、Lookupでは参照されるデータを予め計算する必要がある。例えば32 bitの数字同士のXORのデータをLookupしたい場合は、それぞれのbitのパターンを全て網羅する必要がありデータのサイズは2³² bit * 2³² bitの2⁶⁴ bitを3列で用意するためおおよそ6000 petabyte (2⁶⁴ * 3)のテーブルが必要になる。ゼロ知識証明の回路では256bit等の大きなデータを扱う。そのため大きいサイズのテーブルへのLookupができないことが問題となった。
+
+Caulk Lookupという技術では、テーブルの代表値をパブリックパラメータとしてコミットすることで、予め行われる計算のコストは削減されたが容量の大きいパラメータをダウンロードしなくてはいけないという制限があった。
+
+この予めの計算に必要なテーブルを構造的な性質を用いてより小さいサイズのテーブルに分解し、データサイズを削減したものがLassoである。また、Lassoでは、Lookupの証明に適した制約表現が用いられており、Lookupの証明コストも従来の制約表現に比べて削減されているのが特徴である。
+
+### 最新のアプローチ
+
+Recursionを行う際に、証明の生成には高負荷な処理が必要となるため、証明を生成するのではなく証明しようとする命題を圧縮しようというアプローチがFoldingである。小さく分けられたコンピュテーションの全てに証明を生成するのではなく、分けられたコンピュテーション自体を圧縮し、圧縮されたコンピュテーションに対して証明を生成することで高負荷な処理を避けつつコンピュテーション全体を証明することができる。
+
+FoldingはNovaの論文で提案され、SuperNova、HyperNovaとアップデートされている。主な違いはNovaは特定のコンピュテーションに対するFoldingであったのに対し、SuperNovaでは任意のコンピュテーションに対するFoldingが可能となりHyperNovaでは証明可能な制約表現の種類がR1CSに限らずAIRやPlonkArithmetizationの表現も利用できるようになった。
+
+LookupではTableの前計算という作業が発生する。この予めの計算に必要なテーブルを構造的な性質を用いてより小さいサイズのテーブルに分解し、データサイズを削減したものがLassoである。また、Lassoでは、Lookupの証明に適した制約表現が用いられており、Lookupの証明コストも従来の制約表現に比べて削減されているのが特徴である。
+
+また、重要な概念としてLookup Singularityがある。Lookup Singularityとは、ゼロ知識証明を全てLookupで行おうという考え方である。Lookupは従来のゼロ知識証明で制約を表現するより簡潔で計算量も少ないため、ゼロ知識証明を用いる際に低レベルの知識なしで開発を行うことができることやコード監査の複雑性を抑えることができる。そのためスケーリング技術において発生するあらゆるコストを削減することができる。
+
+## ZkEvmの現状
+
+ZKEvmはスケーリング技術であるため、観点は計算量、費用を鑑みた上で有意にユーザーのトランザクションコストを削減できているかという点で評価する。
+
+### 計算量
+
+現時点で利用できるライブラリでは、通常の通りにVMを実行した場合に比べ証明を生成する場合では約百万から一億倍の計算量のオーバーヘッドが発生する。証明生成の作業は一つのノードで行うことができ、Ethereumのノード数は95万ノードであるためオーバーヘッドを95万倍以下に抑えなければ本末転倒となる。
+
+### 費用
+
+Evmのオペコードに対してゼロ知識証明言語で制約を記述する必要があるためソフトウェアのアップデートの度に、開発・監査・メンテナンスのコストがかかる。また、メインチェーンには代表値のみを書き込むためデータアベイラビリティに必要なデータベースのバックアップやオペレーターノードの運用の費用がかかる。
+
+### 結論
+
+総合的に考えると現時点では、Ethereumのバリデーター数を考えるとスケーラビリティへの対策としてはギリギリ有効であるが開発工数などを考えるとコストの方が高くなるのではないかと推測する。
+
+Lookup Singularityが実現された場合は、証明生成のオーバーヘッドが楽観的な見積もりで40分の1ほどになる。また、開発・監査・メンテナンスのコストが大幅に軽減されるためZkEvmの利用が現実的になるのではないかと思われる。
+
+しかし、現在提案されているスキーマは、データが構造的である場合にのみテーブルのダウンサイジングが可能であるため全ての処理をLookupに置き換えるには別のスキーマが提案される必要があるのではないかと思う。
+
 # まとめ
 
 現在、様々なプロジェクトがZkEvmを実現に取り組んでいる。  
@@ -171,3 +265,12 @@ VyperやSolidityの言語で書かれたアプリケーションは動作する�
 - [Polygon Hermez](https://hermez.io/)
 - [ZKSync](https://zksync.io/)
 - [Warp](https://warpgate.pro/)
+- [Brief Introduction of Latest Zero Knowledge Proof such as ZKVM, Recursion and Lookup](https://medium.com/coinmonks/brief-introduction-of-latest-zero-knowledge-proof-such-as-zkvm-recursion-and-lookup-9cbc60215a47)
+- [Proof-Carrying Data without Succinct Arguments](https://www.youtube.com/watch?v=hdmR4wSwryQ)
+- [Demystifying recursive zero-knowledge proofs](https://anoma.net/blog/demystifying-recursive-zero-knowledge-proofs)
+- [Understanding Lasso and Jolt, from theory to code](https://a16zcrypto.com/posts/article/building-on-lasso-and-jolt/)
+- [An incomplete guide to Folding: Nova, Sangria, SuperNova, HyperNova, Protostar](https://taiko.mirror.xyz/tk8LoE-rC2w0MJ4wCWwaJwbq8-Ih8DXnLUf7aJX1FbU)
+- [Lookup Singularity](https://zkresear.ch/t/lookup-singularity/65)
+- [Lasso, Jolt, and the Lookup Singularity, Part I with Justin Thaler | a16z crypto research talks](https://www.youtube.com/watch?v=aEiHLORcDq4)
+- [Lasso, Jolt, and the Lookup Singularity, Part II with Justin Thaler | a16z crypto research talks](https://www.youtube.com/watch?v=dmVweFbJsxw)
+- [Visualizing Lasso: A fast new lookup argument for SNARKs](https://www.youtube.com/watch?v=iDcXj9Vx3zY)
