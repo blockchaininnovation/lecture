@@ -58,6 +58,10 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
   - ワールドコンピューターを実現するためには、Bitcoin Protocolの様々な仕様を変更する必要がある
   - この資料だけを読んでもわかるようになってはいるが、基本的にはP01 Bitcoinの読了を前提に説明を行う
   
+  　<p><img src="../P02_ethereum/img/calculator.png" width="40%">
+  <img src="../P02_ethereum/img/computer.png" width="40%"></p>
+
+  
 ## この一般化によって様々なアプリケーション開発が可能となる
 
 - 分散型アプリケーション（Decentralized Applications; DApps）
@@ -69,6 +73,13 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
   - DAppsの一例: 分散型取引所 (Decentralized Exchange; DEX)
   - DEXでは取引記録は各ノードが分散的に保持している
     - 企業や政府がその気になれば取引記録を改ざんできる構造になっていない
+
+  <p><img src="../P02_ethereum/img/uniswap.png" width="55%">
+  <img src="../P02_ethereum/img/cryptopunks.png" width="35%"></p>
+
+  Source: https://app.uniswap.org/explore/tokens/ethereum/NATIVE<br>
+  Source: https://cryptopunks.app/
+
 
 # 大枠の仕様について
 
