@@ -84,6 +84,9 @@ KZGコミットメントを使う関係で，多項式の係数は有限体F_p�
 あと，各フルノードがBlobのローデータ，コミットメントの値，その際の乱数値を何処かに保持する必要があると思います．
 18日間の期間，どうやってそれらを保管しているのか，上記3つを含めたどんな情報を保管しているのかも調べてください．
 またユーザーはversioned_hashを用いてフルノードからローデータを取得できると想像していますが，その方法も調べてください．
+→ blobscanというサイトで見れる
+https://blobscan.com/tx/0x81999f40bbb0eaae1361bc02a448cbb7fc3f56762e69b0380b06331ec169d2ca
+ローデータはGoogleとSwarmに保管している？
 
 https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-for-improvement-of-das/
 ここが仕組み詳しそう．

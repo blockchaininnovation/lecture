@@ -108,7 +108,11 @@
   - これも現在は分散化されていない
   - [RBlock](#l2-ブロックarbitrum-ブロックと-rblock-について) を作成したり（ステートを更新）、不正を指摘する役割がある
     <!-- ArbitrumのステートはEthereumと同じマークルパトリシアツリーで管理している？ -->
-    <!-- Re：基本的な仕組み自体は同じだと思います。キーバリューペアで管理しているのは間違いないと思います。ただ Ethereumと全く同じデータをハッシュにかけているわけではなさそうです。実装らしきコードは見つけたのですが、私がGolang読めないのではっきりとはわかりませんでした。（https://github.com/OffchainLabs/nitro/blob/master/arbos/storage/storage.go） -->
+    <!-- Re：基本的な仕組み自体は同じだと思います。キーバリューペアで管理しているのは間違いないと思います。ただ Ethereumと全く同じデータをハッシュにかけているわけではなさそうです。実装らしきコードは見つけたのですが、私がGolang読めないのではっきりとはわかりませんでした。（https://github.com/OffchainLabs/nitro/blob/master/arbos/storage/storage.go）
+    → これはステートを格納しているDBで，多分ここがマークルツリー作っているところ．
+    https://github.com/OffchainLabs/nitro/blob/b066a58ba36fea848e004359b1dfba6b94a30f40/arbitrator/prover/src/memory.rs#L101
+    
+     -->
   - 不正を指摘する（以降「チャレンジ」と呼ぶ）際に L1 に ETH をステークする必要がある
   - バリデーターには 4 種類の戦略がある
 
