@@ -84,6 +84,9 @@ KZGコミットメントを使う関係で，多項式の係数は有限体F_p�
 あと，各フルノードがBlobのローデータ，コミットメントの値，その際の乱数値を何処かに保持する必要があると思います．
 18日間の期間，どうやってそれらを保管しているのか，上記3つを含めたどんな情報を保管しているのかも調べてください．
 またユーザーはversioned_hashを用いてフルノードからローデータを取得できると想像していますが，その方法も調べてください．
+
+https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-for-improvement-of-das/
+ここが仕組み詳しそう．
  -->
 ただし、EVMからは直接アクセスできず、versioned_hashを通じて間接的にデータを扱います。
 
@@ -188,7 +191,7 @@ zkRollupは、この同値性証明を利用して、公開データがversioned
 BLS12-381ではない任意のSNARKの場合はこちらをご覧ください。
 
 https://notes.ethereum.org/@vbuterin/proto_danksharding_faq#Moderate-approach-works-with-any-ZK-SNARK
-
+がちゃんとした仕組みの解説記事ぽい．
 
 ## zkRollupでどう使われているか
 
