@@ -55,6 +55,10 @@ BlobでもData Availabilityを確保するため、全てのノードが確認�
 <!-- Blobデータのハッシュ値だけが保存されているのでしょうか？データそのものが保持されていると思っていました．
 ていうかそうしないとRollupで検証する際Txのローデータを取り出すことができないような・・．
 
+約18日：4096 epochs
+https://eips.ethereum.org/EIPS/eip-4844
+MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS 	4096
+
  -->
 この短期間の保存期間は、Optimistic Rollupにおけるfraud proofの提出期限が終了した後、またはzkRollupでゼロ知識証明によってトランザクションの正当性が確認された後に、永久保存の必要性がなくなるためです。また、Blob自体はEVMから直接アクセスできず、コンセンサスクライアントに保持されるため、エクセキューションノードに計算コストがかかりません。
 
@@ -92,6 +96,12 @@ KZGコミットメントを使う関係で，多項式の係数は有限体F_p�
 → blobscanというサイトで見れる
 https://blobscan.com/tx/0x81999f40bbb0eaae1361bc02a448cbb7fc3f56762e69b0380b06331ec169d2ca
 ローデータはGoogleとSwarmに保管している？
+→ https://www.rareskills.io/post/ethclient-golang を読むとコンセンサスレイヤーのサイドカーという領域に入ってるらしい．
+→ このRPC命令で取れそう．
+https://www.quicknode.com/docs/ethereum/eth-v1-beacon-blob_sidecars-id
+→ prysmなどコンセンサスレイヤーのEthereumクライアントに対してこれを使うことで取得できそう．
+→ ブロックIDを指定することしかできないので，versiond_hashを指定して取得とかはできないのだろう．
+→ つーことはロールアップでcalldataの代わりにTxの保存先をBlobにすると，L1のTx内のblob_version_hashsにbersion_hashは超いっぱい入っているが，どこのブロックに入ってるのかまでは不明なはず（そのブロックに十中八九入ってると思うが）
 
 https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-for-improvement-of-das/
 ここが仕組み詳しそう．
@@ -109,6 +119,8 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
     <!-- EVMを満たす32バイトというのは？
         EVMでの最大の整数値型uint256で表現可能な値ということ？
         というかSHA256は32バイトなので，バージョン情報追加したら33バイトになってしまうが・・・．
+        → ここを見ると最初のバイトを置き換えるぽい．
+        https://hackmd.io/@protolambda/ethdenver_data_blob_transactions
      -->
     
     この値がversioned_hashとして記録されます。バージョン情報は、KZGコミットメントは0x01ですが、将来的に例えば量子耐性のあるコミットメントを導入した時の識別子になります。
@@ -121,7 +133,26 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
 このBlobのデータの追加に伴い、Blob Carrying Transaction(Shared Blob Transaction)と呼ばれる新しいタイプのトランザクションが導入されました。トランザクションには、通常のsender、receiver, nonce, gas bidなどに加えて、Blob特有のものとして、次の2つが新しく追加されました。
 <!-- Txのデータ構造的に以下の2つが追加されたということ？
 https://github.com/blockchaininnovation/lecture/blob/2b7817b26a89b33fbd3588cc6785f5278bd92662/P02_ethereum/2_components.md?plain=1#L108
-に表現を揃えてくれると助かりあmす．
+に表現を揃えてくれると助かります．
+
+・このTxの検証時にBlob実データの検証までやっているのか？
+→ どうなんだろう？
+https://hackmd.io/@protolambda/ethdenver_data_blob_transactions#Networking
+→ ここ見ると，ちゃんとBlobの実データからKZG求めてハッシュ化までやってチェックしてる．
+→ フルノードがやってるのかこれ？
+→ Tx内にはあくまでversioned_hashしか入ってないのでmempoolの伝搬はされないはず．
+→ 誰がやってるんだろうこれ．execution networkと書いてあるが．．
+https://eips.ethereum.org/EIPS/eip-4844#blob-transaction
+の
+ Execution layer validation 
+を見てもBlobの実データとの照合はなんにもしていない．
+Networking
+を見ると，実データとコミットメントなどと一緒に送ってる．
+EIP-2718で規定されている送信方法らしく，rlp()という形でTxに付加情報をつけて送信できるらしい．
+https://note.com/standenglish/n/n6e95cc0b09bb
+ただ，勝手に送るのではなくリクエストされたときだけ送るようになってるぽい？
+日本語訳のサイトを見てもそうらしいと読める： https://qiita.com/cardene/items/4966cf7f6691d7220367
+
  -->
 1. max_fee_per_blob_gas
     
