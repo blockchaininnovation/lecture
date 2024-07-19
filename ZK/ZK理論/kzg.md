@@ -23,27 +23,28 @@ Commitmentsスキームを応用することで、例えばオンラインじゃ
 単純に自分の手を表すデータを他のプレイヤーに送信すると、要件1が達成されないことがわかるでしょう。そこで、最初に各プレイヤーは自分の手に対するcommitmentを他のプレイヤーに送信し、全員がcommitmentを送信した後に、それぞれの手のopeningを送信します。この方式は、Hiding、Bindingの性質により、それぞれ要件1、2を達成することができます。以上のように、commitmentsスキームを使うことで、メッセージをある時点まで隠しながら、そのメッセージに紐づくデータを送信することが可能になります。
 
 厳密には、commitmentsスキームは次のアルゴリズムによって定義されます [7]。
-- $\textsf{Setup}(1^{\lambda}) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ $1^{\lambda}$を受け取り、公開パラメータ $\textsf{pp}$を生成する。
+- $\textsf{Setup}(1^{\lambda}) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ $1^{\lambda}$を受け取り、公開パラメータ $\textsf{pp}$を生成する。ただし、セキュリティパラメータ $1^{\lambda}$は、攻撃者が現在知られている中で最も効率の良いアルゴリズムを用いたとしても、対象の暗号プロトコルの安全性を破るために少なくとも $2^{\lambda}$回の総当たり計算が必要であるということを意味しています。現在は、 $\lambda=80$から $\lambda=120$程度の大きさが求められます。
 <!-- 1^{\lambda}とはどういうノーテーション？
 ビット長がラムダの特定の値をセキュリティパラメータとして使用する，ということ？ 
+セキュリティパラメータの詳しい定義を追加しました。
 -->
-- $\textsf{Commit}(\textsf{pp}, m, r) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $r$を受け取り、 commitment $c$を出力する。
-- $\textsf{Open}(\textsf{pp}, m, r, c) \rightarrow d$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $r$、commitment $c$を受け取り、 opening $d$を出力する。
+- $\textsf{Commit}(\textsf{pp}, m, k) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $k$を受け取り、 commitment $c$を出力する。
+- $\textsf{Open}(\textsf{pp}, m, k, c) \rightarrow d$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、乱数 $k$、commitment $c$を受け取り、 opening $d$を出力する。
 - $\textsf{Verify}(\textsf{pp}, m, c, d) \rightarrow 1/0$: 入力として公開パラメータ $\textsf{pp}$とメッセージ $m$、commitment $c$、opening $d$を受け取り、1 (受理)または0 (拒否)を出力する。
 
-注意点として、封筒の封は誰でも勝手に開けることができるのに対して、commitmentsスキームは $\textsf{Open}$アルゴリズムが乱数 $r$を必要としているため、**commitment $c$を生成した人だけがその $c$に対するopeningを生成できる**ようになっています。
+注意点として、封筒の封は誰でも勝手に開けることができるのに対して、commitmentsスキームは $\textsf{Open}$アルゴリズムが乱数 $k$を必要としているため、**commitment $c$を生成した人だけがその $c$に対するopeningを生成できる**ようになっています。
 
 これらのアルゴリズムが以下の関係を満たすとき、commitmentsスキームは正当性 (correctness)があると言われます。
 ```math
 \begin{align*}
-Pr[\textsf{Verify}(\textsf{pp}, m, c, \textsf{Open}(\textsf{pp}, m, r, c))=1] \geq 1 - \textsf{negl}(\lambda)
+Pr[\textsf{Verify}(\textsf{pp}, m, c, \textsf{Open}(\textsf{pp}, m, k, c))=1] \geq 1 - \textsf{negl}(\lambda)
 \end{align*}
 ```
 ただし、 $\textsf{negl}(\lambda)$は無視できるほど小さい確率を表します。
 
 HidingとBindingは、直感的には次のように定義されます。
-- Hiding: ランダムなメッセージと乱数 $m, r$に対するcommitment $c \leftarrow \textsf{Commit}(\textsf{pp}, m, r)$を見て、（多項式時間の計算ができる）攻撃者が $m$を正しく推定できる確率は $\textsf{negl}(\lambda)$未満である。
-- Binding: 2つの異なるメッセージと乱数のペア $(m_0, r_0), (m_1, r_1)$に対して、 $c_0 \leftarrow \textsf{Commit}(\textsf{pp}, m_0, r_0)$と $c_1 \leftarrow \textsf{Commit}(\textsf{pp}, m_1, r_1)$が $c_0 = c_1$を満たす確率は $\textsf{negl}(\lambda)$未満である。
+- Hiding: ランダムなメッセージ $m$と乱数 $k$に対するcommitment $c \leftarrow \textsf{Commit}(\textsf{pp}, m, k)$を見て、（多項式時間の計算ができる）攻撃者が $m$を正しく推定できる確率は $\textsf{negl}(\lambda)$未満である。
+- Binding: 2つの異なるメッセージと乱数のペア $(m_0, k_0), (m_1, k_1)$に対して、 $c_0 \leftarrow \textsf{Commit}(\textsf{pp}, m_0, k_0)$と $c_1 \leftarrow \textsf{Commit}(\textsf{pp}, m_1, k_1)$が $c_0 = c_1$を満たす確率は $\textsf{negl}(\lambda)$未満である。
 
 
 ### Polynomial Commitments
@@ -51,17 +52,17 @@ PCスキームは、多項式 $f(x)=\Sigma_{i=0}^n f_i x^i$の係数ベクトル
 
 厳密には。PCスキームは次のアルゴリズムによって定義されます [1]。
 - $\textsf{Setup}(1^{\lambda}, n) \rightarrow \textsf{pp}$: 入力としてセキュリティパラメータ $1^{\lambda}$と最大の次数 $n$を受け取り、公開パラメータ $\textsf{pp}$を生成する。
-- $\textsf{Commit}(\textsf{pp}, f(x), r) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、乱数 $r$を受け取り、 commitment $c$を出力する。ただし、 $f(x)$の実際のデータは、 $f(x)$の係数ベクトル $(f_0, \dots, f_n)$になる。また、 $f(x)$の次数はアルゴリズム $\textsf{Setup}$で指定された整数 $n$以下でなければならない。
-- $\textsf{Open}(\textsf{pp}, f(x), r, c) \rightarrow d$: 入力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、乱数 $r$、commitment $c$を受け取り、 opening $d$を出力する。
+- $\textsf{Commit}(\textsf{pp}, f(x), k) \rightarrow c$: 入力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、乱数 $k$を受け取り、 commitment $c$を出力する。ただし、 $f(x)$の実際のデータは、 $f(x)$の係数ベクトル $(f_0, \dots, f_n)$になる。また、 $f(x)$の次数はアルゴリズム $\textsf{Setup}$で指定された整数 $n$以下でなければならない。
+- $\textsf{Open}(\textsf{pp}, f(x), k, c) \rightarrow d$: 入力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、乱数 $k$、commitment $c$を受け取り、 opening $d$を出力する。
 - $\textsf{VerifyPoly}(\textsf{pp}, f(x), c, d) \rightarrow 1/0$: 入力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、commitment $c$、opening $d$を受け取り、1 (受理)または0 (拒否)を出力する。
-- $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$: 力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、評価点 $\alpha$、乱数 $r$を受け取り、評価結果 $\beta = f(\alpha)$とwitness  $\omega_{\alpha}$を出力します。
+- $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, k) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$: 力として公開パラメータ $\textsf{pp}$と多項式 $f(x)$、評価点 $\alpha$、乱数 $k$を受け取り、評価結果 $\beta = f(\alpha)$とwitness  $\omega_{\alpha}$を出力します。
 - $\textsf{VerifyEval}(\textsf{pp}, c, \alpha, \beta, \omega_{\alpha}) \rightarrow 1/0$: 入力として公開パラメータ $\textsf{pp}$とcommitment $c$、評価点 $\alpha$、評価結果 $\beta$、witness $\omega_{\alpha}$を入力として受け取り、1 (受理)または0 (拒否)を出力する。
 
 これらのアルゴリズムが以下の2つの関係を満たすとき、commitmentsスキームは正当性 (correctness)があると言われます [1]。
 ```math
 \begin{align*}
-    &Pr[\textsf{VerifyPoly}(\textsf{pp}, f(x), c, \textsf{Open}(\textsf{pp}, f(x), r, c))=1] \geq 1 - \textsf{negl}(\lambda) \\
-    &Pr[\textsf{VerifyEval}((\textsf{pp}, c, \alpha, \textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r)))] \geq 1 - \textsf{negl}(\lambda)
+    &Pr[\textsf{VerifyPoly}(\textsf{pp}, f(x), c, \textsf{Open}(\textsf{pp}, f(x), k, c))=1] \geq 1 - \textsf{negl}(\lambda) \\
+    &Pr[\textsf{VerifyEval}((\textsf{pp}, c, \alpha, \textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, k)))] \geq 1 - \textsf{negl}(\lambda)
 \end{align*}
 ```
 特に後者の条件は、 $f(\alpha)=\beta$を満たす正当な $f(x)$、 $\alpha$、 $\beta$に対して生成されたwitnessは、十分に高い確率で $\textsf{VerifyEval}$によって受理されることを要請しています。
@@ -96,6 +97,8 @@ KZG commitmentの構成を説明するために必要な記号を準備します
     \mathbb{G}_T = \{1, g, g^2, \dots, g^{r-1}\}
 \end{align*}
 ```
+このように、ある元で同じ演算を繰り返すことで生成される群 (上記の説明では $\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T$)を巡回群、巡回群を生成する元 (上記の説明では $P \in \mathbb{G}_1, Q \in \mathbb{G}_2, g \in \mathbb{G}_T$)を生成元と呼びます。
+
 pairing $e$は次の2つの性質を満たします [9]。
 1. 非縮退性
 任意の $P \in \mathbb{G}_1$（ $Q \in \mathbb{G}_2$）に対して、 $e(P, Q) = 1$ならば $Q = \mathbb{O}$ ( $P = \mathbb{O}$)である。
@@ -124,20 +127,25 @@ KZG commitmentsは、端的には剰余の定理の関係が成り立つこと�
 \end{align*}
 ```
 直感的には、証明者が検証者に $f(\alpha)=\beta$になることを示すためには、
-証明者がこのような $q(x)$を直接検証者に送信し、検証者には $f(x) - \beta$が $q(x)(x - \alpha)$と多項式として等しいことを確かめてもらえば良いと言えます。しかし、この方法では検証者の計算量・通信量が多項式の次数 $n$に対して線形以上のオーダーで増加するため、効率的ではありません。
+証明者がこのような $q(x)$を直接検証者に送信し、検証者には $f(x) - \beta$が $q(x)(x - \alpha)$と多項式として等しいことを確かめてもらえば良いと言えます。KZG commitmentsでは、証明者が $f(x), q(x)$に対応する情報を検証者に渡し、検証者は $f(x) - \beta = q(x)(x - \alpha)$が成り立つことを確かめます。しかし、これらの多項式を直接送信・検証すると、検証者の計算量・通信量が多項式の次数 $n$に対して線形以上のオーダーで増加するため、効率的ではありません。また、証明者が隠したい情報である $f(x)$が検証者に知られてしまうため、秘匿性が実現されません。
 <!-- というかその方法だと直接方程式を検証者に渡してしまっていることと同じになってしまい，ダメなのでは？
 多項式そのものを明かさずにf(α)=βを示す方法のはず．
 直接f(x)渡しても同じな気がする．
 
 検証者が知っているのがq(x)だけだと，どうやってf(x)-βがq(x)(x-α)と多項式として等しいかチェックできるんだろう？
+
+f(x) (実際の構成では、G1上の要素 f(s)P)も検証者に渡すので、その点を明確にしました。また、上記のf(x), q(x)を直接送信・検証する方法はあくまでイメージで、実際にはもちろん非効率で秘匿性がないので、その誤解が少なくなるように文章を修正しました。
  -->
 
 そこで、多項式として等式を検証する代わりに、あるランダムな一点 $s$で多項式を評価した結果が等しいこと、すなわち $f(s) - \beta = q(s)(s - \alpha)$を検証することを考えます。証明者は $f(s), q(s)$を検証者に送信すると、検証者はこの等式が整数として成立することだけを確かめられれば良いため、検証者の計算量・通信量は $n$に関わらず一定になることがわかります。
 <!-- f(s)，q(s)は計算結果の単なるスカラー値であるため．多項式の形で送る必要はなくなる． -->
-では、この方式はBindingの性質を実現している、つまり悪意のある証明者が $f(\alpha) \neq \beta$ではない $f(x), \alpha, \beta$に対して有効な $q(s)$を提出することを防いでいるでしょうか？
+では、 $f(\alpha) \neq \beta$である場合に、悪意のある証明者が $f(s) - \beta = q(s)(s - \alpha)$という検証を通る $f(s), q(s)$を提出することは、なぜ難しいのでしょうか？
 <!--$f(\alpha) \neq \beta$である $f(x)に対して検証者側がf(α)=βであると誤検出してしまうq(s)を提出することを妨げているでしょうか？
-ということ？  -->
-仮に $s$がランダムかつ、証明者が $s$を知ることができなければ、Schwartz–Zippelの補題によりBindingが無視できるほど小さい確率を除いて成り立つことを証明できます [11]。具体的には、非零の次数 $n$の多項式で $g(x)=0$となる点 $x$は高々 $n$個しかないため、サイズ $|S|$の集合から評価点 $s \in S$を一様にランダムに取った時に、 $g(s)=0$となる確率、すなわち $s$がその $n+1$個の点のいずれかに一致する確率は高々 $\frac{n}{|S|}$になります。今回の例では、 $g(x) = f(x) - \beta - q(x)(x - \alpha)$、 $|S| \approx 2^{254}$であるため、次数 $n$が100万程度でも $g(s)=0$になる確率は $\frac{1000000}{2^{254}} \approx 3.45447×10^{-71}$で、無視できる程小さい値になります。
+ということ？  
+
+意図がわかりやすくなるように書き換えました。
+-->
+仮に $s$がランダムかつ、証明者が $s$を知ることができなければ、Schwartz–Zippelの補題によりBindingが無視できるほど小さい確率を除いて成り立つことを証明できます [11]。具体的には、非零の次数 $n$の多項式で $g(x)=0$となる点 $x$は高々 $n$個しかないため、サイズ $|S|$の集合から評価点 $s \in S$を一様にランダムに取った時に、 $g(s)=0$となる確率、すなわち $s$がその $n+1$個の点のいずれかに一致する確率は高々 $\frac{n}{|S|}$になります。KZG commitmentsでは、 $g(x) = f(x) - \beta - q(x)(x - \alpha)$であり、 $F_r$全体から評価点をランダムに選ぶため、 $S=F_r$です。例えば、Ethereumで使われている楕円曲線であるBN254 curveでは、$r$が254 bitの素数であるため、 $|S|=|F_r| \approx 2^{254}$になります [14]。そのため、次数 $n$が100万程度でも、 $g(s)=0$になる確率は $\frac{1000000}{2^{254}} \approx 3.45447×10^{-71}$で、無視できる程小さいと言えます。
 <!-- $|S| \approx 2^{254}$ってどこから出てきた？
 ↓の記述でF_rから取るとなっている．
 F_rなどKZGコミットメントを使用する上での仮定を最初に書くと良い．
@@ -148,41 +156,54 @@ F_rなどKZGコミットメントを使用する上での仮定を最初に書�
 ここに書くのが不適切なら，この文章の最後にプラクティカルな使い方としてf(x)，F_r，楕円曲線は何を使うか，などの記載がほしい．
 要するにプロトダンクシャーディングやPlonKで使うときにどういうインプット値を持ってくればよいのか，がわかるようにしたい．
 
+本Subsectionの最後に、ご指摘の点についての情報を追記しました。
+
 
 F_r：有限体，r：十分大きな素数，G_1^i： ・・・-->
 
-では、いかにして $s$を証明者に対して隠しながら、同時に証明者に $f(s), q(s)$を計算させることができるでしょうか？これを実現するために、KZG commitmentsは楕円曲線とpairingを利用します。以下がその基本的な構成になります [1, 12]。
+次に、いかにして $s$を証明者に対して隠しながら、同時に証明者に $f(s), q(s)$を計算させることができるでしょうか？これを実現するために、KZG commitmentsは楕円曲線とpairingを利用します。以下がその基本的な構成になります [1, 12]。ただし、以下の構成は乱数 $k$を使わないので、先述のPCのアルゴリズムのインターフェースから $k$を削除しています。
 - $\textsf{Setup}(1^{\lambda}, n) \rightarrow \textsf{pp}$: 
     1. ランダムな $s$を $\mathbb{F}_r$から取る。
-    2. $(P, sP, s^2P, \dots, s^nP) \in \mathbb{G}_1^{n+1}$を計算する。
-    3. $(Q, sQ) \in \mathbb{G}_2^{2}$を計算する。
-    2. $\textsf{pp}=((P, sP, s^2P, \dots, s^nP)、(Q, sQ))$を出力する。
+    2. $(P, sP, s^2P, \dots, s^nP) \in \mathbb{G}_1^{n+1}$を計算する。ただし、 $P$は巡回群 $\mathbb{G}_1$の生成元である。
+    3. $(Q, sQ) \in \mathbb{G}_2^{2}$を計算する。ただし、 $Q$は巡回群 $\mathbb{G}_2$の生成元である。
+    2. $\textsf{pp}=((P, sP, s^2P, \dots, s^nP)、(Q, sQ)) \in \mathbb{G}_1^{n+1} \times \mathbb{G}_2^{2}$を出力する。
     <!-- ここで，PとQはG_1,G_2上の任意の点？ 
     ppはペアリングの値？じゃなくて異なる2つの有限体のそれぞれの点のペアか．
     最後の出力されるppはなんの元なのかははっきり記述したほうが理解しやすい．
     pp \in (G_1^n+1, G_2^2) など
-    → ペアっていうか，iiとiiiを全部並べた点の集合．有限体が異なる点が混ざっているから()で区切って記載してあるという理解．-->
-- $\textsf{Commit}(\textsf{pp}, f(x), r) \rightarrow c$:
+    → ペアっていうか，iiとiiiを全部並べた点の集合．有限体が異なる点が混ざっているから()で区切って記載してあるという理解．
+    pp はpublic parametersの略になります。
+    -->
+- $\textsf{Commit}(\textsf{pp}, f(x)) \rightarrow c$:
 <!-- ppじゃなくてP, sP, s^2P,...しか使ってないので上記iiだけあれば十分？
-乱数rはどこで使っているんだろう．F_rのrとするとよくわからなくなるし・・． -->
-    1. $f(x)$を係数ベクトル $(f_0, f_1, \dots, f_n) \in \mathbb{F}_r$としてパースする。
+    上記iiだけあれば十分ですが、上述のPCのアルゴリズムの定義と整合性をできるだけ取るために、pp全てをinputにしています。
+
+乱数rはどこで使っているんだろう．F_rのrとするとよくわからなくなるし・・．
+乱数rとF_rで衝突していたので、乱数をkに置き換えました。また、ここのKZG commitmentsの基本的な構成では乱数を使わないので、但し書きをした上で削除しました。
+ -->
+    1. $f(x)$を係数ベクトル $(f_0, f_1, \dots, f_n) \in \mathbb{F}_r^{n+1}$としてパースする。
 <!-- ここで隠したい多項式f(x)が登場．
 係数ベクトルとは，多項式の各項の係数ってこと？
     f(x) = f_n*x^n + f_{n-1} *x^{n-1} + ... + f_1*x + f_0 
     $(f_0, f_1, \dots, f_n) \in \mathbb{F}_r$
-    のF_rはF_r^nの誤記？多分各係数がF_rの元で，それがn次元．-->
-    2. $c \leftarrow \Sigma_{i = 0}^{n} f_{i}(s^{i}P) \in \mathbb{G}_1$を計算する。
-    <!-- これはcはG_1の元ってことだと思う．←を使っていてさらに右辺にG_1の元という表記があると，何かしら違う集合の元にあらためて飛ばしているふうにも見えてしまうので，cを右辺に持ってきて c \in G_1 としたほうが読みやすい． -->
-    3. $c$を出力する。
+    のF_rはF_r^nの誤記？多分各係数がF_rの元で，それがn次元．
+    すみません、F_rはF_r^{n+1}の誤記でした。
+    -->
+    2. $c \leftarrow \Sigma_{i = 0}^{n} f_{i}(s^{i}P)$を計算する。
+    <!-- これはcはG_1の元ってことだと思う．←を使っていてさらに右辺にG_1の元という表記があると，何かしら違う集合の元にあらためて飛ばしているふうにも見えてしまうので，cを右辺に持ってきて c \in G_1 としたほうが読みやすい．
+    変数への代入であるという意図を明確にしたいので、cは左辺に置きました。
+    $c \in G_1$であることは、代わりに下記ステップ3で明記しました。
+     -->
+    3. $c \in \mathbb{G}_1$を出力する。
     <!-- これもなんの元なのかはっきり記述．
     c \in G_1 -->
 - $\textsf{CreateWitness}(\textsf{pp}, f(x), \alpha, r) \rightarrow (\beta = f(\alpha), \omega_{\alpha})$:
 <!-- これもppのiiiの部分は不要でiiだけで十分に見える． -->
     1. $q(x) = \frac{f(x) - f(\alpha)}{x - \alpha}$を計算する。
     2. $q(x)$を係数ベクトル $(q_0, q_1, \dots, q_n) \in \mathbb{F}_r$としてパースする。
-    3. $\omega_{\alpha} \leftarrow \Sigma_{i = 0}^{n} q_{i}(s^{i}P) \in \mathbb{G}_1$を計算する。
+    3. $\omega_{\alpha} \leftarrow \Sigma_{i = 0}^{n} q_{i}(s^{i}P)$を計算する。
     <!-- 上記と同じく右辺に持ってきた方が良い -->
-    4. $\omega_{\alpha}$を出力する。
+    4. $\omega_{\alpha} \in \mathbb{G}_1$を出力する。
 <!-- \omega_alpha \in G_1 
     ここまで証明者が行う作業．
 -->
@@ -210,6 +231,7 @@ F_r：有限体，r：十分大きな素数，G_1^i： ・・・-->
 
 上記の構成は、部分的にHidingを満たしています。具体的には、 $f(x)$の係数のうち少なくとも一つが十分にランダムである、例えばある $f_i$が254 bit程度の位数の有限体 $F_r$からランダムに取られる場合であれば、攻撃者が $c$と次数 $n$以下の評価点・評価結果から $f(x)$の係数や他の評価結果を推定することは困難だと言えます。しかし、例えば次数が $n=31$で各係数が0もしくは1の場合、係数ベクトルの候補は $2^{32}$個しかないため、攻撃者は $\textsf{pp}$から各候補に対応する $2^{32}$個のcommitmentをそれぞれ生成できます。そのため、どの候補のものが渡されたcommitmentと一致するか確かめることによって、攻撃者はそのcommitmentに対応する $f(x)$の係数および任意の評価結果 $f(\alpha)$を知ることができます。この問題を修正するために、原論文 [1]は3.3章でランダムな多項式で元の多項式を秘匿した構成を提案しています。ただし、その構成は検証者がペアリング $e$を3回計算する必要があるため、検証者の計算量を増やしています。それに対して、Plonk [2]などZKPの構成では、評価したい点 $\alpha_1,\dots,\alpha_n$で評価結果が0になるような多項式をランダムに生成し、それを $f(x)$に足した多項式に本章で述べたKZG commitmentsの構成を適用することで、 $f(x)$の係数を秘匿しています。
 
+ゼロ知識証明の検証など、Ethereum上でKZG commitmentsを使う場合には、一般にBN254 curveが楕円曲線として利用されます。なぜなら、BN254 curveはペアリングの計算が効率的 (pairing-friendly)であるかつ [14]、EVM上のprecompiled contracts (事前に定義された、安価なgas代で実行可能な処理)として、BN254 curve上の点の加算 (アドレス0x06)、点のスカラー倍 (アドレス0x07)、ペアリングによる等号の検証 (アドレス0x08)が提供されているためです [15]。また、2024年にEthereumのコアプロトコルに導入されたProto-Danksharding(EIP-4844) [16] では、pairing-friendlyな楕円曲線であるBLS12-381 [17] が利用されています。BLS12-381の巡回群の位数 $r$は255 bitの素数であるため、例えばデータを254 bitごとのチャンクに分け、それぞれを $F_r$上の整数とみなしたものを係数とすることで、Proto-Dankshardingで検証される多項式を構成することができます。
 
 ### 複数の評価点・複数の評価結果に対する証明のバッチ検証処理
 上述の構成は効率的に $f(\alpha)=\beta$を検証できる一方、複数の多項式を複数の評価点で評価した結果を検証したい場合、単純な方法では各多項式・評価点の組ごとにpairingを実行する必要があります。pairingの計算は楕円曲線の加算やスカラー倍の計算よりも時間がかかるため、KZG commitmentsを多用するためにはpairingの計算回数を減らさなければなりません。そこで、pairingの計算回数を多項式や評価点の個数に関わらず一定(2回)にする圧縮方法を、[2]の3.1章に沿って説明します。
@@ -295,3 +317,7 @@ Bindingも、前述の評価点が全て共通だった場合と同様に、2つ
 11. Oveis Gharan, S. (2017). CSE 521: Design and Analysis of Algorithms I. Lecture 7: Schwartz-Zippel Lemma, Perfect Matching. Available at https://courses.cs.washington.edu/courses/cse521/17wi/521-lecture-7.pdf
 12. Fleischhacker, N., Hall-Andersen, M., & Simkin, M. (2024). Extractable Witness Encryption for KZG Commitments and Efficient Laconic OT. Cryptology ePrint Archive.
 13. Ethereum Community. (2022). KZG Ceremony. SUMMONING GUIDES. Available at https://ceremony.ethereum.org/
+14. Wang, J. (2022). BN254 For The Rest Of Us. Available at https://hackmd.io/@jpw/bn254
+15. smlXL. Inc. (n.d.). Precompiled Contracts. Available at https://www.evm.codes/precompiled
+16. Buterin, V., Feist, D., Loerakker, D., Kadianakis, G., Garnett, M., Taiwo, M., & Dietrichs, A. (2022). EIP-4844: Shard Blob Transactions. Available at https://eips.ethereum.org/EIPS/eip-4844
+17. Edgington, B. (2023). BLS12-381 For The Rest Of Us. Available at https://hackmd.io/@benjaminion/bls12-381
