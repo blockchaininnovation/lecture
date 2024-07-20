@@ -158,7 +158,14 @@
   - しかしブロックを区切っているのはシーケンサーで、[ソフトファイナリティ](#ファイナリティ)の状態でブロックを進めている
 
 - L2 ブロックはシーケンサー（ArbOS）が`ArbitrumInternalTxType`という種類のトランザクションを挟むことで区切られる
-
+<!-- 
+InternalTxStartBlockの間違いかも？
+nitro内のProduceBlockAdvanced()で
+	// Prepend a tx before all others to touch up the state (update the L1 block num, pricing pools, etc)
+	startTx := InternalTxStartBlock(chainConfig.ChainID, l1Header.L1BaseFee, l1BlockNum, header, lastBlockHeader)
+	txes = append(types.Transactions{types.NewTx(startTx)}, txes...)
+  という箇所がある．
+ -->
   - 見た感じ結構頻繁に区切られており、そのせいで L2 ブロックは 2 億個ほどある
   - [ここ](https://arbiscan.io/txs)を眺めるとちらほらと見える`Start Block`というメソッドのトランザクションがそうである
   - トランザクションで区切ってるだけなので、プロトコルにおいてはあまり意識されていない
@@ -486,8 +493,34 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   - Sequencer Inbox からトランザクションデータを取得（実行も行う）
   - そのデータをもとにローカルのステートを更新
   - 新たなローカルのステートをもとに RBlock を作成・L1 に投稿
+  <!-- 
+  RollupCore#createNewNode()
+  でやっている．
+  入力値としてAssersionという構造体があり，ここの中にステートが入っている．
+  struct Assertion {
+    ExecutionState beforeState;
+    ExecutionState afterState;
+    uint64 numBlocks;
+  }
+  Assersionは上記のようになっていて，numBlocksでInboxの中に作られているブロックをいくつRBlockにするかを指定していると思われる．
+  ステートも構造体で定義されていて，
+  struct ExecutionState {
+    GlobalState globalState;
+    MachineStatus machineStatus;
+  }
+  となっている．
+  なぜ2つあるのかは不明．
+
+  -->
   - 検証を待つ（チャレンジ期間終了を待つ）
   - 何もなければ承認し、Outbox コントラクトへデータをコミット
+  <!-- おそらく以下のコード：
+  RollupCore#confirmNode()
+  内の
+    outbox.updateSendRoot(sendRoot, blockHash);
+  ここでoutbox内にブロックハッシュを記録している．
+
+    -->
   - 異議があればチャレンジを行う
 
 ## RBlock の作成
@@ -758,3 +791,10 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   | GAP      | 0.099795764739956643 ETH |
 
   - 安くなりすぎである
+
+
+# 参考URL
+https://github.com/OffchainLabs/nitro/blob/master/docs/Nitro-whitepaper.pdf
+https://l2beat.com/scaling/projects/arbitrum#contracts
+https://docs.arbitrum.io/how-arbitrum-works/inside-arbitrum-nitro#arbitrum-rollup-protocol
+https://recruit.gmo.jp/engineer/jisedai/blog/l2-arbitrum/
