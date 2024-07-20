@@ -44,21 +44,22 @@ EIP 4844以前、Rollupのコストはどこに集中していたのでしょう
 # Proto-Dankshardingの概要
 ## Blobの導入
 Proto-Dankshardingには大きく2つの要素があります：
-1. 短期間だけビーコンノードに保持されるBlob（Binary Large Object）という新しいデータ形式の導入
+1. 短期間だけBeacon Chianに保持されるBlob（Binary Large Object）という新しいデータ形式の導入
 2. BlobのハッシュをEthereumに送信する新しいトランザクションタイプであるBlob Carrying Transaction(Shared Blob Transaction)の導入
 
 ## Blobの特徴
 ![BlobとCalldataの比較](./img/blob_calldata.png)
 出典: https://youtu.be/JQDUvqv60qw?si=92l7WQojZNf1rKKH&t=946
 
-BlobでもData Availabilityを確保するため、全てのノードが確認できるようにする必要があります。従来のブロックではトランザクションデータを永久に保存する必要がありましたが、Blobのハッシュ値が数週間（約18日）のみ保存され、その後は削除されます。
+BlobでもData Availabilityを確保するため、全てのノードが確認できるようにする必要があります。従来のブロックではトランザクションデータを永久に保存する必要がありましたが、Blobのデータが数週間（約18日）のみ保存され、その後は削除されます。
 <!-- Blobデータのハッシュ値だけが保存されているのでしょうか？データそのものが保持されていると思っていました．
 ていうかそうしないとRollupで検証する際Txのローデータを取り出すことができないような・・．
+
+Blob transactionのdataにTransactionなどのデータを入れているので、誤った表現でした。修正しました。
 
 約18日：4096 epochs
 https://eips.ethereum.org/EIPS/eip-4844
 MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS 	4096
-
  -->
 この短期間の保存期間は、Optimistic Rollupにおけるfraud proofの提出期限が終了した後、またはzkRollupでゼロ知識証明によってトランザクションの正当性が確認された後に、永久保存の必要性がなくなるためです。また、Blob自体はEVMから直接アクセスできず、コンセンサスクライアントに保持されるため、エクセキューションノードに計算コストがかかりません。
 
@@ -67,7 +68,8 @@ MIN_EPOCHS_FOR_BLOB_SIDECARS_REQUESTS 	4096
 出典: https://youtu.be/JQDUvqv60qw?si=i2lg8on_bAhtaiPa&t=1825
 
 
-BlobはBLS12-381と呼ばれる楕円曲線を使用し、法 p = 52435875175126190479447740508185965837690552500527637822603658699938581184512の下で4096個のフィールド要素から成り立っています。各要素は32バイトで、全体としては約128kbのデータをBlob一つに格納できます。
+Blobは長さが4096個の配列で表されます。Blobでは、データの正当性を確認し保証する時に、KZGコミットメントを使用するため、ペアリングフレンドリーなBLS12-381と呼ばれる楕円曲線を使用されます。この楕円曲線は、法 $p$ = 52435875175126190479447740508185965837690552500527637822603658699938581184512 の有限体 $F_p$ 上で定義され、Blobの各要素の値は$0$から$p-1$までの整数値で、それぞれ32バイトのデータとして格納されます。1つのBlob全体では、約131キロバイトのデータを格納することができます。
+
 <!-- 4096 * 32 Byte = 131,072 Byte
 一つのデータをこの領域に入れる．
 
@@ -92,6 +94,10 @@ KZGコミットメントを使う関係で，多項式の係数は有限体F_p�
 
 あと，各フルノードがBlobのローデータ，コミットメントの値を何処かに保持する必要があると思います．
 18日間の期間，どうやってそれらを保管しているのか，上記を含めたどんな情報を保管しているのかも調べてください．
+
+Beacon ChainのBeacon Clients
+https://taiko.mirror.xyz/3_5rjTXFT_bLYnRBD2ZxqLQu9-qgTF4JOkwK7rUpwJs
+
 またユーザーはversioned_hashを用いてフルノードからローデータを取得できると想像していますが，その方法も調べてください．
 → blobscanというサイトで見れる
 https://blobscan.com/tx/0x81999f40bbb0eaae1361bc02a448cbb7fc3f56762e69b0380b06331ec169d2ca
@@ -123,15 +129,19 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
         https://hackmd.io/@protolambda/ethdenver_data_blob_transactions
      -->
     
-    この値がversioned_hashとして記録されます。バージョン情報は、KZGコミットメントは0x01ですが、将来的に例えば量子耐性のあるコミットメントを導入した時の識別子になります。
+    この値がversioned_hashとして記録されます。バージョン情報は、KZGコミットメントは0x01ですが、将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります
     <!-- 
     versioned_hashとは，Blobとして保存した各データを識別する識別子という理解であっている？
     IPFSにおけるcidみたいな．
-    将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります，とか表現改善が必要． -->
+    将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります，とか表現改善が必要．
+     -->
 
 ## Blob Carrying Transaction(Shared Blob Transaction)の詳細
 このBlobのデータの追加に伴い、Blob Carrying Transaction(Shared Blob Transaction)と呼ばれる新しいタイプのトランザクションが導入されました。トランザクションには、通常のsender、receiver, nonce, gas bidなどに加えて、Blob特有のものとして、次の2つが新しく追加されました。
+
 <!-- Txのデータ構造的に以下の2つが追加されたということ？
+そうだと認識しています。
+
 https://github.com/blockchaininnovation/lecture/blob/2b7817b26a89b33fbd3588cc6785f5278bd92662/P02_ethereum/2_components.md?plain=1#L108
 に表現を揃えてくれると助かります．
 
@@ -154,25 +164,23 @@ https://note.com/standenglish/n/n6e95cc0b09bb
 日本語訳のサイトを見てもそうらしいと読める： https://qiita.com/cardene/items/4966cf7f6691d7220367
 
  -->
-1. max_fee_per_blob_gas
-    
-    これはsenderがBlobに対して支払う意思のある金額の入札です。ここでのgasは、既存のEIP-1556とは別でBlobはBlob自体のfee marketを持ちます。
-<!-- EIP-1556と唐突に出てきてもわかりにくいので通常のTxのガス料金を規定したEIP-1556・・・などのように補足説明を記述してください． -->
-2. blob_version_hashs
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+| max_fee_per_blob_gas | これはsenderがBlobに対して支払う意思のある金額の入札です。| ここでのgasは、通常のTxのガス料金を規定した既存のEIP-1556とは別でBlobはBlob自体のfee marketを持ちます。|
+| blob_version_hashs | これは、複数の versioned_hash をリストとして保持します。|  |
 
-    これは、複数の versioned_hash をリストとして保持します。
+<!-- EIP-1556と唐突に出てきてもわかりにくいので通常のTxのガス料金を規定したEIP-1556・・・などのように補足説明を記述してください． -->
 
 ブロックヘッダーにも変更があり、blob_gas_usedとextra_blob_gasが追加されています。
 
-1. blob_gas_used
-    
-    ブロック内のトランザクションによって消費されたblob gasの総量です。
-    
-2. excess_blob_gas
-    
-    ブロックごとのBlobの目標使用量を超えた場合の累積ガス量です。1ブロックの目標Blob数は3つであり、3つを超えると超過分だけ増加し、3つ未満の場合は減少します。ただし、超過がない場合は0に保持されます。現在の制限では1ブロックに最大6つのBlobが含まれることができます。
+| 名称 | 役割 | 備考 |
+| ---- | ---- | ---- |
+| blob_gas_used | ブロック内のトランザクションによって消費されたblob gasの総量です。| |
+| excess_blob_gas | ブロックごとのBlobの目標使用量を超えた場合の累積ガス量です。| 1ブロックの目標Blob数は3つであり、3つを超えると超過分だけ増加し、3つ未満の場合は減少します。ただし、超過がない場合は0に保持されます。現在の制限では1ブロックに最大6つのBlobが含まれることができます。|
 
 ## Blobのfeeについて
+
+<!-- 正直feeについては複雑で深掘りできませんでした。すみません。 -->
 Proto-Dankshardingは、Blobの基本料金を通常のガス使用料金の基本料金とは別に調整する、Blob固有の料金市場を導入します。
 
 $$
@@ -203,7 +211,7 @@ Proto-Dankshardingの導入に伴い、Ethereumの仮想マシン（EVM）には
     - トランザクションが持つversioned_hashをEVMに読み込む機能を提供します。
 
 2. point_evaluation_precompile
-    - このプリコンパイルは、与えられた多項式 $p(x)$ のKZGコミットメントと、ポイント $z$ およびその評価値 $y$ が提供された $versioned_hash$ に対応することを証明するKZG Proofを使用して、$f(z)$ が $y$ であることを検証します。プリコンパイルは、192バイトの入力を受け取り、versioned_hash、$z$ 、$y$ 、commitment、proofを解析し、コミットメントがversioned_hashに一致することを確認した後、KZG proofを検証します。この検証により、Blobの特定の要素が期待される値を持っていることが証明されます。
+    - このプリコンパイルは、与えられた多項式 $p(x)$ のKZGコミットメントと、ポイント $z$ およびその評価値 $y$ が提供された versioned_hash に対応することを証明するKZG Proofを使用して、$f(z)$ が $y$ であることを検証します。プリコンパイルは、192バイトの入力を受け取り、versioned_hash、$z$ 、$y$ 、commitment、proofを解析し、コミットメントがversioned_hashに一致することを確認した後、KZG proofを検証します。この検証により、Blobの特定の要素が期待される値を持っていることが証明されます。
     - このプリコンパイルを使用することで、$f(\omega^i) = B_i$ という関係を確認し、Blobの $i$ 番目の要素が $B_i$ であることを証明できます。
 
 
@@ -230,7 +238,7 @@ zkRollupは、この同値性証明を利用して、公開データがversioned
 BLS12-381ではない任意のSNARKの場合はこちらをご覧ください。
 
 https://notes.ethereum.org/@vbuterin/proto_danksharding_faq#Moderate-approach-works-with-any-ZK-SNARK
-がちゃんとした仕組みの解説記事ぽい．
+
 
 ## zkRollupでどう使われているか
 
@@ -249,6 +257,7 @@ zkRollupシステム内でKZGのコードを実行する代わりに、point_eva
 出典: https://hackmd.io/@protolambda/blobs_l2_tx_usage#Blob-TXs-in-EVM-but-without-blob-data
 
 Optimistic Rollupでのpoint_evaluation_precompileの使われ方はこちらをご覧ください。
+
 https://hackmd.io/@protolambda/blobs_l2_tx_usage#Blob-TXs-in-EVM-but-without-blob-data
 
 # まとめ
