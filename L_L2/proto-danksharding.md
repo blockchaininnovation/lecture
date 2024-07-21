@@ -24,7 +24,7 @@ Proto-Dankshardingでは1ブロックあたりに最大6個のBlobを、Dankshar
 
 Dankshardingの主な革新の一つは、merged fee marketです。これは、固定数のシャードがそれぞれ異なるブロックとブロックProposerを持つ代わりに、Dankshardingではすべてのトランザクションとデータを選択する一人のProposerのみが存在します。
 
-さらに、高いスペック要件がバリデータに強制されないように、Proposer/Builder Separation (PBS)は、ブロックの内容を選択する権利を競う特殊なクラスのアクター、Block Builderを導入しました。Proposerは最も高い入札額を持つ有効なヘッダーを選択するだけでよく、Block builderのみがブロック全体の処理を必要とします。他のバリデータやユーザーは、Data Availability Sampling(DAS)と呼ばれる技術を使用することによって、非常に効率的なデータ検証を実施することができます。
+さらに、高いスペック要件がバリデータに強制されないように、Proposer/Builder Separation (PBS)は、ブロックの内容を選択する権利を競う特殊なクラスのアクター、Block Builderを導入しました。Proposerは最も高い入札額を持つ有効なヘッダーを選択するだけでよく、Block builderのみがブロック全体の処理を必要とします。他のバリデータやユーザーは、Data Availability Sampling(DAS)と呼ばれる技術を使用することによって、非常に効率的なデータ検証を実施することができます。またそのDASを強化するテクニックとしてErasure Encodingが導入されます。Erasure Encodingによって、blobの少なくとも半分が検証されれば、残りのblobを再構築できることを保証します。
 
 Dankshardingでも技術的な課題が多く、先立ってProto-Dankshardingが実装されることになりました。
 
@@ -51,7 +51,7 @@ Proto-Dankshardingには大きく2つの要素があります：
 ![BlobとCalldataの比較](./img/blob_calldata.png)
 出典: https://youtu.be/JQDUvqv60qw?si=92l7WQojZNf1rKKH&t=946
 
-BlobでもData Availabilityを確保するため、全てのノードが確認できるようにする必要があります。従来のブロックではトランザクションデータを永久に保存する必要がありましたが、Blobのデータが数週間（約18日）のみ保存され、その後は削除されます。
+BlobでもData Availabilityを確保するため、全てのノードが確認できるようにする必要があります。従来のブロックではトランザクションデータを永久に保存する必要がありましたが、Blobのデータが数週間（約18日: 4096 epochs）のみ保存され、その後は削除されます。
 <!-- Blobデータのハッシュ値だけが保存されているのでしょうか？データそのものが保持されていると思っていました．
 ていうかそうしないとRollupで検証する際Txのローデータを取り出すことができないような・・．
 
@@ -112,7 +112,7 @@ https://www.quicknode.com/docs/ethereum/eth-v1-beacon-blob_sidecars-id
 https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-for-improvement-of-das/
 ここが仕組み詳しそう．
  -->
-ただし、EVMからは直接アクセスできず、versioned_hashを通じて間接的にデータを扱います。
+ただし、コンセンサスクライアントに保存されているため、EVMからは直接アクセスできず、versioned_hashを通じて間接的にデータを扱います。
 
 1. 多項式の構築:
     Blobの各要素 $B_i$ はフィールド要素の値であり、これを用いて多項式 $P(x)$ を構築します。$\omega^{4096} = 1$ mod $p$ を満たす整数 $\omega$ を使用し、$(\omega^{0}, B_0)$ から $(\omega^{4095}, B_{4095})$ を通過する4095次の一意の多項式 $P(x)$ を作ります。
@@ -141,6 +141,9 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
     IPFSにおけるcidみたいな．
     将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります，とか表現改善が必要．
      -->
+
+### なぜMerkle Treeではなく、KZGのようなPolynomial Cpmmitmentsを使用するのか？
+Dankshardingのロードマップでは、データの可用性を保証するためにDASとErasure Encodingが導入されます。Erasure EncodingはReed-Solomon codeの多項式補完を使用してデータを拡張する技術です。例えば、多項式を評価域を2倍にすると、その半分を失っても元の多項式を復元できる特性を持ちます。これをデータ復元能力と呼びます。このような特性をMerkle Treeでは持てませんが、Polynomial Commitmentでは持つことができます。しかし、これらの特性はProto-Dankshardingでは完全には使用されておらず、Full Danksharding時において最大限の効果を発揮します。
 
 ## Blob Carrying Transaction(Shared Blob Transaction)の詳細
 このBlobのデータの追加に伴い、Blob Carrying Transaction(Shared Blob Transaction)と呼ばれる新しいタイプのトランザクションが導入されました。トランザクションには、通常のsender、receiver, nonce, gas bidなどに加えて、Blob特有のものとして、次の2つが新しく追加されました。
@@ -183,6 +186,15 @@ https://note.com/standenglish/n/n6e95cc0b09bb
 | ---- | ---- | ---- |
 | blob_gas_used | ブロック内のトランザクションによって消費されたblob gasの総量です。| |
 | excess_blob_gas | ブロックごとのBlobの目標使用量を超えた場合の累積ガス量です。| 1ブロックの目標Blob数は3つであり、3つを超えると超過分だけ増加し、3つ未満の場合は減少します。ただし、超過がない場合は0に保持されます。現在の制限では1ブロックに最大6つのBlobが含まれることができます。|
+
+## BlobのLifecycle
+![Blobのデータ構造](./img/blob_lifecycle.png)
+
+1. L2でトランザクションが送信されます。
+2. Rollup operatorがL2のトランザクションをバンドルします。
+3. Rollup operatorはバッチされたトランザクションをBlobとして、Ethereum mem poolに手数料と共に提出します。
+4. Beacon chainで、手数料とBlobトランザクションに関するMEVに基づいて、バリデータによってブロックに取り込まれます。
+5. Blobはコンセンサスレイヤーに数週間保管されます。
 
 ## Blobのfeeについて
 
