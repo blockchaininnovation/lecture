@@ -111,8 +111,8 @@
     <!-- Re：基本的な仕組み自体は同じだと思います。キーバリューペアで管理しているのは間違いないと思います。ただ Ethereumと全く同じデータをハッシュにかけているわけではなさそうです。実装らしきコードは見つけたのですが、私がGolang読めないのではっきりとはわかりませんでした。（https://github.com/OffchainLabs/nitro/blob/master/arbos/storage/storage.go）
     → これはステートを格納しているDBで，多分ここがマークルツリー作っているところ．
     https://github.com/OffchainLabs/nitro/blob/b066a58ba36fea848e004359b1dfba6b94a30f40/arbitrator/prover/src/memory.rs#L101
-    
      -->
+
   - 不正を指摘する（以降「チャレンジ」と呼ぶ）際に L1 に ETH をステークする必要がある
   - バリデーターには 4 種類の戦略がある
 
@@ -158,14 +158,21 @@
   - しかしブロックを区切っているのはシーケンサーで、[ソフトファイナリティ](#ファイナリティ)の状態でブロックを進めている
 
 - L2 ブロックはシーケンサー（ArbOS）が`ArbitrumInternalTxType`という種類のトランザクションを挟むことで区切られる
-<!-- 
-InternalTxStartBlockの間違いかも？
-nitro内のProduceBlockAdvanced()で
-	// Prepend a tx before all others to touch up the state (update the L1 block num, pricing pools, etc)
-	startTx := InternalTxStartBlock(chainConfig.ChainID, l1Header.L1BaseFee, l1BlockNum, header, lastBlockHeader)
-	txes = append(types.Transactions{types.NewTx(startTx)}, txes...)
-  という箇所がある．
- -->
+  <!--
+  InternalTxStartBlockの間違いかも？
+  nitro内のProduceBlockAdvanced()で
+  	// Prepend a tx before all others to touch up the state (update the L1 block num, pricing pools, etc)
+  	startTx := InternalTxStartBlock(chainConfig.ChainID, l1Header.L1BaseFee, l1BlockNum, header, lastBlockHeader)
+  	txes = append(types.Transactions{types.NewTx(startTx)}, txes...)
+    という箇所がある．
+   -->
+  <!-- Re：https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/rpc-methods#transaction-types
+    ここに定義してあるものですね。ソースコードはそれであってそうです。
+
+    「ArbOS とシーケンサーは、1 つの Arbitrum ブロックが終了し、次のブロックが開始するタイミングを区別する役割を担っています。」
+    https://docs.arbitrum.io/build-decentralized-apps/arbitrum-vs-ethereum/block-numbers-and-time#arbitrum-block-numbers
+   -->
+
   - 見た感じ結構頻繁に区切られており、そのせいで L2 ブロックは 2 億個ほどある
   - [ここ](https://arbiscan.io/txs)を眺めるとちらほらと見える`Start Block`というメソッドのトランザクションがそうである
   - トランザクションで区切ってるだけなので、プロトコルにおいてはあまり意識されていない
@@ -512,6 +519,7 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   なぜ2つあるのかは不明．
 
   -->
+
   - 検証を待つ（チャレンジ期間終了を待つ）
   - 何もなければ承認し、Outbox コントラクトへデータをコミット
   <!-- おそらく以下のコード：
@@ -521,6 +529,7 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   ここでoutbox内にブロックハッシュを記録している．
 
     -->
+
   - 異議があればチャレンジを行う
 
 ## RBlock の作成
@@ -792,8 +801,8 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
 
   - 安くなりすぎである
 
+# 参考 URL
 
-# 参考URL
 https://github.com/OffchainLabs/nitro/blob/master/docs/Nitro-whitepaper.pdf
 https://l2beat.com/scaling/projects/arbitrum#contracts
 https://docs.arbitrum.io/how-arbitrum-works/inside-arbitrum-nitro#arbitrum-rollup-protocol
