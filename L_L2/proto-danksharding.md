@@ -45,7 +45,7 @@ EIP 4844以前、Rollupのコストはどこに集中していたのでしょう
 ## Blobの導入
 Proto-Dankshardingには大きく2つの要素があります：
 1. 短期間だけBeacon chainに保持されるBlob（Binary Large Object）という新しいデータ形式の導入
-2. BlobのハッシュをEthereumに送信する新しいトランザクションタイプであるBlob Carrying Transaction(Shared Blob Transaction)の導入
+2. BlobをEthereumに送信する新しいトランザクションタイプであるBlob Carrying Transaction(Shared Blob Transaction)の導入
 
 ## Blobの特徴
 ![BlobとCalldataの比較](./img/blob_calldata.png)
@@ -261,7 +261,7 @@ Optimistic Rollupでのpoint_evaluation_precompileの使われ方はこちらを
 https://hackmd.io/@protolambda/blobs_l2_tx_usage#Blob-TXs-in-EVM-but-without-blob-data
 
 # まとめ
-Proto-DankShadingは、Dankshardingに先駆けて行われたアップデートで、EthereumのRollupのL1に保管されるトランザクションの保存コストを削減し、Rollupのガス代の削減およびTPSの増加を目的としたものです。短期間保存されるBlobというデータ形式を導入し、またBlobを持つBlob Carrying Transaction(Shared Blob Transaction)というトランザクションタイプが導入されました。Blob Carrying Transaction(Shared Blob Transaction)には、コミットメントのハッシュ値が記録されており、EVMから直接Blobの値を取得することはできませんが、現在はKZG コミットメントとpoint evaluation precompileを使用してBlobの要素を取得することができます。
+Proto-DankShadingは、Dankshardingに先駆けて行われたアップデートで、EthereumのRollupのトランザクションをL1に保存するコストを削減し、Rollupのガス代の削減およびTPSの増加を目的としたものです。短期間保存されるBlobというデータ形式を導入し、またBlobを持つBlob Carrying Transaction(Shared Blob Transaction)というトランザクションタイプが導入されました。Blob Carrying Transaction(Shared Blob Transaction)には、コミットメントのハッシュ値（versioned_hash）も記録されており、EVMから直接Blobの値を取得することはできませんが、BLOBHASHというオペコードを通じてversioned_hashを取得し、KZG コミットメントを使用したpoint evaluation precompileを使用してBlobの要素を証明、検証することができます。
 
 # 参考
 - EIP-4844: Shard Blob Transactions: https://eips.ethereum.org/EIPS/eip-4844#point-evaluation-precompile
