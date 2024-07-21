@@ -127,6 +127,9 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
         というかSHA256は32バイトなので，バージョン情報追加したら33バイトになってしまうが・・・．
         → ここを見ると最初のバイトを置き換えるぽい．
         https://hackmd.io/@protolambda/ethdenver_data_blob_transactions
+
+        というか，なんでコミットメントそのものではなくハッシュ値を使うんだろう・・？
+        後日異なるコミットメントを採用したときにも識別子として機能できるようにするため？
      -->
     
     この値がversioned_hashとして記録されます。バージョン情報は、KZGコミットメントは0x01ですが、将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります
