@@ -44,7 +44,7 @@ EIP 4844以前、Rollupのコストはどこに集中していたのでしょう
 # Proto-Dankshardingの概要
 ## Blobの導入
 Proto-Dankshardingには大きく2つの要素があります：
-1. 短期間だけBeacon Chianに保持されるBlob（Binary Large Object）という新しいデータ形式の導入
+1. 短期間だけBeacon chainに保持されるBlob（Binary Large Object）という新しいデータ形式の導入
 2. BlobのハッシュをEthereumに送信する新しいトランザクションタイプであるBlob Carrying Transaction(Shared Blob Transaction)の導入
 
 ## Blobの特徴
