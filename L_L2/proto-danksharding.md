@@ -121,7 +121,7 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
     $P(x)$ と Trusted Setupの値を用いて、KZGコミットメントを生成します。
 
 3. コミットメントのハッシュ化:
-    KZGコミットメントのSHA256ハッシュ値にバージョン情報（0x01）を付加し、最終的にEVMを満たす32バイトの長さにします。
+    KZGコミットメントのSHA256のハッシュ値の最初のバイトをバージョン情報（0x01）に置き換え32バイトの長さにします。これは、EVMが32バイトワードを使用するため、利便性を考慮したものです。
     <!-- EVMを満たす32バイトというのは？
         EVMでの最大の整数値型uint256で表現可能な値ということ？
         というかSHA256は32バイトなので，バージョン情報追加したら33バイトになってしまうが・・・．
@@ -130,6 +130,9 @@ https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-
 
         というか，なんでコミットメントそのものではなくハッシュ値を使うんだろう・・？
         後日異なるコミットメントを採用したときにも識別子として機能できるようにするため？
+
+        The versioned hash is just a convenience since the EVM uses 32 byte words.
+        https://youtu.be/JQDUvqv60qw?si=EtSHXZiYOom_dBnP&t=1862
      -->
     
     この値がversioned_hashとして記録されます。バージョン情報は、KZGコミットメントは0x01ですが、将来的に別の例えば量子体制のあるコミットメントを導入した場合に区別ができるようにするための識別子となります
@@ -274,3 +277,5 @@ Proto-DankShadingは、Dankshardingに先駆けて行われたアップデート
 - Proto-Danksharding-Part1: https://medium.com/@chaisomsri96/proto-danksharding-part1-b6449e120f78
 - Proto-Danksharding-Part2: https://medium.com/@chaisomsri96/proto-danksharding-part2-c5fb314f54e7
 - Blobspace101: https://domothy.com/blobspace
+- Proto-danksharding: What It Is and How It Works: https://www.galaxy.com/insights/research/protodanksharding-what-it-is-and-how-it-works
+- Why EIP-4844 matters for rollups and how it works for ZK-EVM: https://taiko.mirror.xyz/3_5rjTXFT_bLYnRBD2ZxqLQu9-qgTF4JOkwK7rUpwJs
