@@ -517,9 +517,7 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   }
   となっている．
   なぜ2つあるのかは不明．
-
   -->
-
   - 検証を待つ（チャレンジ期間終了を待つ）
   - 何もなければ承認し、Outbox コントラクトへデータをコミット
   <!-- おそらく以下のコード：
@@ -527,8 +525,7 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   内の
     outbox.updateSendRoot(sendRoot, blockHash);
   ここでoutbox内にブロックハッシュを記録している．
-
-    -->
+  -->
 
   - 異議があればチャレンジを行う
 
