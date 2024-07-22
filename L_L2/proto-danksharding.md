@@ -111,6 +111,27 @@ https://www.quicknode.com/docs/ethereum/eth-v1-beacon-blob_sidecars-id
 
 https://a16zcrypto.com/posts/article/an-overview-of-danksharding-and-a-proposal-for-improvement-of-das/
 ここが仕組み詳しそう．
+
+
+楕円曲線BLS12-381で，データを表現するための位数は，
+https://hackmd.io/@benjaminion/bls12-381
+の楕円曲線そのものの有限体の位数ではなく，多項式の演算時の有限体の位数．
+なので，上記のページのSubgroup sizeの
+0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
+で，これは
+52435875175126190479447740508185965837690552500527637822603658699938581184513
+
+
+KZGコミットメントのプルーフ（ウィットネス）生成のときの評価点は
+https://github.com/grandinetech/rust-kzg/blob/main/kzg/src/eip_4844.rs#L769
+のところ．
+Blobのデータからハッシュを求めた，すなわちDeterministicな乱数．
+https://eips.ethereum.org/EIPS/eip-4844#networking
+に記載されている
+(Note: this can be optimized using verify_blob_kzg_proof_batch, with a proof for a random evaluation at a point derived from the commitment and blob data for each blob)
+はこれを意味している．
+乱数で評価点を決めることで，その多項式全体からコミットメントを計算させることなく，その一点での評価で多項式そのものを知っている代わりにしている．
+
  -->
 ただし、コンセンサスクライアントに保存されているため、EVMからは直接アクセスできず、versioned_hashを通じて間接的にデータを扱います。
 
