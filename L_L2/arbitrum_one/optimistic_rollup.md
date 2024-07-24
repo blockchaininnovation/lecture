@@ -111,6 +111,9 @@
     <!-- Re：基本的な仕組み自体は同じだと思います。キーバリューペアで管理しているのは間違いないと思います。ただ Ethereumと全く同じデータをハッシュにかけているわけではなさそうです。実装らしきコードは見つけたのですが、私がGolang読めないのではっきりとはわかりませんでした。（https://github.com/OffchainLabs/nitro/blob/master/arbos/storage/storage.go）
     → これはステートを格納しているDBで，多分ここがマークルツリー作っているところ．
     https://github.com/OffchainLabs/nitro/blob/b066a58ba36fea848e004359b1dfba6b94a30f40/arbitrator/prover/src/memory.rs#L101
+
+    ドキュメント
+    https://docs.arbitrum.io/learn-more/faq#what-is-the-difference-between-an-l2-block-and-a-rblock
      -->
 
   - 不正を指摘する（以降「チャレンジ」と呼ぶ）際に L1 に ETH をステークする必要がある
@@ -570,6 +573,10 @@ Sequencer Indexに入っている各々のTx情報とRBlock情報を組み合わ
   - このプロトコルによって、Arbitrum の許可なしにだれでも検証ができるようになる
 
 # チャレンジシステム
+
+<!-- https://docs.arbitrum.io/how-arbitrum-works/assertion-tree
+  https://docs.arbitrum.io/how-arbitrum-works/fraud-proofs/osp-assumptions
+ -->
 
 - Arbitrum Rollup の正当性を保つのがこのチャレンジシステムである
 
