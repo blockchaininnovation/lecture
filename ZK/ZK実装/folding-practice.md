@@ -3,6 +3,8 @@
 Circomを使った応用編として、Recursiveなゼロ知識証明（再帰証明）の回路を書いて行きたいと思います。
 今回は1例として、CircomでIncremental verifiable computationを実現するFolding Schemeの回路の実装手順について紹介します。
 
+![Sonobeの概要](./img/incrementalcomputation.png)
+
 例としてこれらのプロジェクトは、Folding Schemeを効果的に使用した使用例になります。
 
 - Zator: https://github.com/lyronctk/zator
