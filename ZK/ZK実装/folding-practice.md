@@ -19,7 +19,7 @@ Circomを使った応用編として、Recursiveなゼロ知識証明（再帰�
   
 # Sonobeの概要
 
-今回使用するFolding-Shcemeを使用するのは、0xPARCとPSE(Privacy + Scaling Explorations)の共同作業によって実装されたSonobeというライブラリです。Sonobeでは、将来的に様々Arithmetizationとそのライブラリ(arkworks, Circom, Halo2, Noir)とFolding Scheme(Nova, HyperNova, Protogralaxy)をサポートし、それらをモジュール式で使えるライブラリです。現在は、ゼロ知識証明の回路をRustのarkworksか、circomで定義することができ、Folding-schemeとしてはNovaを使用することができます。また、Folding Scheme自体の証明であるIVC ProofからzkSNARKのProofを生成し、そのProofをEVMで検証することが可能です。
+今回使用するFolding-Schemeのライブラリは、0xPARCとPSE(Privacy + Scaling Explorations)の共同で実装されたSonobeというものです。Sonobeでは、将来的に様々Arithmetizationとそのライブラリ(arkworks, Circom, Halo2, Noir)とFolding Scheme(Nova, HyperNova, Protogralaxy)をサポートし、それらをモジュール式で使えるようにするライブラリです。現在は、ゼロ知識証明の回路をRustのarkworksか、circomで定義することができ、Folding-schemeとしてはNovaを使用することができます。また、Folding Scheme自体の証明であるIVC ProofからzkSNARKのProofを生成し、そのProofをEVMで検証することが可能です。
 
 ![Sonobeの概要](./img/sonobe.png)
 出典: https://privacy-scaling-explorations.github.io/sonobe-docs/folding-and-sonobe.html
@@ -33,7 +33,7 @@ Sonobeを用いた開発手順は以下の通りです。
 ![novafolding](./img/novafolding.png)
 
 FCircuitというのは、IVCで各ステップで実行されるユーザーが定義する関数Fに対応する回路のことです。
-また、ステップ3が行なっていることは、IVCのProofは簡潔(succinct)でない、NARKであるため、Decider ProverでIVCのProofをSNARKでラップするする必要があります。
+また、ステップ3が行なっていることは、IVCのProofは簡潔(succinct)でない、NARKであるため、Decider ProverでIVCのProofをSNARKでラップする必要があります。
 
 Augmented Circuitは、FCircuitとFoldingのVerifierである、Non-Interactive Folding Verifier $NIFS.V$を統合したCircuitになります。このAugemented CircuitがNovaだとRelaxed R1CSで表され、Relaxed R1CSのインスタンスwitnessペアがfoldingの各ステップで折り畳まれることによって、高効率な再帰性を持っています。
 
