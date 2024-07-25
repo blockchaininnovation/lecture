@@ -64,7 +64,7 @@ component main {public [ivc_input]} = Example();
 
 ## 例1
 
-IVCの各ステップで$\text{ivc\_input}[0]^3 + \text{ivc\_input}[0] + 5$を繰り返し行なっていく回路です。
+IVCの各ステップで $\text{ivc\_input}[0]^3 + \text{ivc\_input}[0] + 5$ を繰り返し行なっていく回路です。
 
 ```
 pragma circom 2.0.3;
@@ -83,7 +83,7 @@ component main {public [ivc_input]} = Example();
 
 ## 例2
 
-IVCの各ステップで$\text{ivc\_input}[0]^3 + \text{ivc\_input}[0]*\text{external\_input}[0] + \text{external\_input}[1]$を繰り返し行なっていく回路です。
+IVCの各ステップで $\text{ivc\_input}[0]^3 + \text{ivc\_input}[0]*\text{external\_input}[0] + \text{external\_input}[1]$ を繰り返し行なっていく回路です。
 
 ```
 pragma circom 2.0.3;
@@ -175,7 +175,7 @@ let mut nova = N::init(nova_params.clone(), f_circuit.clone(), z_0).unwrap();
 let (decider_pp, decider_vp) = D::preprocess(&mut rng, &nova_params, nova.clone()).unwrap();
 ```
 
-実際にFoldingが行われる部分です。
+実際にFoldingが行われる部分です。既存のコードに、`println!("state : {:?}", nova.state());`を足すことで、IVCで行われているネイティブのstateの遷移を可視化することができます。
 
 ```
 for (i, external_inputs_at_step) in external_inputs.iter().enumerate() {
