@@ -64,7 +64,7 @@ component main {public [ivc_input]} = Example();
 
 ## 例1
 
-IVCの各ステップで $\text{ivc_input}[0]^3 + \text{ivc_input}[0] + 5$ を繰り返し行なっていく回路です。
+IVCの各ステップで $\text{ivc input}[0]^3 + \text{ivc input}[0] + 5$ を繰り返し行なっていく回路です。
 
 ```
 pragma circom 2.0.3;
@@ -83,7 +83,7 @@ component main {public [ivc_input]} = Example();
 
 ## 例2
 
-IVCの各ステップで $\text{ivc_input}[0]^3 + \text{ivc_input}[0]*\text{external_input}[0] + \text{external_input}[1]$ を繰り返し行なっていく回路です。
+IVCの各ステップで $\text{ivc input}[0]^3 + \text{ivc input}[0]*\text{external input}[0] + \text{external input}[1]$ を繰り返し行なっていく回路です。
 
 ```
 pragma circom 2.0.3;
