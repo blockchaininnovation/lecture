@@ -159,6 +159,8 @@ a(), b()のコミットメントを作るときに一部を開示している？
 > To bind a variable to a public value, we let qR, qO, qM equal to 0, qL equal to 1, and qC equal to the public value.
 ただ，制約増やしても別にその制約を公開するわけではないので，謎．
 
+というかOutputも回路そのものの共有と検証もよく考えるとどうやってやるんだろう？
+上記のプロセスだと謎多項式が一定の制約を満たしているということだけしか検証できてなくて，多項式の情報が一切検証者側に渡ってない気がする．
 -->
 
 
