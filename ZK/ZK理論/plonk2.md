@@ -153,6 +153,11 @@ verification key: ppとコミットメント値c
 
 
 あとは，パブリックインプットとプライベートインプットをどう表現しているかがわからない．
+a(), b()のコミットメントを作るときに一部を開示している？
+→ https://research.metastate.dev/plonk-by-hand-part-1/
+この辺を読んでいると，ゲート制約を作るときにパブリックインプットの値は制約を増やすらしいが・・・
+> To bind a variable to a public value, we let qR, qO, qM equal to 0, qL equal to 1, and qC equal to the public value.
+ただ，制約増やしても別にその制約を公開するわけではないので，謎．
 
 -->
 
