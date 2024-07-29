@@ -41,7 +41,7 @@ NP問題を算術回路に変換する問題のことを算術回路の充足可
 -->
 証明したいNP問題は、最初に有限体上の算術回路の充足可能性問題として定義されます。算術回路とは、論理回路と同じように、2入力1出力の加算・乗算を表すゲートを組み合わせることで、関数の計算を定義するモデルです。証明者は、自身が持つ値を回路に入力したとき、回路の出力が検証者によって指定された値になることを示します。
 
-回路の充足可能性問題は任意のNP問題を表すことができ、回路や回路の出力がNP問題の命題 (instance)、回路への入力や途中のゲートの入出力がNP問題の解 (witness)に対応します [9]。ただし、回路の入力の一部が命題に含まれることもあります。算術回路が十分に幅広い種類の関数を表現できることを直感的に理解するために、有限体上の四則演算が加算・乗算の組み合わせによって表せることを確かめます。
+回路の充足可能性問題は任意のNP問題を表すことができ、回路や回路の出力がNP問題の命題 (instance)、回路への入力や途中のゲートの入出力がNP問題の解 (witness)に対応します [9]。ただし、回路の入力の一部が命題に含まれることもあります。算術回路が十分に幅広い種類の関数を表現できることを直感的に理解するために、有限体$F_r$ 上の四則演算が加算・乗算の組み合わせによって表せることを確かめます。
 - 加算: 加算ゲートを直接用いて計算できます。
 - 減算: 位数 $r$の有限体上では、 $a + (r-b) = r = 0 \mod q$が成り立つため、 $-b$は  $r-b$で表すことができます。したがって、 $a - b$という減算は $a$と $r-b$の加算として計算できます。
 - 乗算: 乗算ゲートを直接用いて計算できます。
@@ -136,13 +136,15 @@ x_a  x_b
  -->
 また、あるワイヤの値 $x_c$をある定数 $q_c$に固定させたい場合、制約条件 $q_c - x_c = 0$を定義します。以降、定数になるワイヤは便宜的に定数ゲートの出力と見做します。
 
-これらの制約条件を各ゲートに対して定めることで、回路が正しく評価された場合にのみ満たされるような制約条件のリストを作ることができます。ただし、このままだとゲートの種類ごとに制約条件が異なり扱いが面倒なので、ゲートごとに決まるパラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$を導入して、式の形式を次のように統一します。
+これらの制約条件を各ゲートに対して定めることで、回路が正しく評価された場合にのみ満たされるような制約条件のリストを作ることができます。ただし、このままだとゲートの種類ごとに制約条件が異なり扱いが面倒なので、ゲート数を$n$ として、ゲートごとに決まるパラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$を導入し、式の形式を次のように統一します。
 <!-- 
 係数の次元は (\mathbb{F}_r^n)^5 じゃなくて(\mathbb{F}_r)^5 の間違い？
 → じゃなくてゲートがn個あるとしてF_rのn次元でよいのか．
 nの定義を書くべき．
 
-x_iの定義域も触れられていないが同じくF_r？-->
+x_iの定義域も触れられていないが同じくF_r？
+<-- はい、F_rになります。
+-->
 
 ```math
     \textbf{q}_{L_i} x_{a_i} + \textbf{q}_{R_i} x_{b_i} + \textbf{q}_{O_i} x_{c_i} + \textbf{q}_{M_i} x_{a_i} x_{b_i} + \textbf{q}_{C_i} = 0
@@ -175,6 +177,7 @@ $x_i = x_{\sigma(i)}$ が全ての $i$で成り立つならば、累積値の値
 
 自分が解を知っているという正当性を示したい人はそのセキュリティを甘くしたいことはないので，ちゃんとした乱数を取ってもらえるという理解．
 
+<-- はい、証明者と検証者がinteractiveな場合は、検証者が（勝手に）選んだ乱数になります。non-interactiveな場合は、commitmentsを含むデータのハッシュ値から乱数が一意に求められ、証明者と検証者はそれらを同じように計算します。
  -->
 
 <!-- 
@@ -190,7 +193,7 @@ $x_i = x_{\sigma(i)}$ が全ての $i$で成り立つならば、累積値の値
 その制約条件を満たす解を知っていることを占めることが問題となる．
 
 ということは制約条件の解って一意？
-
+<--必ずしも一意でないと思います。例えば、ECDSA署名検証の回路に対応する制約条件の場合、同じ鍵・同じメッセージでも、署名時の乱数によって複数の有効な署名が作られうる(つまり署名は一意でない)ので、その分だけ解も複数あることになります。
  -->
 
 ## 制約条件から多項式へ
@@ -242,7 +245,7 @@ gate constaintsは次の多項式によって定義されます。
 ```math
 Q_L(X)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + (Q_C(x) + \textsf{PI}(X)) = 0
 ```
-これに$\textbf{g}^i$ を代入すると、上の多項式は元のgate constraintsを全て表していることがわかります。ただし、$i \in [p]$ では、$Q_L(\textbf{g}^i)=1, Q_R(\textbf{g}^i)=Q_O(\textbf{g}^i)=Q_M(\textbf{g}^i)=Q_C(\textbf{g}^i)=0$ とします。この時、上の多項式は$A(\textbf{g}^i) - x_i = 0$ という形になるため、instanceの値がwitnessで使用されていることを確かめられます。なお、instanceの値が $x_{b_j}$ や$x_{c_j}$ に使われている場合は、一旦それが$x_{a_i}$ にあると見做した後、$x_{a_i} - x_{b_j} = 0$や$x_{a_i} - x_{c_j} = 0$ という制約を作ることができます。したがって、上の多項式を最後にKZG commitmentで証明することで、各ゲートごとにgate constraintが成り立つこと、および特定のinstanceの値が使われていることを証明できます。
+これに各$\textbf{g}^i$ を代入すると、上の多項式は元のgate constraintsを全て表していることがわかります。ただし、$i \in [p]$ では、$Q_L(\textbf{g}^i)=1, Q_R(\textbf{g}^i)=Q_O(\textbf{g}^i)=Q_M(\textbf{g}^i)=Q_C(\textbf{g}^i)=0$ とします。この時、上の多項式は$A(\textbf{g}^i) - x_i = 0$ という形になるため、instanceの値がwitnessで使用されていることを確かめられます。なお、instanceの値が $x_{b_j}$ や$x_{c_j}$ に使われている場合は、一旦それが$x_{a_i}$ にあると見做した後、$x_{a_i} - x_{b_j} = 0$や$x_{a_i} - x_{c_j} = 0$ という制約を作ることができます。したがって、上の多項式を最後にKZG commitmentで証明することで、各ゲートごとにgate constraintが成り立つこと、および特定のinstanceの値が使われていることを証明できます。
 
 
 
@@ -257,6 +260,7 @@ q_L(g^i)=q_L_i
 q_Lっていうのはn個の定数が並んだ単なるベクトルなのでは？
 → というかq_Lから作られる多項式をq_L(x)っておいているのか．
 これは混乱するので表記を変えたほうがよい．
+<-- 多項式は全て大文字 (例えばQ_L(X))にして、表記を区別しました。
 -->
 <!-- 2. ワイヤの値 $\textbf{x}_a=(x_{a_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_b=(x_{b_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_c=(x_{c_i})_{i \in \{0,\dots, n-1\}}$ を多項式補間して、 $n-1$次多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を求める。全ての $i\in \{0,\dots, n-1\}$ で、それぞれ $\textbf{a}(\textbf{g}^{i}) = x_{a_i}, \textbf{b}(\textbf{g}^{i}) = x_{b_i}, \textbf{c}(\textbf{g}^{i}) = x_{c_i}$ が成立する。
 3. 多項式の等式 $\textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x) = 0$ が成り立つことを、KZG commitmentsで証明する。 -->
@@ -317,7 +321,7 @@ Z(\textbf{g}^{i+1})(x_{a_i} + \beta \sigma(i) + \gamma)(x_{b_i} + \beta \sigma(n
 ここで、回路のインデックスを表す多項式、$S_{\textsf{ID}1}(X) = X, S_{\textsf{ID}2}(X) = k_1X, S_{\textsf{ID}3}(X) = k_2X, S_{\sigma_1}(X) = \Sigma_{i \in [n]} \sigma(i)\ell_i(X), S_{\sigma_2}(X) = \Sigma_{i \in [n]} \sigma(n+i)\ell_i(X), S_{\sigma_3}(X) = \Sigma_{i \in [n]} \sigma(2n+i)\ell_i(X)$ を定義します。これらは、全ての$i \in [n]$ で、$S_{\sigma_1}(X) = \sigma(i), S_{\sigma_2}(X) = \sigma(n+i), S_{\sigma_3}(X) = \sigma(2n+i)$ を満たします。これらの多項式を用いて、 $Z(X)$が満たす漸化式を次のような多項式の関係で表すことが可能です。
 ```math
 Z(1) = 1 \\
-Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
+\forall X \in \{g^0, \dots, g^{n-1}\}, Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
 ```
 これらの多項式の関係をKZG commitmentsで証明することで、copy constraintsが成り立つことを示すことができます。
 
@@ -340,9 +344,9 @@ Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(
 5. $x_a, x_b, x_c, \beta, \gamma$から、多項式 $Z(X)$を求める。
 6. 次の多項式の関係が成り立つことを、KZG commitmentsで証明する。
 ```math
-Q_L(X)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + (Q_C(x) + \textsf{PI}(X)) = 0 \\
+\forall X \in \{g^0, \dots, g^{n-1}\}, Q_L(X)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + (Q_C(x) + \textsf{PI}(X)) = 0 \\
 Z(1) = 1 \\
-Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
+\forall X \in \{g^0, \dots, g^{n-1}\}, Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
 ```
 
 #### 検証

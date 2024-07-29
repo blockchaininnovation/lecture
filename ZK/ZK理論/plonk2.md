@@ -11,18 +11,19 @@
 算術回路の充足可能性問題として記述されたNP問題は、ゲートごとの制約条件を表すgate constraintsとゲート間の制約条件を表すcopy constraintsに変換され、それらの証明は次の多項式の関係によってそれぞれ表されるのでした。
 ```math
 \begin{align*}
-&\forall x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}, \textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x) = 0\\
-&\forall x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}, z(x\textbf{g})(\textbf{a}(x) + \beta \sigma(i) + \gamma)(\textbf{b}(x) + \beta \sigma(n+i) + \gamma)(\textbf{c}(x) + \beta \sigma(2n+i) + \gamma) - z(x)(\textbf{a}(x) + \beta \textbf{g}^i + \gamma)(\textbf{b}(x) + \beta k_1 \textbf{g}^i + \gamma)(\textbf{c}(x) + \beta k_2 \textbf{g}^i + \gamma) = 0
+&\forall x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}, Q_L(x)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + Q_C(x) = 0\\
+&\forall x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}, Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma) - Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = 0
 \end{align*}
 ```
 
 これらの多項式の関係にKZG commitmentsを適用しようとすると、次の3つの問題があります。
 1. 複数の評価点 $\forall x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}$で評価結果が0になることを証明しなければならない。しかし、証明のサイズは$n$によらず一定になる必要がある。
-2. 検証者が指定する多項式 (例: $\textbf{q}_L(x), \sigma(i)$)と証明者が提供する多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$の積を扱う必要がある。しかし、KZG commitmentsはどちらも$\mathbb{G}_1$上の要素になるため、2つのKZG commitmentsを直接かけることは不可能である。
-3. 共通の多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$がそれぞれの式で使われていることを証明する必要がある。しかし、これらの多項式は証明者の秘密情報 (例: 算術回路への入力)を含むため、直接検証者に公開することはできない。
+2. 検証者が指定する多項式 (例: $Q_L(x), \sigma(i)$ )と証明者が提供する多項式 $A(x), B(x), C(x)$の積を扱う必要がある。しかし、KZG commitmentsはどちらも$\mathbb{G}_1$ 上の要素になるため、2つのKZG commitmentsを直接かけることは不可能である。
+3. 共通の多項式 $A(x), B(x), C(x)$ がそれぞれの式で使われていることを証明する必要がある。しかし、これらの多項式は証明者の秘密情報 (例: 算術回路への入力)を含むため、直接検証者に公開することはできない。
 <!-- 
 上記の式は，多項式と評価点が混ざっているためKZGコミットメントに適用しようとしたときに使うイメージがわかない．
 なので単純に多項式fは何なのか，ということと評価点αがどこでf(α)=βを示すべきは何なのかが不明瞭．
+<-- 以降の説明でその不明瞭な部分を説明しています。
 
 説明を読むとαがg_0, ... , g_{n-1}のn個の点で上の式と下の式がβ=0になる，という複数の評価点の話が出てくる．
 
@@ -33,7 +34,7 @@
 
  -->
 ##　複数の評価点でのKZG Commitments
-一つ目の問題は、複数の評価点での評価結果に対して証明が行えるように、KZG Commitmentsを修正することで解決できます。KZG commitmentsの最も基本的な形を復習すると、ある多項式 $f(x)$のcommitment $c$について $f(\alpha)=\beta$であることを証明するためには、商の多項式 $q(x) = \frac{f(x) - f(\alpha)}{x - \alpha}$を計算し、それを $\mathbb{G}_1$上でランダムな点で評価した結果である $\pi \leftarrow \Sigma_{i = 0}^{n} q_{i}(s^{i}P)$を、証明として提出します。
+一つ目の問題は、複数の評価点での評価結果に対して証明が行えるように、KZG Commitmentsを修正することで解決できます。KZG commitmentsの最も基本的な形を復習すると、ある多項式 $f(x)$のcommitment $c$について $f(\alpha)=\beta$であることを証明するためには、商の多項式 $q(x) = \frac{f(x) - f(\alpha)}{x - \alpha}$を計算し、それを $\mathbb{G}_1$上でランダムな点で評価した結果である $\pi \leftarrow \Sigma_{i = 0}^{n} q_{i}(s^{i}P)$を、証明として提出します。なお、ZKPのwitnessと名前が重複するため、KZG commitmentsの章で述べたwitnessを、ここではここでは証明と呼んでいることに注意してください。
 <!-- ランダムな点というか，隠蔽化された乱数sで構築されている巡回群G_1中の点列． 
 KZGコミットメントのときにはπじゃなくてω_α と表記されていた点．
 -->
@@ -41,7 +42,7 @@ KZGコミットメントのときにはπじゃなくてω_α と表記されて
 
 ここで、 $\forall \alpha^{'} \in \{\alpha_1, \dots, \alpha_n\}$で $f(\alpha^{'})=0$ならば、因数定理より次の式を満たす多項式 $q(x)$が存在します。
 ```math
-  f(x) = q(x)(x - \alpha_1)(x - \alpha_2) \cdot (x - \alpha_n)
+  f(x) = q(x)(x - \alpha_1)(x - \alpha_2) \cdots (x - \alpha_n)
 ```
 <!-- \cdotは\cdotsの誤記？ -->
 特に $\{\alpha_1, \dots, \alpha_n\} = \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}$の場合、この集合の全ての元が1の累乗根である、つまり $x^n = 1$を満たすので、 $(x - \alpha_1)(x - \alpha_2) \cdot (x - \alpha_n) = x^n-1$と単純になります。
@@ -93,25 +94,27 @@ x \in \{\textbf{g}^0, \dots, \textbf{g}^{n-1}\}
 
 
 ここは，KZGコミットメントのページでのウィットネスの表記と合わせて，さらにおなじq()だと混乱するので適宜変数は置き換えたほうがわかりやすそう．
-
+<-- q(x)は常に商の多項式になっているので、意図的に同じ表記を使っています。また、KZG commitmentsのwitnessはZKPのwitnessと重複するので、ここでは注意書きした上で前者を証明と呼んでいます。
  -->
 
 ## ランダム評価点による多項式の定数化と線形化
 2つ目と3つ目の問題は、多項式をランダムな点で評価した結果の定数に置き換え、多項式の積を含む等式を複数の多項式の線形和に変換することで解決できます。簡単な例として、証明者はある3つの多項式 $h_1(x), h_2(x), h_3(x)$について、それらのKZG commitments $c_1 = h_1(s)P, c_2 = h_2(s)P, c_3 = h_3(P)$を事前に検証者に渡し、これらが多項式として $h_1(x)h_2(x) - h_3(x) = 0$を満たすことを、検証者に証明したいとしましょう。単純な解決策は、検証者が選んだランダムな評価点 $\delta$でそれぞれの多項式を評価した結果 $t_1 = h_1(\delta), t_2 = h_2(\delta), t_3 = h_3(\delta)$を、証明者に計算・証明させ、検証者は$t_1 t_2 - t_3 = 0$というスカラーの等式が成り立つことを確かめるという方法です。
-<!-- その評価点だけで成り立っていることだけ示せばよい場合はこれでよい．任意のxで成り立つことを示すには違う方法じゃないとダメ？ -->
+<!-- その評価点だけで成り立っていることだけ示せばよい場合はこれでよい．任意のxで成り立つことを示すには違う方法じゃないとダメ？ 
+<-- 確かに一点でしか評価していませんが、ランダムな評価点で多項式の和・積を評価しているため、そのランダム評価点で0になるならば高い確率で多項式としても0だと言えます。
+-->
 しかし、これでは多項式の種類に比例した数だけ、証明者がそれぞれの多項式の評価結果を送信する必要があります。
 
 そこで、証明者と検証者は、commitmentsが送信された後に次のようなプロトコルを行うことで、この関係を効率的に証明・検証できます。
-1. 検証者はランダムな評価点 $\delta \in \mathbb{F}_r$を取り、これを証明者に送信する。
+1. 検証者はランダムな評価点 $\delta \in \mathbb{F}_r$ を取り、これを証明者に送信する。
 <!-- 
 ランダムといいつつインタラクティブな証明・検証はないはずなので，適当な乱数で一致する数をお互いに取っているはず．
 → KZGコミットメントのページのフィアットシャミアのところか．
-
+<-- はい、ここではまずinteractiveなプロトコルとして定義して、実際にはFiat-Shamir変換でnon-interactiveなものに変換します。
 -->
-2. 証明者は$h_1(\delta)=t_1$という評価結果について、証明$\pi_1$を検証者に送信する。
+2. 証明者は$h_1(\delta)=t_1$ という評価結果について、証明$\pi_1$を検証者に送信する。
 <!-- 
 表記の問題だが，証明→ウィットネス，π→ωで統一． -->
-3. さらに、証明者は $h^{'}(x) = t_1h_2(x) - h_3(x)$という多項式の、 $h^{'}(\delta) = 0$という評価結果について、証明$\pi_2$を検証者に送信する。
+3. さらに、証明者は $h^{'}(x) = t_1h_2(x) - h_3(x)$ という多項式の、 $h^{'}(\delta) = 0$ という評価結果について、証明$\pi_2$ を検証者に送信する。
 <!-- 
 h_1(x)h_2(x)-h_3(x)=0を満たすことを示したいから
 h'(x)=h_1(x)h_2(x)-h_3(x)
@@ -121,11 +124,11 @@ h'(δ) = h_1(δ)h_2(δ)-h_3(δ) = t_1 h_2(δ)-h_3(δ)
 
 ということはKZGコミットメントについて，多項式はh_1()とh'()の2つを使ってコミットメントはc_1とc'を使う，という2回やるイメージ．
  -->
-4. 検証者は$\pi_1$をcommitments $c_1$、$\pi_2$をcommitments $c^{'} = t_1c_2 + c_3$でそれぞれ検証する。
+4. 検証者は$\pi_1$ をcommitments $c_1$ 、$\pi_2$ をcommitments $c^{'} = t_1c_2 + c_3$ でそれぞれ検証する。
 
 4の検証が成り立つのは、KZG commitmentsが加法準同型性、すなわち**多項式の和のcommitmentsは多項式のcommitmentsの和と等しい**という性質を満たすためです [1-2]。これにより、証明者は別の多項式との積になっている多項式についてのみその評価結果を送信すれば良く、線形関係の多項式については、それらの線形和の多項式の評価結果を送ることが可能です。
 
-上記の例と同様に、Plonkの証明者は多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を、検証者が選んだランダムな評価点 $\delta$で評価し、その評価結果 $\bar{a} = \textbf{a}(\delta), \bar{b} = \textbf{b}(\delta), \bar{c} = \textbf{c}(\delta)$とそれらに対するKZG commitmentsの証明を検証者に送信します。さらに、商の多項式 
+上記の例と同様に、Plonkの証明者は多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$ を、検証者が選んだランダムな評価点 $\delta$ で評価し、その評価結果 $\bar{a} = \textbf{a}(\delta), \bar{b} = \textbf{b}(\delta), \bar{c} = \textbf{c}(\delta)$ とそれらに対するKZG commitmentsの証明を検証者に送信します。さらに、商の多項式 
 ```math
 q_1(x) = \frac{\textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x)}{x^n - 1}
 ```
