@@ -53,7 +53,7 @@ NP問題を算術回路に変換する問題のことを算術回路の充足可
 要するに足し算「 $+$  」と掛け算「 $\times$ 」のみの数式で表現することを考えます．
 ```js
 function myfunc(w, a, b) {
-    if (w == true) {
+    if (w == 1) {
         return a * (b + 3);
     } else {
         return a * b;
@@ -87,7 +87,7 @@ function sumUpTo() {
     s_2 &= s_1 + 2 \\
     s_3 &= s_2 + 3 \\
     &... \\
-    s_{N-1} &= s_{N-2} + N \\
+    s_{N-1} &= s_{N-2} + (N - 1) \\
     v &= s_{N-1} + N \\
 \end{align*}
 ```
@@ -119,7 +119,7 @@ gate/copy 制約への変換でできているすべての方程式を満たす
 次数は最大2次．
 2次なのは多分，ペアリングで一回までしか掛け算できないことによる？
 というよりもともとの算術回路が足し算もしくは掛け算を一回しかやっていないゲートを1つの式にして，制約条件を作っているからどうしても最大2次（一回の掛け算）にしかならない．
-
+<- はい、2次なのはペアリングの制約のためです。（もしくは、一般論として次数が小さい方が暗号学的な計算がやりやすいので、できるだけ次数が小さい形式を探した結果2次になったとも言えます。）
 -->
 
 最初に、gate constraintsについて説明します。加算・乗算ゲートの左入力、右入力、出力の値をそれぞれ $x_a, x_b, x_c$とすると、各ゲートが正しく評価された場合にのみ、これらは次の制約条件を満たします。
@@ -152,7 +152,7 @@ x_iの定義域も触れられていないが同じくF_r？-->
 
 次に、copy constraintsについて説明します。これは、あるゲート $i$の出力 $c_i$が別のゲート $j$の入力 $a_j$ (もしくは $b_j$)と等しい場合に、それらのワイヤの値が等しい、つまり $x_{c_i} = x_{a_j}$ (もしくは $x_{c_i} = x_{b_j}$ )であるという制約条件になります。もしワイヤの値がgate constraintsのみで制約される場合、悪意のある証明者は $x_{c_i}$とは異なる $x_{a_j}$を使うことで、回路を正しく評価していないにも関わらず全ての制約条件を満たすことができてしまうため、copy constraintsも追加で必要になります。
 
-では、どのようにしてcopy constraintsを単純な等式で表すことができるでしょうか？各ワイヤごとにワイヤ間の等式 $x_{c_i} = x_{a_j}$ を定めると、等式の種類がワイヤ数に比例して増えるため望ましくありません。そこで、値のコピーが全てのワイヤで成り立つことだけを確認すればいいという点を利用して、ワイヤ間の等式をまとめて確認します。具体的には、次のような累積値 (アキュムレータ)を計算します。ただし、 $\beta, \gamma$は証明者が予測できないような乱数です。便宜的に、 $0 \leq i < n, n \leq i < 2n, 2n \leq i < 3n$ の場合、 $x_i$はそれぞれ $x_{a_i}, x_{b_i}, x_{c_i}$ を表すとし、 $\sigma(i)$は、 $i$番目のワイヤの値がコピーされるワイヤを表します。
+では、どのようにしてcopy constraintsを単純な等式で表すことができるでしょうか？各ワイヤごとにワイヤ間の等式 $x_{c_i} = x_{a_j}$ を定めると、等式の種類がワイヤ数に比例して増えるため望ましくありません。そこで、値のコピーが全てのワイヤで成り立つことだけを確認すればいいという点を利用して、ワイヤ間の等式をまとめて確認します。具体的には、次のような累積値 (アキュムレータ)を計算します。ただし、 $\beta, \gamma$は証明者が予測できないような乱数です。具体的には、証明者が提出した値のハッシュ値を用いることが多く、このような手法はFiat-Shamir変換と呼ばれます。便宜的に、 $0 \leq i < n, n \leq i < 2n, 2n \leq i < 3n$ の場合、 $x_i$はそれぞれ $x_{a_i}, x_{b_i}, x_{c_i}$ を表すとし、 $\sigma(i)$は、 $i$番目のワイヤの値がコピーされるワイヤを表します。
 <!-- 
 各ゲートの左入力であるa_i，右入力のb_i，出力のc_iを全部順番に並べてx_iと設定する．
 
@@ -164,8 +164,9 @@ x_iの定義域も触れられていないが同じくF_r？-->
 \end{align*}
 ```
 $x_i = x_{\sigma(i)}$ が全ての $i$で成り立つならば、累積値の値は $x_i$と $x_{\sigma(i)}$を入れ替えても同じように計算されるはずなので、 $F=G$ が成り立ちます。
-逆に $F=G$ならば、高い確率で $x_i = x_{\sigma(i)}$ が全ての $i$ で成り立ちます。直感的には、 $j = \sigma(i)$ ならば $i = \sigma(j)$であるかつ、 $\beta, \gamma$のランダム性により $F, G$ の因数で $\beta$ の係数が同じもの同士がそれぞれ等しくなる必要があるので、  $x_i + \beta \cdot i + \gamma = x_{\sigma(i)} + \beta \cdot i + \gamma$ が高い確率で成り立つためです。このように、 $3n$個のワイヤのコピーの制約条件は、単縦な累積値の等式一つで表されます。
+逆に $F=G$ならば、高い確率で $x_i = x_{\sigma(i)}$ が全ての $i$ で成り立ちます。直感的には、 $j = \sigma(i)$ ならば $i = \sigma(j)$であるかつ、 $\beta, \gamma$のランダム性により $F, G$ の因数で $\beta$ の係数が同じもの同士がそれぞれ等しくなる必要があるので、  $x_i + \beta \cdot i + \gamma = x_{\sigma(i)} + \beta \cdot i + \gamma$ が高い確率で成り立つためです。このように、 $3n$ 個のワイヤのコピーの制約条件は、単縦な累積値の等式一つで表されます。
 
+なお、前述の通り、$x_a, x_b, x_c$がwitness (証明者のみが知る知識)に対応し、パラメータ$\textbf{q}_{L_i}, \textbf{q}_{R_i}, \textbf{q}_{O_i}, \textbf{q}_{M_i}, \textbf{q}_{C_i}$ や $\sigma(i)$の定義、witnessのうち検証者にも共有される一部の値はinstanceに対応します。
 <!-- 
 これ，乱数β，γはどういうタイミングで乱数なんだろう？
 この制約条件をつくる人が乱数を選んで作ればOK？
@@ -201,6 +202,7 @@ KZGコミットメントではどうやってもとの「問題」と「解」�
 つまり，多項式の係数は「解」を表している？
 そうすると評価点は任意でよい？
 → 次のページ見たところ評価点はない．
+<- 評価点は基本的に1の累乗根です。
 
 以下のプロセスを見ていくと，算術回路から導かれた制約条件を使って多項式を作っている．
 また，ワイヤの値もその中に含まれているので，ワイヤの値の一部である入力値もその中に含まれている．
@@ -214,21 +216,37 @@ KZGコミットメントではどうやってもとの「問題」と「解」�
 
  -->
 
-その基礎となるテクニックが多項式補間です。ある2点を通る直線 (1次多項式)、3点を通る2次曲線 (2次多項式)を一意に決められるように、ある $n$点を通る $n-1$次多項式を求めることができます。よって、例えば左入力のワイヤの値 $(0, x_{a_0}), \dots, (n-1, x_{a_{n-1}})$ から $a(i) = x_{a_i}$ を満たす $n-1$次多項式 $a(x)$ を求められます。
+その基礎となるテクニックが多項式補間です。ある2点を通る直線 (1次多項式)、3点を通る2次曲線 (2次多項式)を一意に決められるように、ある $n$点を通る $n-1$次多項式を求めることができます。よって、例えば左入力のワイヤの値 $(0, x_{a_0}), \dots, (n-1, x_{a_{n-1}})$ から $A(i) = x_{a_i}$ を満たす $n-1$次多項式 $A(X)$ を求められます。
 <!-- 各x_a_iの値をy座標にして，x座標は単純に0からn-1までの整数とする． -->
 なお、実際のプロトコルでは、$\textbf{g}^n = 1$ を満たす1の累乗根 $\textbf{g}$を用いて、自然数 $i$ の代わりに $\textbf{g}^{i}$ を使用します。これにより、高速フーリエ変換 (fast Fourier transform; FFT)を利用して高速に多項式の評価と補間を行うことが可能になります。
 <!-- FFT使って速く計算したいからこういうgをもってくる． 
 
 逆に言うと，y座標が制約条件で指定されたx_iであれば対応するx座標の値は何でも良い？
 いくらなんでも全部x=1とかにすると多項式が作れないので異なるx座標にしないとダメだとは思うが．．．
+<- FFTによる効率化を考えなければ、理論的には、事前に定義されている異なる任意のx座標を使うことができると思います。
 
 → y座標が今回証明したい情報(問題である算術回路，問題の入力値に該当する起点となるゲートの入力値と，問題の解である最終ゲートの出力値)がすべて詰まっていればなんでもよい，と理解．
 そのy座標で表現される情報でユニークに多項式が表現できればよい．
 なので，xはそれぞれのyで異なる値であればなんでもよいので，計算しやすい（FFTを使える）値が採用されている．
 -->
 
-gate constaintsは以下のように多項式に変換されます。
-1. パラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$ を多項式補間して、 $n-1$次多項式 $\textbf{q}_L(x), \textbf{q}_R(x), \textbf{q}_O(x), \textbf{q}_M(x), \textbf{q}_C(x)$を求める。全ての $i\in \{0,\dots,n-1\}$ で、それぞれ $\textbf{q}_L(\textbf{g}^{i})=q_{L_i}, \textbf{q}_R(\textbf{g}^{i})=q_{R_i}, \textbf{q}_O(\textbf{g}^{i})=q_{O_i}, \textbf{q}_M(\textbf{g}^{i})=q_{M_i}, \textbf{q}_C(\textbf{g}^{i})=q_{C_i}$ が成立する。
+gate constaintsを多項式の関係に変換するためには、それぞれのパラメータ$\textbf{q}_{L_i}, \textbf{q}_{R_i}, \textbf{q}_{O_i}, \textbf{q}_{M_i}, \textbf{q}_{C_i}$ とwitness $x_a, x_b, x_c$について、各ゲートごとの値を多項式補間して次の多項式を求めます。ただし、 $\ell_i(X) = \prod_{j \in \{0,\dots, n-1\}, i\neq j} \frac{X-\textbf{g}^{j}}{\textbf{g}^{i}-\textbf{g}^{j}}$ はラグランジュ基底と呼ばれ、 $\ell_i(\textbf{g}^{i})=1$、 $j \neq i$ で $\ell_i(\textbf{g}^{j})=0$ であるという特徴を持ちます。
+
+- 多項式$Q_L(X) = \Sigma_{i \in [n]} q_{L_i}\ell_i(X), Q_R(X) = \Sigma_{i \in [n]} q_{R_i}\ell_i(X), Q_O(X) = \Sigma_{i \in [n]} q_{O_i}\ell_i(X), Q_M(X) = \Sigma_{i \in [n]} q_{M_i}\ell_i(X), Q_C(X) = \Sigma_{i \in [n]} q_{C_i}\ell_i(X)$ 。全ての$i \in [n]$ で、$Q_L(\textbf{g}^{i}) = \textbf{q}_{L_i}, Q_R(\textbf{g}^{i}) = \textbf{q}_{R_i}, Q_O(\textbf{g}^{i}) = \textbf{q}_{O_i}, Q_M(\textbf{g}^{i}) = \textbf{q}_{M_i}, Q_C(\textbf{g}^{i}) = \textbf{q}_{C_i}$ が成り立つ。
+- 多項式$A(X) = \Sigma_{i \in [n]} x_{a_i}\ell_i(X), B(X) = \Sigma_{i \in [n]} x_{b_i}\ell_i(X), C(X) = \Sigma_{i \in [n]} x_{c_i}\ell_i(X)$ 。全ての$i \in [n]$ で、$A(\textbf{g}^{i}) = x_{a_i}, B(\textbf{g}^{i}) = x_{b_i}, C(\textbf{g}^{i}) = x_{c_i}$ が成り立つ。
+
+
+さらに、witnessの中に、instanceとして共有された $p$ 個の値$(x_1, \dots, x_{p})$が含まれていることを確かめるために、public input多項式$\textsf{PI}(X) = \Sigma_{i \in [p]} -x_i \ell_i(X)$を定義します。 
+
+gate constaintsは次の多項式によって定義されます。
+```math
+Q_L(X)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + (Q_C(x) + \textsf{PI}(X)) = 0
+```
+これに$\textbf{g}^i$ を代入すると、上の多項式は元のgate constraintsを全て表していることがわかります。ただし、$i \in [p]$ では、$Q_L(\textbf{g}^i)=1, Q_R(\textbf{g}^i)=Q_O(\textbf{g}^i)=Q_M(\textbf{g}^i)=Q_C(\textbf{g}^i)=0$ とします。この時、上の多項式は$A(\textbf{g}^i) - x_i = 0$ という形になるため、instanceの値がwitnessで使用されていることを確かめられます。なお、instanceの値が $x_{b_j}$ や$x_{c_j}$ に使われている場合は、一旦それが$x_{a_i}$ にあると見做した後、$x_{a_i} - x_{b_j} = 0$や$x_{a_i} - x_{c_j} = 0$ という制約を作ることができます。したがって、上の多項式を最後にKZG commitmentで証明することで、各ゲートごとにgate constraintが成り立つこと、および特定のinstanceの値が使われていることを証明できます。
+
+
+
+<!-- 1. パラメータ $(\textbf{q}_L, \textbf{q}_R, \textbf{q}_O, \textbf{q}_M, \textbf{q}_C) \in (\mathbb{F}_r^n)^5$ を多項式補間して、 $n-1$ 次多項式 $\textbf{q}_L(x), \textbf{q}_R(x), \textbf{q}_O(x), \textbf{q}_M(x), \textbf{q}_C(x)$を求める。全ての $i\in \{0,\dots,n-1\}$ で、それぞれ $\textbf{q}_L(\textbf{g}^{i})=q_{L_i}, \textbf{q}_R(\textbf{g}^{i})=q_{R_i}, \textbf{q}_O(\textbf{g}^{i})=q_{O_i}, \textbf{q}_M(\textbf{g}^{i})=q_{M_i}, \textbf{q}_C(\textbf{g}^{i})=q_{C_i}$ が成立する。 -->
 <!-- 
 ここでのnはゲートの数nなので上記の説明のときのあるn点のnとは別．
 各q_?はn個の定数なので，gを用いて（xの値として）q_?をyとしてn個の点を通るn-1次の多項式を求める．
@@ -240,21 +258,26 @@ q_Lっていうのはn個の定数が並んだ単なるベクトルなのでは�
 → というかq_Lから作られる多項式をq_L(x)っておいているのか．
 これは混乱するので表記を変えたほうがよい．
 -->
-2. ワイヤの値 $\textbf{x}_a=(x_{a_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_b=(x_{b_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_c=(x_{c_i})_{i \in \{0,\dots, n-1\}}$ を多項式補間して、 $n-1$次多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を求める。全ての $i\in \{0,\dots, n-1\}$ で、それぞれ $\textbf{a}(\textbf{g}^{i}) = x_{a_i}, \textbf{b}(\textbf{g}^{i}) = x_{b_i}, \textbf{c}(\textbf{g}^{i}) = x_{c_i}$ が成立する。
-3. 多項式の等式 $\textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x) = 0$ が成り立つことを、KZG commitmentsで証明する。
+<!-- 2. ワイヤの値 $\textbf{x}_a=(x_{a_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_b=(x_{b_i})_{i \in \{0,\dots, n-1\}}, \textbf{x}_c=(x_{c_i})_{i \in \{0,\dots, n-1\}}$ を多項式補間して、 $n-1$次多項式 $\textbf{a}(x), \textbf{b}(x), \textbf{c}(x)$を求める。全ての $i\in \{0,\dots, n-1\}$ で、それぞれ $\textbf{a}(\textbf{g}^{i}) = x_{a_i}, \textbf{b}(\textbf{g}^{i}) = x_{b_i}, \textbf{c}(\textbf{g}^{i}) = x_{c_i}$ が成立する。
+3. 多項式の等式 $\textbf{q}_L(x)\textbf{a}(x) + \textbf{q}_R(x)\textbf{b}(x) + \textbf{q}_O(x)\textbf{c}(x) + \textbf{q}_M(x)\textbf{a}(x)\textbf{b}(x) + \textbf{q}_C(x) = 0$ が成り立つことを、KZG commitmentsで証明する。 -->
+
+
+
 <!-- 
 ここでの左辺をKZGコミットメントでのドキュメントにおける多項式fで，特定の評価点で全部0が成り立つことを示す，と理解．
 ちなみにここではxの定義域はF_rということでよい？
+<-- はい、xの定義域もyの値域もF_rです。
  -->
-copy constraintsを多項式に変換する際は、 $i \geq n$についても 1の累乗根で表せるようにするために、定数 $k_1, k_2 \in \mathbb{F}_q$ を用いて、 $n \leq i < 2n$を $k_1\textbf{g}^i$、$2n \leq i < 3n$を $k_2\textbf{g}^i$ で表します。
+copy constraintsを多項式に変換する際は、 $i \geq n$についても 1の累乗根で表せるようにするために、定数 $k_1, k_2 \in \mathbb{F}_q$ を用いて、 $n \leq i < 2n$を $k_1\textbf{g}^i$、$2n \leq i < 3n$を $k_2\textbf{g}^i$ で表します。なお、それぞれサイズ$n$ の集合 $(\textbf{g}^0, \dots, \textbf{g}^{n-1}), (k_1 \textbf{g}^{0}, \dots, k_1 \textbf{g}^{n-1}), (k_2 \textbf{g}^0, \dots, k_2 \textbf{g}^{n-1})$ は別個なものになっているため、 $3n$ 個のインデックス$i \in \{0,\dots, 3n-1\}$ と1対1で対応しています。そして、累積値に対応する多項式を次のように定義します。
 <!-- nはゲート数なので，copy制約はそれよりたくさんの数の項がある．k_1,k_2は定数って言っているので，毎回違う値を取る必要はなく（とってもいいかもしれんが），plonkのときはこれ，と世界で一個適当に決まっているんだろう，きっと．
+<-- 僕もk_1, k_2は事前に決まっていると認識しています。
  -->
-なお、集合 $(\textbf{g}^0, \dots, \textbf{g}^{n-1}), (k_1 \textbf{g}^{0}, \dots, k_1 \textbf{g}^{n-1}), (k_2 \textbf{g}^0, \dots, k_2 \textbf{g}^{n-1})$は別個なものになっているため、 $i \in \{0,\dots, 3n-1\}$ と1対1で対応しています。そして、累積値に対応する多項式を次のように定義します。
 <!-- 
 別個なものになっているため
 → 別個なものになっているが のが適切？
+<-- それぞれサイズnである3つの集合が別個になっているので、3n個のインデックスといずれかの集合のいずれかの要素がそれぞれ1対1で対応しています。そのため、順接 ("なっているため")の方が文章として適切だと思います。
  -->
-ただし、 $L_i(x) = \prod_{j \in \{0,\dots, n-1\}, i\neq j} \frac{x-\textbf{g}^{j}}{\textbf{g}^{i}-\textbf{g}^{j}}$ であり、 $L_i(\textbf{g}^{i})=1$、 $j \neq i$ で $L_i(\textbf{g}^{j})=0$ であるという特徴を持ちます。
+<!-- ただし、 $L_i(x) = \prod_{j \in \{0,\dots, n-1\}, i\neq j} \frac{x-\textbf{g}^{j}}{\textbf{g}^{i}-\textbf{g}^{j}}$ であり、 $L_i(\textbf{g}^{i})=1$、 $j \neq i$ で $L_i(\textbf{g}^{j})=0$ であるという特徴を持ちます。 -->
 <!-- 
 L_i(x)ををなぜこのように取ったのかz(x)もこういう風に取った理由は不明だが，逆説的に，この形式でL_i(x)を取ると，一番下の等式（積のやつ）がF=Gに対応しており，これを満たすような関数を考えていくとL_i(x)にたどり着いた，と理解．
 
@@ -264,30 +287,69 @@ plonk2のページを見ると，最後の積で表現されている式(**)で�
 KZGコミットメントでも(*)を使用して証明することで十分である，ということなんだろう．
 (**)を直接KZGコミットメントで採用していない理由って何かあるのか？単に複雑になるから？
 というか(**)が直接適用可能ならわざわざL_i()とかz()を考える必要がないからたぶんそうなんだろうと理解．
-
  -->
+
+
+多項式 $Z(X)$を次のように定義します。
 ```math
-z(x) = L_1(x) + \Sigma_{i \in [n-1]} (L_{i+1}(x) \prod_{j \in [i]} \frac{(x_{j} + \beta \textbf{g}^j + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^j + \gamma)(x_{2n+j} + \beta k_2 \textbf{g}^j + \gamma)}{(x_{j} + \beta \sigma(j) + \gamma)(x_{n+j} + \beta \sigma(n+j) + \gamma)(x_{2n+j} + \beta \sigma(2n+j) + \gamma)})
+Z(x) = \ell_1(x) + \Sigma_{i \in [n-1]} (\ell_{i+1}(x) \prod_{j \in [i]} \frac{(x_{a_j} + \beta \textbf{g}^j + \gamma)(x_{b_j} + \beta k_1 \textbf{g}^j + \gamma)(x_{c_j} + \beta k_2 \textbf{g}^j + \gamma)}{(x_{a_j} + \beta \sigma(j) + \gamma)(x_{b_j} + \beta \sigma(n+j) + \gamma)(x_{c_j} + \beta \sigma(2n+j) + \gamma)})
 ```
-$z(x)$は次の関係を満たす漸化式になっています。
+$Z(x)$は次の関係を満たす漸化式になっています。
 ```math
 \begin{align*}
-    &z(1)=1 \\
-    &z(\textbf{g}^{i+1})=z(\textbf{g}^{i})\frac{(x_{i} + \beta \textbf{g}^i + \gamma)(x_{n+j} + \beta k_1 \textbf{g}^i + \gamma)(x_{2n+i} + \beta k_2 \textbf{g}^i + \gamma)}{(x_{i} + \beta \sigma(i) + \gamma)(x_{n+i} + \beta \sigma(n+i) + \gamma)(x_{2n+i} + \beta \sigma(2n+i) + \gamma)}
+    &Z(1)=1 \\
+    &Z(\textbf{g}^{i+1})=Z(\textbf{g}^{i})\frac{(x_{a_i} + \beta \textbf{g}^i + \gamma)(x_{b_i} + \beta k_1 \textbf{g}^i + \gamma)(x_{c_i} + \beta k_2 \textbf{g}^i + \gamma)}{(x_{a_i} + \beta \sigma(i) + \gamma)(x_{b_i}+ \beta \sigma(n+i) + \gamma)(x_{c_i} + \beta \sigma(2n+i) + \gamma)}
 \end{align*}
 ```
 特に2つ目の式を変形すると、
 ```math
-z(\textbf{g}^{i+1})(a(\textbf{g}^i) + \beta \sigma(i) + \gamma)(b(\textbf{g}^i) + \beta \sigma(n+i) + \gamma)(c(\textbf{g}^i) + \beta \sigma(2n+i) + \gamma) = z(\textbf{g}^{i})(a(\textbf{g}^i) + \beta \textbf{g}^i + \gamma)(b(\textbf{g}^i) + \beta k_1 \textbf{g}^i + \gamma)(c(\textbf{g}^i) + \beta k_2 \textbf{g}^i + \gamma)
+Z(\textbf{g}^{i+1})(x_{a_i} + \beta \sigma(i) + \gamma)(x_{b_i} + \beta \sigma(n+i) + \gamma)(x_{c_i} + \beta \sigma(2n+i) + \gamma) = Z(\textbf{g}^{i})(x_{a_i} + \beta \textbf{g}^i + \gamma)(x_{b_i} + \beta k_1 \textbf{g}^i + \gamma)(x_{c_i} + \beta k_2 \textbf{g}^i + \gamma)
 ```
 が成り立ちます。 $\textbf{g}^{n}=1$ であるため、その総積をとると、
 ```math
 \begin{align*}
-&\prod_{i=0}^{n-1}(a(\textbf{g}^i) + \beta \sigma(i) + \gamma)(b(\textbf{g}^i) + \beta \sigma(n+i) + \gamma)(c(\textbf{g}^i) + \beta \sigma(2n+i) + \gamma) \\
-=&\prod_{i=0}^{n-1}(a(\textbf{g}^i) + \beta \textbf{g}^i + \gamma)(b(\textbf{g}^i) + \beta k_1 \textbf{g}^i + \gamma)(c(\textbf{g}^i) + \beta k_2 \textbf{g}^i + \gamma)
+&\prod_{i=0}^{n-1}(x_{a_i} + \beta \sigma(i) + \gamma)(x_{b_i} + \beta \sigma(n+i) + \gamma)(x_{c_i} + \beta \sigma(2n+i) + \gamma) \\
+=&\prod_{i=0}^{n-1}(x_{a_i} + \beta \textbf{g}^i + \gamma)(x_{b_i} + \beta k_1 \textbf{g}^i + \gamma)(x_{c_i}+ \beta k_2 \textbf{g}^i + \gamma)
 \end{align*}
 ```
 が成り立ちますが、これはcopy constaintsにおける累積値の等式 $F=G$に対応していることがわかります。
+
+ここで、回路のインデックスを表す多項式、$S_{\textsf{ID}1}(X) = X, S_{\textsf{ID}2}(X) = k_1X, S_{\textsf{ID}3}(X) = k_2X, S_{\sigma_1}(X) = \Sigma_{i \in [n]} \sigma(i)\ell_i(X), S_{\sigma_2}(X) = \Sigma_{i \in [n]} \sigma(n+i)\ell_i(X), S_{\sigma_3}(X) = \Sigma_{i \in [n]} \sigma(2n+i)\ell_i(X)$ を定義します。これらは、全ての$i \in [n]$ で、$S_{\sigma_1}(X) = \sigma(i), S_{\sigma_2}(X) = \sigma(n+i), S_{\sigma_3}(X) = \sigma(2n+i)$ を満たします。これらの多項式を用いて、 $Z(X)$が満たす漸化式を次のような多項式の関係で表すことが可能です。
+```math
+Z(1) = 1 \\
+Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
+```
+これらの多項式の関係をKZG commitmentsで証明することで、copy constraintsが成り立つことを示すことができます。
+
+
+
+## まとめ
+最後に、plonkの証明・検証のプロトコルの全体像をまとめます。ただし、KZG commitmentsを用いた証明の厳密なプロセスは、原論文 [6]の8章を参照してください。
+#### 事前準備
+1. 算術回路からgate constraintsのパラメータ$(\textbf{q}_{L_i}, \textbf{q}_{R_i}, \textbf{q}_{O_i}, \textbf{q}_{M_i}, \textbf{q}_{C_i})$ およびcopy constraintsが成り立つワイヤ間の関係 $\sigma(i)$ を求める。
+2. 1の値に多項式補間を適用して、それぞれ多項式$Q_L(X), Q_R(X), Q_O(X), Q_M(X), Q_C(X), S_{\sigma_1}(X), S_{\sigma_2}(X), S_{\sigma_3}(X)$ を求める。
+3. 2のそれぞれの多項式に対して、KZG commitmentsを求める。
+
+ただし、この事前準備は回路ごとに一度だけ行えば良いです。また、検証者は3のcommitmentsのみを保持すればいいので、検証者のストレージが限られている場合 (例: スマートコントラクトとして検証者のロジックが実装されている場合)でも、回路のサイズによらず一定のストレージ量しか必要としません。
+
+#### 証明
+1. 算術回路への入力から、witness $x_a, x_b, x_c$ を求める。ただし、$x_a$ のうち最初の$p$ 個はinstanceとする。
+2. $x_a, x_b, x_c$に多項式補間を適用して、それぞれ多項式 $A(X), B(X), C(X)$を求める。同様に、instanceから多項式 $\textsf{PI}(X)$を求める。
+3. $\textsf{PI}(X)$を除く2の多項式に対して、KZG commitmentsを求める。
+4. 3のcommitmentsのハッシュ値から、乱数 $\beta, \gamma$を求める。
+5. $x_a, x_b, x_c, \beta, \gamma$から、多項式 $Z(X)$を求める。
+6. 次の多項式の関係が成り立つことを、KZG commitmentsで証明する。
+```math
+Q_L(X)A(x) + Q_R(x)B(x) + Q_O(x)C(x) + Q_M(x)A(x)B(x) + (Q_C(x) + \textsf{PI}(X)) = 0 \\
+Z(1) = 1 \\
+Z(\textbf{g}X)(A(X) + \beta S_{\sigma_1}(X) + \gamma)(B(X) + \beta S_{\sigma_2}(X) + \gamma)(C(X) + \beta S_{\sigma_3}(X) + \gamma) = Z(X)(A(X) + \beta S_{\textsf{ID}1}(X) + \gamma)(B(X) + \beta k_1 S_{\textsf{ID}2}(X) + \gamma)(C(X) + \beta k_2 S_{\textsf{ID}3}(X) + \gamma)
+```
+
+#### 検証
+1. 与えられた$A(X), B(X), C(X)$のKZG commitmentsのハッシュ値から、乱数 $\beta, \gamma$を求める。
+2. instanceの値から、多項式 $\textsf{PI}(X)$を求める。
+3. $Q_L(X), Q_R(X), Q_O(X), Q_M(X), Q_C(X), S_{\sigma_1}(X), S_{\sigma_2}(X), S_{\sigma_3}(X), A(X), B(X), C(X), Z(X)$ のKZG commitmentsと、$\textsf{PI}(X)$、与えられたKZG commitmentsのwitnessを用いて、上記証明プロセスのステップ6で述べられた多項式の関係が成り立つことを検証する。
+
 
 ## References
 1. Sasson, E. B., Chiesa, A., Garman, C., Green, M., Miers, I., Tromer, E., & Virza, M. (2014, May). Zerocash: Decentralized anonymous payments from bitcoin. In 2014 IEEE symposium on security and privacy (pp. 459-474). IEEE.
