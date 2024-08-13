@@ -299,6 +299,7 @@ $$
 ephemeralKeyは送金元がNoteを暗号化するときに使った公開鍵．
 送金先は自身の秘密鍵とephemeralKeyを用いて暗号化Noteを復号化できる，と理解．
 
+encCiphertextsとかephemeralKeyが正しいかどうかって検証なしでTx内に入れているがいいのか？
  -->
 ### ブロックチェーン
 
