@@ -6,7 +6,7 @@ Zcashは、Bitcoin Protocolのプライバシー問題を解決するための�
 Bitcoin送金におけるプライバシーを実現するためにBitcoin Protocolの様々な仕様を追加しています。
 では具体的に、どこを / どのように / なぜそのように追加したのでしょうか？
 この資料は、Zcashを理解する上で誰しもが抱くであろう上記の疑問を解消することを目指して書かれています。
-尚、取り扱っているバージョンは[Sprout](https://github.com/zcash/zips/blob/main/protocol/sprout.pdf)になります。
+尚、取り扱っているバージョンは[Sprout](https://github.com/zcash/zips/blob/8b2929cd7f925f30ab7075e3107dd845669e6717/protocol/sprout.pdf)になります。
 
 `Writer: @ashWhiteHat`
 
