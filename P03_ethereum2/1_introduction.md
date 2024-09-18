@@ -43,17 +43,6 @@ Ethereumは、ブロックチェーン上でプログラム（スマートコン
 - Proof of Work (PoW) から Proof of Stake (PoS) へ (i.e., マイニングの廃止)
 - この資料では、**PoS移行に伴うEthereumプロトコルの変化部分について説明する**
 
-【キャスレー追記】
-- PoWとは？
-　- 計算問題を解けたノードが提案できる権利が与えられ、いわば早もの勝ち
-- PoSとは？
-　- デポジットを預けることにより確率で提案の権利が与えられ、誰にでも提案のチャンスがある
-  - 不正が生じた場合はペナルティが課せられる ※後述のバリデータ
-
-- PoWとPoSの違いとは？
-　- PoWでは計算資源をたくさん使えば使うほど機会があるのに対し、PoSではデポジットが多ければ多いほど機会がある
-【キャスレー追記】
-
 <center>
 <img src="./img/the-merge.png" width="50%">
 
@@ -93,15 +82,6 @@ Source: https://ethereum.org/en/roadmap/merge/
 - 両者は相互依存関係にあり、フルノードを建てる場合にはどちらも必要となる
   - Execution Clientだけ: どのチェーンが現在の正統なのかわからない
   - Consensus Clientだけ: ブロックを作成できない
- 
-【キャスレー：The Mergeが行われたことによって実際にどういうメリットがあったか？
-　⇒消費電力を抑える→これは間違いないが、資源が消費されたことによって価値が付く
- 　セキュリティを強化→そもそもバリデータになるコストが高いので本当に分散されているかが微妙
-   高性能なマシンが必要なくなることでより多くの人が参加できる→分散化が進むから？
- 　ただしマージされたことで処理できるものが増えるだけで速くなるというわけではない？→ある程度速くはなってるTPSが10%向上してる】
-
-【キャスレー：PoWとPoSどっちの方がいいかというのはずっと議論されていて、決着はついてない
-　　⇒PoSが優れているわけではなく、支持している人が多かったからそうなっただけ】
 
 <center>
 <img src="./img/clients.png" width="80%">
@@ -116,10 +96,6 @@ Source: https://ethereum.org/en/developers/docs/nodes-and-clients/
 - EOAは32ETHを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
   - つまりバリデータは、人間がつくるノードがつくるEOAがつくる存在
   - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3,200ETHを使えば100個持てる)
-【キャスレー追記】
-→仮に複数のバリデータを持った場合、報酬の当選率や報酬自体の増加に繋がるが、デポジットにしているethは利用する事が出来ないうえ、
-ブロックを作ったり正当性を決めたりといった仕事もしないといけないので、持っていれば持っているだけ良いというわけではない。
-ユーザーは機会費用を考慮してethの使い道を選ぶ必要がある。
 - この32ETHを預ける行為を**Staking**と呼ぶ
   - `なぜ？: ブロックの作成や投票の結果、預けた32ETHは増減するから`
   - PoSという言葉の背景
@@ -128,6 +104,9 @@ Source: https://ethereum.org/en/developers/docs/nodes-and-clients/
 <img src="./img/validator1.png" width="80%">
 
 Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
+</center>
+<center>
+<img src="./img/consensusLayer.png" width="80%">
 </center>
 
 ## トランザクションのライフサイクル

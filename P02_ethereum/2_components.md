@@ -94,6 +94,7 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
 - CAのnonceは、別のCAを生み出すinternal transactionが実行された場合にのみ増える
 - コントラクトの結果は、複数のアウトプット (e.g., コントラクト5回目, ‘送金が完了しました’) をマークル・パトリシアツリーに格納する形式で保存される。
 - ただし、CAが保持するのは、根(root)の部分のみ。
+  *葉の部分は各ノードがブロックチェーン外で保持している
   - `なぜ?: コントラクトの全てのアウトプットを結果としてブロックチェーンに記録すると、容量を圧迫してしまうから`
 
 ### 補足: マークル・パトリシアツリー
@@ -103,6 +104,8 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
 - 詳細な説明は割愛するが、興味がある方はたとえば以下の資料を参照のこと
   - https://qiita.com/yanagisawa-kentaro/items/bfdbb5564d1751c3d2ea (JP)
   - https://wiki.nebulas.io/en/latest/go-nebulas/design-overview/merkle_trie.html (EN)
+  <p><img src="../P02_ethereum/img/merkleTree.png" width="55%">
+  <img src="../P02_ethereum/img/patriciaTree.png" width="35%"></p>
 
 ## Message Call トランザクションのデータ構造
 
@@ -288,6 +291,8 @@ CAから発せられる、ブロックチェーンに記録されない処理 (�
 <center>
 <img src="./img/etherscan.png" width="75%">
 </center>
+
+Source: https://etherscan.io/
 
 
 # まとめ
