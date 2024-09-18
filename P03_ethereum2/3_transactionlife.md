@@ -221,15 +221,7 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 - The Merge後のEthereumも「最も重いチェーン」を正統とするが、先述のGHOSTプロトコルとは異なるアルゴリズムを採用している
 - 重いチェーンは **Gasperプロトコル (LMD GHOST + Casper FFG)** で定義されている
   - LMD GHOST: epoch内でブロックチェーンが分岐した場合の「重いチェーン」
-  - Casper FFG: epochを跨いでブロックチェーンが分岐した場合の「重いチェーン」
-
-【キャスレー：GHOSTプロトコルとは？Greedy Heaviest Observed Subtree⇒鬼ではない……
-　どのチェーンをメインチェーンにするかを決定するプロトコル
-　Bitcoinとの違い⇒Bitcoinは、一番長いチェーンがメインチェーン。Ethereumは、一番重い(heaviest)チェーン
- 　⇒TODO 「先述のGHOSTプロトコル」の部分、リンクあった方がいい？
-  PoSになってからepochの概念が出てきた⇒投票でやるのでfinalizeが使えるようになる、
-  LMD GHOST：ブロックを比較したときにより重い方を正とする】
-
+  - Casper FFG: epochを跨いでブロックチェーンが分岐した場合の「重いチェーン
 - どちらもブロックに含まれる投票 (attestation)を用いて「重いチェーン」を決める
   - 復習: 以前のGHOSTプロトコルでは、子ブロックの数を数えていた
 
