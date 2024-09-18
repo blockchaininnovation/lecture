@@ -61,7 +61,6 @@ EthereumにおけるThe Merge (2022)
 - Ethereum
 - Ethereum PoW
 
-
 ## いくつかのEIP紹介
 EIPの一覧は[こちら](https://eips.ethereum.org/all)から確認可能
 - 仕様変更の提案 (Core) のみならず、プログラマへの呼びかけ (ERC; Ethereum Request for Comments) も存在する

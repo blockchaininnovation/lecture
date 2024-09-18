@@ -57,8 +57,8 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
   - 1 ether = 1 ETH = Ξ1 = ♦1
   - 通貨はあくまでetherであって、Ethereumはシステム名
 - weiという単位もあり、etherの最小単位
-  - 1 ether = 1 * 10^18 or 1,000,000,000,000,000,000 wei
-  - 1 eth = 100京 wei
+  - 1 ETH = 1 * 10^18 or 1,000,000,000,000,000,000 wei
+  - 1 ETH = 100京 wei
 - 参考:Bitcoin Protocolにおけるsatoshiは・・・
   - 1 BTC = 1 * 10^8 or 100,000,000 satoshi
   - 1 BTC = 1億 satoshi
@@ -66,7 +66,6 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
   - bitcoin: Digital Gold
   - ether: Digital Oil　
 と、良くたとえられる
-
 
 ## CA (Contract Account)
 - CAもアドレスを持つが、コントラクトの入れ物であるため作り方は大きく異なる
@@ -95,6 +94,7 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
 - CAのnonceは、別のCAを生み出すinternal transactionが実行された場合にのみ増える
 - コントラクトの結果は、複数のアウトプット (e.g., コントラクト5回目, ‘送金が完了しました’) をマークル・パトリシアツリーに格納する形式で保存される。
 - ただし、CAが保持するのは、根(root)の部分のみ。
+  *葉の部分は各ノードがブロックチェーン外で保持している
   - `なぜ?: コントラクトの全てのアウトプットを結果としてブロックチェーンに記録すると、容量を圧迫してしまうから`
 
 ### 補足: マークル・パトリシアツリー
@@ -104,6 +104,8 @@ Ethereumの構成要素である2種類のアカウントと2種類のトラン�
 - 詳細な説明は割愛するが、興味がある方はたとえば以下の資料を参照のこと
   - https://qiita.com/yanagisawa-kentaro/items/bfdbb5564d1751c3d2ea (JP)
   - https://wiki.nebulas.io/en/latest/go-nebulas/design-overview/merkle_trie.html (EN)
+  <p><img src="../P02_ethereum/img/merkleTree.png" width="55%">
+  <img src="../P02_ethereum/img/patriciaTree.png" width="35%"></p>
 
 ## Message Call トランザクションのデータ構造
 
@@ -118,7 +120,7 @@ Bitcoin Protocolの送金に相当する、いわゆるトランザクション
 |to| このtxの宛先 (EOA or CA) のアドレス|
 |nonce| 作成者であるEOAにとってこのtxが何番目か|
 |hash| このtx自体のハッシュ|
-|value| 送金するetherの量 (wei)|
+|value| 送金するETHの量 (wei)|
 |data| データ領域 (16進数の数列にエンコード化されている)| 引数を入れてCAに送ることでコントラクトを実行
 |gasLimit| EOAがtx実行に対して支払えるGasの最大量| 手数料 (以下に詳述)
 |maxPriorityFeePerGas| EOAがマイナーノードに支払えるGasの最大金額| 手数料 (以下に詳述)
@@ -130,9 +132,9 @@ Bitcoin Protocolの送金に相当する、いわゆるトランザクション
   - `なぜ?: スパム攻撃 (意味のないトランザクションを大量に送ってネットワークを混雑させる) 対策のため&実行を担うマイナーノードへのインセンティブのため`
 - 他方でEthereumは、ether (wei) 単位での手数料入力にgasという単位を噛ませている
   - e.g., あるEOAが自身が作成したトランザクションの手数料を決める場合
-  - 「手数料は0.1etherとする」 ではなく
-  - 「feePerGas = 0.000002ether, gasLimit = 50000」 といった入力を行う
-    - (0.000002*50000 = 0.1ether)
+  - 「手数料は0.1ETHとする」 ではなく
+  - 「feePerGas = 0.000002ETH, gasLimit = 50000」 といった入力を行う
+    - (0.000002*50000 = 0.1ETH)
   - `なぜ?: トランザクションの実行に必要な計算量を、マイナーノードに対して定量的にわかりやすく示したいから`
 - Bitcoin Protocolは (inputの数などで決まる) トランザクションの大きさだけが手数料に影響するが、スマートコントラクトを含むEthereumはマイナーノードが負担する計算量も手数料に影響する
   - Bitcoin Protocolのマイニングノード
@@ -289,6 +291,8 @@ CAから発せられる、ブロックチェーンに記録されない処理 (�
 <center>
 <img src="./img/etherscan.png" width="75%">
 </center>
+
+Source: https://etherscan.io/
 
 
 # まとめ

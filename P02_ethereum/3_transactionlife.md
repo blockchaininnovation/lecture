@@ -149,7 +149,6 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 
 トランザクションは、マークル・パトリシアツリー構造でブロックに格納されます。ここまでは基本的にBitcoin Protocolと同じです。しかし、Ethereumにおけるブロックの作成作業はこれだけに留まりません。Ethereumのブロックは、Bitcoin Protocolのそれ以上に様々な情報を格納しているのです。
 
-
 <center>
 <img src="./img/blockstructure.drawio.svg" width="60%">
 </center>
@@ -174,7 +173,7 @@ Bitcoin ProtocolのMempoolもTransaction poolとOrphan transaction poolがあっ
 - マイナーノードは、トランザクションに加えてUncle blockの情報もブロックに格納する
   - Uncle block: メインチェーンから分岐したブロックのこと
   - 具体的には、任意のUncle blockのブロックヘッダを2つまで格納することが出来る
-- `なぜ?:Ethereumのブロックチェーンは、Bitcoin Protocolと比べてより頻繁に分岐するから`
+- `なぜ?：Ethereumのブロックチェーンは、ブロック生成速度がBitcoin Protocolと比べて速いため、Nakamoto Consensusのままだとより頻繁に分岐しやすく、分岐した状態で伸びっぱなしになりやすい。そのため、別のコンセンサスアルゴリズムを採用しており、その過程でUncle blockを使用して、ブロックに情報を格納している。`
   - (後述するが) Ethereumのblock intervalは15秒に設定されている。
   - Block intervalが短くなると、同時にマイニングに成功する可能性が高まるため、ブロックチェーンはより頻繁に分岐してしまう
   - (これも後述するが) その対策として、Nakamoto Consensusの代わりにUncle blockを考慮した合意形成 (GHOST protocol) を採用し、かつUncle blockにも報酬を与えている

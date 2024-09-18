@@ -93,17 +93,20 @@ Source: https://ethereum.org/en/developers/docs/nodes-and-clients/
 - バリデータは、ブロックの提案とブロックの正統性を決めるための投票を担う
   - 以前はマイナーノードが担当していた
   - バリデータの総数や報酬はConsensus Layer上で管理されている
-- EOAは32etherを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
+- EOAは32ETHを[deposit contract](https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa)に預けることで、バリデータになることができる
   - つまりバリデータは、人間がつくるノードがつくるEOAがつくる存在
-  - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3,200etherを使えば100個持てる)
-- この32etherを預ける行為を**Staking**と呼ぶ
-  - `なぜ？: ブロックの作成や投票の結果、預けた32etherは増減するから`
+  - 1つのEOAが複数のバリデータを持つこともできる (e.g., 3,200ETHを使えば100個持てる)
+- この32ETHを預ける行為を**Staking**と呼ぶ
+  - `なぜ？: ブロックの作成や投票の結果、預けた32ETHは増減するから`
   - PoSという言葉の背景
 
 <center>
 <img src="./img/validator1.png" width="80%">
 
 Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
+</center>
+<center>
+<img src="./img/consensusLayer.png" width="80%">
 </center>
 
 ## トランザクションのライフサイクル

@@ -28,9 +28,9 @@ Pass: x3C594HBVoPG
 - Validator Signing Key: ブロックの提案・投票における署名
   - 公開鍵 バリデータのID的なものとして使われる
   - 秘密鍵 これを持つ者だけがブロックの提案・投票を行える
-- Withdrawal Key: deposit contractからのether引き出し
+- Withdrawal Key: deposit contractからのETH引き出し
   - 公開鍵 バリデータのウォレットアドレス的なものとして使われる
-  - 秘密鍵 これを持つ者だけがstakeしたetherを引き出せる
+  - 秘密鍵 これを持つ者だけがstakeしたETHを引き出せる
 
 <center>
 <img src="./img/validator.png" width="70%">
@@ -42,23 +42,23 @@ Source: https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/keys/
 
 - 具体的に、バリデータは以下のプロセスで作成される
   - EOAの所有者がWithdrawal Keyのペアを作成する
-  - EOAがdeposit contractに32etherを送るトランザクションのinput部分にWithdrawal Keyの公開鍵情報を埋め込む (秘密鍵の情報は手元に残す)
-  - deposit contractが32etherにバリデータインデックスを割り当てる
+  - EOAがdeposit contractに32ETHを送るトランザクションのinput部分にWithdrawal Keyの公開鍵情報を埋め込む (秘密鍵の情報は手元に残す)
+  - deposit contractが32ETHにバリデータインデックスを割り当てる
 - 2種類の鍵はConsesus Clientが管理、Conseus Layerで管理、手元で管理
 - バリデータ用の鍵を別途作ることにより、次のような運用が可能になる
   - Validator Signing Keyをノードに渡すことで、Stakingを委任できる。この場合、自身でConsensus Clientやフルノードを稼働させずともStakingが行える (Staking as a Service; SaaS)
-  - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のetherを集約して共用のバリデータ (Staking Pool) を運用することが可能
+  - また、そもそもバリデータ自体を自分で用意せずにStakingを行うことも出来る。つまり、Bitcoin Protocolにおけるマイニングプールのように少額のETHを集約して共用のバリデータ (Staking Pool) を運用することが可能
 
 Solo Staking, SaaS, Staking Poolの3つの運用方法について、それぞれの特徴は以下のとおり
   
 |  | 自身で用意するもの | 自身で作成するもの | 自身で管理するもの | トラストへの依存 |
 | ---- | ---- | ---- | ---- | ---- |
-| Solo Staking | full (or archive) node, EOA, 32ether以上のether | バリデータ | バリデータ | 低
-| Staking as a Service (SaaS) | EOA, 32ether以上のether | バリデータ |  | 中
-| Staking Pool | EOA, 任意量のether | |  | 高
+| Solo Staking | full (or archive) node, EOA, 32ETH以上のETH | バリデータ | バリデータ | 低
+| Staking as a Service (SaaS) | EOA, 32ETH以上のETH | バリデータ | - | 中
+| Staking Pool | EOA, 任意量のETH | - | - | 高
 
 
 # まとめ
 - 各構成要素が保持するデータは、以前のEthereumと同様である
-- バリデータが
+- バリデータが保持するデータにはValidator Signing KeyとWithdrawal Keyがある
 - しかしこれらの構成要素がどう連動するかについて説明する次の資料からは、内容が大きく異なりはじめる

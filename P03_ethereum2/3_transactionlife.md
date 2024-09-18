@@ -221,8 +221,7 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 - The Merge後のEthereumも「最も重いチェーン」を正統とするが、先述のGHOSTプロトコルとは異なるアルゴリズムを採用している
 - 重いチェーンは **Gasperプロトコル (LMD GHOST + Casper FFG)** で定義されている
   - LMD GHOST: epoch内でブロックチェーンが分岐した場合の「重いチェーン」
-  - Casper FFG: epochを跨いでブロックチェーンが分岐した場合の「重いチェーン」
-
+  - Casper FFG: epochを跨いでブロックチェーンが分岐した場合の「重いチェーン
 - どちらもブロックに含まれる投票 (attestation)を用いて「重いチェーン」を決める
   - 復習: 以前のGHOSTプロトコルでは、子ブロックの数を数えていた
 
@@ -250,14 +249,29 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
   - 2/3と2/3は、少なくとも1/3だけ重複する
 - チェーンの分岐や空のslotが延々と続くなどの事態がなければ、checkpointは大体1.5epoch (9.6分) 後にfinalizedとなる
 
+<center>
+<img src="./img/epoch.png" width="100%">
+</center>
 
 ### LMD GHOSTについて
-- epoch内で分岐した場合の「最も重いチェーン」は、各分岐の先端から遡って最も多くの投票 (beacon_block_root) を集めたチェーンとする
+- epoch内で分岐した場合の「最も重いチェーン」（投票量の多いブロック）は、各分岐の先端から遡って最も多くの投票 (beacon_block_root) を集めたチェーンとする
 - このとき... ①投票は各バリデータのstake量に応じて重み付けされる (ただし32ETHが上限) ②投票数の計算は直近のjustifiedブロックからはじめる
+<center>
+<img src="./img/lmd_ghost.png" width="80%">
+
+Source: https://arxiv.org/pdf/2003.03052
+</center>
 
 ### Casper FFGについて
-- epochを跨いで分岐した場合の「最も重いチェーン」は、一番先にckeckpointがjustifiedになったチェーンとする
-- 低い投票率や票の割れによってもし4epochの間にfinalizedが発生しなかった場合、投票していない or 少数派に投票しているバリデータのstakeを徐々に没収する (inactivity leak) ことで事後的にfinalizedにする仕様になっている 
+- epochを跨いで分岐した場合の「最も重いチェーン」は、一番先にcheckpointがjustifiedになったチェーンとする
+- 低い投票率や票の割れによってもし4epochの間にfinalizedが発生しなかった場合、投票していない or 少数派に投票しているバリデータのstakeを徐々に没収する (inactivity leak) ことで事後的にfinalizedにする仕様になっている
+- justifiedが速い方が正しいとし、4epoch経ってもjustifiedされずにfinalizedされない場合は無効となる
+  epoch内で分岐した場合と跨いで分岐した場合は判断基準が異なる
+<center>
+<img src="./img/casper_ffg.jpg" width="80%">
+
+Source: https://github.com/ethereum/annotated-spec/blob/master/phase0/fork-choice.md
+</center>
 
 ### 報酬メカニズム
 - ブロック提案者とブロック投票者に対してetherが報酬として新規発行される
@@ -277,6 +291,12 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 | 2 | comitteeに選ばれた際に、ブロックの検証作業を行った | 
 | 8 | ブロック提案者に選ばれた際に、割り当てられたslotに新しいブロックを提案した | 
 
+投票の有効期限は以下の通り
+<center>
+<img src="./img/expiration.png" width="80%">
+</center>
+
+
 さらに追加報酬として、以下の要素が存在する:
 
 **ブロック提案者**
@@ -294,9 +314,19 @@ The Merge以前のブロックはExecution Layerと呼ばれている。
 
 stake量の減少は、ブロックの提案・投票ノードに選ばれる確率が下がることを意味する。さらに、stakeが半分の16ETHを割った場合には自動的にバリデータの地位を喪失することになっている
 
+- 減少した分だけを追加することは可能
+　1ETH単位でStakingはできるが、結局最低16ETH（投票するための最低額）を預けないと実質何もできない
+　32ETH分を投入しないとバリデータには選出されない、64ETHだと宝くじ2枚、63ETHの場合は宝くじ1枚と同じ扱い
+  減少した分を追加で投入しないとバリデータの資格はいつか失われる
+　没収額は https://eth2book.info/capella/part2/incentives/inactivity/　にある式によって計算される。
 
 **不完全な内容を提出してしまった場合:**
-- ブロック提案者は単に報酬機会を逃すだけ
+- ブロック提案者は単に報酬機会を逃すだけ(Bitcoin Protocolや以前のEthereumと同様)
+- ブロック投票者はペナルティとしてstakeしているETHが減らされる
+  減額量は間違えた項⽬(source, target, beacon_block_root)と提出時期(1slot以内, 5slot以内, 32slot以内)に依存
+  詳細は[こちら](https://eth2book.info/capella/part2/incentives/penalties/)を参照のこと
+  また先述のinactivity leakが発⽣した場合には、2/3の集票が成⽴するまで、投票しなかった or 少数派の選択肢 に投票した バリデータのstake量が段階的に減らされる
+
 - ブロック投票者はbeacon_block_rootが空の場合は単に報酬機会を逃すだけ
 - しかしsource, targetが空の場合は、報酬として得られた分のetherがstakeから減らされる
 
@@ -308,7 +338,9 @@ stake量の減少は、ブロックの提案・投票ノードに選ばれる確
     - 過去に source -> target の投票で、32 -> 64 という投票があるとする
     - 次のepochで 0 -> 96 などの投票を行うとslashing対象となる
     - Finalizedされたチェーンの歴史を覆すにはこうした投票が必ず必要になる (はず...)
-
+<center>
+<img src="./img/slashing.png" width="80%">
+</center>
 Slashingは、バリデータが他のバリデータの不正行為を発見→
 バリデータが不正行為の証拠データを作成してブロック提案者に投げる→
 ブロック提案者がブロックに含める
